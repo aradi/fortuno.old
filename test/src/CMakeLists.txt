@@ -6,6 +6,7 @@ set(
     multiple
     parametrized
     parametrized2
+    selftest
     simple
 )
 
@@ -43,11 +44,3 @@ if(WITH_COARRAY)
         target_link_libraries(test_${test} mylib Fortuno_Coarray)
     endforeach()
 endif()
-
-
-add_executable(test_version test_version.f90)
-target_link_libraries(test_version Fortuno)
-add_test(
-    NAME src/test_version
-    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_version
-)

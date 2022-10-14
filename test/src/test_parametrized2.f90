@@ -35,7 +35,8 @@ contains
     testsuite = test_suite("param2")
     do icalc = 1, size(factcalcs)
       write(name, "(a, i0, a)") "factorial(", factcalcs(icalc)%arg, ")"
-      call testsuite%add_test_case(param_test(trim(name), test_fact_calc, factcalcs(icalc)))
+      call testsuite%add_test_case(&
+          & param_test(trim(name), test_fact_calc, factcalc=factcalcs(icalc)))
     end do
 
   end function new_test_suite
@@ -48,7 +49,6 @@ contains
     testcase => param_test_ptr(ctx%testcase)
 
     call ctx%check(factorial(testcase%factcalc%arg) == testcase%factcalc%res)
-    if (ctx%failed()) return
 
   end subroutine test_fact_calc
 

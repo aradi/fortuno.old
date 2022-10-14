@@ -22,7 +22,6 @@ contains
     class(test_context), pointer, intent(in) :: ctx
 
     call ctx%check(factorial(0) == 1)
-    if (ctx%failed()) return
 
   end subroutine test_0
 
@@ -53,7 +52,6 @@ contains
     class(test_context), pointer, intent(in) :: ctx
 
     call ctx%check(factorial(0) == 0, msg="Failing on purpose")
-    if (ctx%failed()) return
 
   end subroutine test_0
 

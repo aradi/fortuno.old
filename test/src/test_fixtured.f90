@@ -62,7 +62,6 @@ contains
 
     testcase => random_test_ptr(ctx%testcase)
     call ctx%check(factorial(testcase%nn) == testcase%nn * factorial(testcase%nn - 1))
-    if (ctx%failed()) return
 
   end subroutine test_recursion
 

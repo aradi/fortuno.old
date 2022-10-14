@@ -53,7 +53,6 @@ module test_mpi_simple
 
       call MPI_Bcast(buffer, 1, MPI_INTEGER, 0, mpictx%comm)
       call ctx%check(buffer == 42)
-      if (ctx%failed()) return
 
     end subroutine test_0
 
@@ -62,7 +61,6 @@ module test_mpi_simple
       class(test_context), pointer, intent(in) :: ctx
 
       call ctx%check(factorial(1) == 1)
-      if (ctx%failed()) return
 
     end subroutine test_1
 
@@ -71,7 +69,6 @@ module test_mpi_simple
       class(test_context), pointer, intent(in) :: ctx
 
       call ctx%check(factorial(2) == 3, msg="This has failed on purpose on all ranks")
-      if (ctx%failed()) return
 
     end subroutine test_2
 
@@ -91,7 +88,6 @@ module test_mpi_simple
       else
         call ctx%check(.true.)
       end if
-      if (ctx%failed()) return
 
     end subroutine test_3
 

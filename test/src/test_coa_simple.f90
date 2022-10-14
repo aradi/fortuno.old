@@ -51,7 +51,6 @@ contains
 
     buffer = buffer[1]
     call ctx%check(buffer == 42)
-    if (ctx%failed()) return
 
   end subroutine test_0
 
@@ -60,7 +59,6 @@ contains
     class(test_context), pointer, intent(in) :: ctx
 
     call ctx%check(factorial(1) == 1)
-    if (ctx%failed()) return
 
   end subroutine test_1
 
@@ -69,7 +67,6 @@ contains
     class(test_context), pointer, intent(in) :: ctx
 
     call ctx%check(factorial(2) == 3, msg="This has intentionally failed on all images")
-    if (ctx%failed()) return
 
   end subroutine test_2
 
@@ -87,7 +84,6 @@ contains
     else
       call ctx%check(.true.)
     end if
-    if (ctx%failed()) return
 
   end subroutine test_3
 
