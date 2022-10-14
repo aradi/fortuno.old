@@ -7,10 +7,6 @@ module fortuno
   use fortuno_serialdriver, only : serial_driver
   use fortuno_testlogger, only : driver_result
   use fortuno_version, only : get_version
-#ifdef WITH_COARRAY
-  use fortuno_coarraycontext, only : coa_context, coa_context_ptr
-  use fortuno_coarraydriver, only : coa_driver
-#endif
   implicit none
 
   private
@@ -22,8 +18,5 @@ module fortuno
   public :: serial_driver
   public :: test_name
   public :: get_version
-#ifdef WITH_COARRAY
-  public :: coa_context, coa_context_ptr, coa_driver
-#endif
 
 end module fortuno

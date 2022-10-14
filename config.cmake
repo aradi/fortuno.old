@@ -24,7 +24,7 @@ if("GNU" STREQUAL "${CMAKE_Fortran_COMPILER_ID}")
     # Specific settings for the GNU compiler
 
     set(Fortran_FLAGS
-        "${CMAKE_Fortran_FLAGS} ${COARRAY_FLAG} -std=f2018 -cpp -ffree-line-length-none"
+        "${CMAKE_Fortran_FLAGS} ${COARRAY_FLAG} -std=f2018"
         CACHE STRING "General Fortran compiler flags")
 
     set(Fortran_FLAGS_RELEASE "-O3 -funroll-all-loops"
@@ -39,7 +39,7 @@ elseif("Intel" STREQUAL "${CMAKE_Fortran_COMPILER_ID}")
 
     # Specific settings for the Intel compiler
 
-    set(Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -stand f18 -fpp -diag-error-limit 1"
+    set(Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -stand f18 -diag-error-limit 1"
         CACHE STRING "General Fortran compiler flags")
 
     set(Fortran_FLAGS_RELEASE "-O3 -ip"
@@ -54,7 +54,7 @@ elseif("NAG" STREQUAL "${CMAKE_Fortran_COMPILER_ID}")
 
     # Specific settings for the NAG compiler
 
-    set(Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -f2018 -fpp"
+    set(Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -f2018"
         CACHE STRING "General Fortran compiler flags")
 
     set(Fortran_FLAGS_RELEASE "-O3"
