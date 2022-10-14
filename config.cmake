@@ -12,7 +12,7 @@ option(WITH_COARRAY "Whether coarray support should be enabled")
 option(BUILD_SHARED_LIBS "Whether the libraries built should be shared" FALSE)
 
 # Turn this off, if you don't want to build the tests
-option(WITH_TESTS "Whether tests should be built" TRUE)
+option(WITH_TESTS "Whether tests should be built" FALSE)
 
 
 #

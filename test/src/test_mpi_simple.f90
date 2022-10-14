@@ -26,7 +26,7 @@ module test_mpi_simple
           & test_case("factorial(1)", test_1),&
           & test_case("factorial(2)", test_2)&
           & ])
-      call testsuite%add_test_case(div_n_failure("divnfailure", test_3, div=3, rem=2))
+      call testsuite%add_test_case(div_n_failure("divnfailure", test_3, div=3, rem=0))
 
     end function new_test_suite
 
