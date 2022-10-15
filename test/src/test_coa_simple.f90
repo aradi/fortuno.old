@@ -1,37 +1,35 @@
-module test_coa_simple
+module testsuite_coa_simple
   use mylib, only : factorial
   use fortuno, only : test_suite, test_case, test_context
-  use fortuno_coarray, only : coa_context, coa_context_ptr
+  use fortuno_coarray, only : coa_context, coa_context_ptr, coa_test
   implicit none
 
-  private
-  public :: new_test_suite
 
   type, extends(test_case) :: div_n_failure
-    integer :: divisor
-    integer :: remainder
+    procedure(test_divnfailure), nopass, pointer :: testproc
+    integer :: divisor, remainder
   contains
-    procedure :: get_status_str => div_n_failure_get_status_str
+    procedure :: run => div_n_failure_run
   end type
 
-
 contains
+
 
   function new_test_suite() result(testsuite)
     type(test_suite) :: testsuite
 
-    testsuite = test_suite("simple", [&
-        & test_case("factorial(0)", test_0),&
-        & test_case("factorial(1)", test_1),&
-        & test_case("factorial(2)", test_2)&
+    testsuite = test_suite("coa_simple", [&
+        & coa_test("broadcast", test_broadcast),&
+        & coa_test("allreduce", test_allreduce)&
         & ])
-    call testsuite%add_test_case(div_n_failure("divnfailure", test_3, divisor=3, remainder=0))
+    call testsuite%add_test_case(&
+        & div_n_failure("divnfailure(3, 0)", test_divnfailure, divisor=3, remainder=0))
 
   end function new_test_suite
 
 
-  subroutine test_0(ctx)
-    class(test_context), pointer, intent(in) :: ctx
+  subroutine test_broadcast(ctx)
+    class(coa_context), intent(inout) :: ctx
 
     integer, allocatable :: buffer[:]
 
@@ -52,74 +50,65 @@ contains
     buffer = buffer[1]
     call ctx%check(buffer == 42)
 
-  end subroutine test_0
+  end subroutine test_broadcast
 
 
-  subroutine test_1(ctx)
-    class(test_context), pointer, intent(in) :: ctx
+  subroutine test_allreduce(ctx)
+    class(coa_context), intent(inout) :: ctx
 
-    call ctx%check(factorial(1) == 1)
+    integer, allocatable :: buffer[:]
+    integer :: iimg, expected
 
-  end subroutine test_1
+    allocate(buffer[*])
+    buffer = this_image()
+    sync all
+
+    if (this_image() == 1) then
+      do iimg = 2, num_images()
+        buffer= buffer + buffer[iimg]
+      end do
+    end if
+    sync all
+
+    buffer = buffer[1]
+    expected = num_images() * (num_images() + 1) / 2
+    call ctx%check(buffer == expected)
+
+  end subroutine test_allreduce
 
 
-  subroutine test_2(ctx)
-    class(test_context), pointer, intent(in) :: ctx
+  subroutine test_divnfailure(ctx, mycase)
+    class(coa_context), intent(inout) :: ctx
+    class(div_n_failure), intent(in) :: mycase
 
-    call ctx%check(factorial(2) == 3, msg="This has intentionally failed on all images")
-
-  end subroutine test_2
-
-
-  subroutine test_3(ctx)
-    class(test_context), pointer, intent(in) :: ctx
-
-    type(div_n_failure), pointer :: testcase
     character(100) :: msg
 
-    testcase => div_n_failure_ptr(ctx%testcase)
-    if (mod(this_image() - 1, testcase%divisor) == testcase%remainder) then
-      write(msg, "(a, i0)") "This has intentionally failed on image ", this_image()
-      call ctx%check(.false., trim(msg))
+    if (mod(this_image() - 1, mycase%divisor) == mycase%remainder) then
+      write(msg, "(a, i0)") "This has failed on purpose on image ", this_image()
+      call ctx%check(.false., msg=trim(msg))
     else
       call ctx%check(.true.)
     end if
 
-  end subroutine test_3
+  end subroutine test_divnfailure
 
 
-  subroutine div_n_failure_get_status_str(this, state)
-    class(div_n_failure), intent(in) :: this
-    character(:), allocatable, intent(out) :: state
+  subroutine div_n_failure_run(this, ctx)
+    class(div_n_failure), intent(inout) :: this
+    class(test_context), pointer, intent(in) :: ctx
 
-    character(100) :: buffer
+    class(coa_context), pointer :: coactx
+    coactx => coa_context_ptr(ctx)
+    call this%testproc(coactx, this)
 
-    write(buffer, "(a, i0, a, i0)") "d=", this%divisor, ",r=", this%remainder
-    state = trim(buffer)
+  end subroutine div_n_failure_run
 
-  end subroutine div_n_failure_get_status_str
-
-
-  function div_n_failure_ptr(testcase) result(mycase)
-    class(test_case), pointer, intent(in) :: testcase
-    type(div_n_failure), pointer :: mycase
-
-    select type (testcase)
-    type is (div_n_failure)
-      mycase => testcase
-    class default
-      error stop "Internal error, expected div_n_failure, received something else"
-    end select
-
-  end function div_n_failure_ptr
+end module testsuite_coa_simple
 
 
-end module test_coa_simple
-
-
-program test_simple_driver
+program testdriver_coa_simple
   use fortuno_coarray, only : coa_driver
-  use test_coa_simple, only : new_test_suite
+  use testsuite_coa_simple, only : new_test_suite
   implicit none
 
   type(coa_driver), allocatable :: driver
@@ -127,4 +116,4 @@ program test_simple_driver
   driver = coa_driver([new_test_suite()])
   call driver%run()
 
-end program test_simple_driver
+end program testdriver_coa_simple

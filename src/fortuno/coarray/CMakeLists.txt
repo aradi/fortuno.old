@@ -6,6 +6,7 @@ list(
     "${curdir}/coadriver.f90"
     "${curdir}/coafailureinfo.f90"
     "${curdir}/coalogger.f90"
+    "${curdir}/coatest.f90"
 )
 
 set(coa-f90-sources "${coa-f90-sources}" PARENT_SCOPE)

@@ -1,129 +1,103 @@
-module test_mpi_simple
-    use mpi_f08, only : MPI_Bcast, MPI_INTEGER
-    use mylib, only : factorial
+module testsuite_mpi_simple
+    use mpi_f08, only : MPI_Allreduce, MPI_Bcast, MPI_INTEGER, MPI_SUM
     use fortuno, only : test_suite, test_case, test_context
-    use fortuno_mpi, only : mpi_context, mpi_context_ptr
+    use fortuno_mpi, only : mpi_context, mpi_context_ptr, mpi_test
     implicit none
 
-    private
-    public :: new_test_suite
 
     type, extends(test_case) :: div_n_failure
-      integer :: div
-      integer :: rem
+      procedure(test_divnfailure), nopass, pointer :: testproc
+      integer :: div, rem
     contains
-      procedure :: get_status_str => div_n_failure_get_status_str
+      procedure :: run => div_n_failure_run
     end type
 
-
   contains
+
 
     function new_test_suite() result(testsuite)
       type(test_suite) :: testsuite
 
-      testsuite = test_suite("simple", [&
-          & test_case("factorial(0)", test_0),&
-          & test_case("factorial(1)", test_1),&
-          & test_case("factorial(2)", test_2)&
+      testsuite = test_suite("mpi_simple", [&
+          & mpi_test("broadcast", test_broadcast),&
+          & mpi_test("allreduce", test_allreduce)&
           & ])
-      call testsuite%add_test_case(div_n_failure("divnfailure", test_3, div=3, rem=0))
+      call testsuite%add_test_case(&
+          & div_n_failure("divnfailure(3, 0)", test_divnfailure, div=3, rem=0))
 
     end function new_test_suite
 
 
-    subroutine test_0(ctx)
-      class(test_context), pointer, intent(in) :: ctx
+    subroutine test_broadcast(ctx)
+      class(mpi_context), intent(inout) :: ctx
 
-      type(mpi_context), pointer :: mpictx
       integer :: buffer
 
-      mpictx => mpi_context_ptr(ctx)
-      if (mpictx%myrank == 0) then
+      if (ctx%mpi%rank == 0) then
         buffer = 42
       else
         buffer = -1
       end if
 
-      if (mpictx%myrank == 0) then
+      if (ctx%mpi%rank == 0) then
         call ctx%check(buffer == 42)
       else
         call ctx%check(buffer == -1)
       end if
       if (ctx%failed()) return
 
-      call MPI_Bcast(buffer, 1, MPI_INTEGER, 0, mpictx%comm)
+      call MPI_Bcast(buffer, 1, MPI_INTEGER, 0, ctx%mpi%comm)
       call ctx%check(buffer == 42)
 
-    end subroutine test_0
+    end subroutine test_broadcast
 
 
-    subroutine test_1(ctx)
-      class(test_context), pointer, intent(in) :: ctx
+    subroutine test_allreduce(ctx)
+      class(mpi_context),intent(inout) :: ctx
 
-      call ctx%check(factorial(1) == 1)
+      integer :: send, recv, expected
 
-    end subroutine test_1
+      send = ctx%mpi%rank + 1
+      call MPI_Allreduce(send, recv, 1, MPI_INTEGER, MPI_SUM, ctx%mpi%comm)
+      call ctx%check(send == ctx%mpi%rank + 1)
+      expected = ctx%mpi%commsize * (ctx%mpi%commsize + 1) / 2
+      call ctx%check(recv == expected)
 
-
-    subroutine test_2(ctx)
-      class(test_context), pointer, intent(in) :: ctx
-
-      call ctx%check(factorial(2) == 3, msg="This has failed on purpose on all ranks")
-
-    end subroutine test_2
+    end subroutine test_allreduce
 
 
-    subroutine test_3(ctx)
-      class(test_context), pointer, intent(in) :: ctx
+    subroutine test_divnfailure(ctx, mycase)
+      class(mpi_context), intent(inout) :: ctx
+      class(div_n_failure), intent(in) :: mycase
 
-      type(mpi_context), pointer :: mpictx
-      type(div_n_failure), pointer :: testcase
       character(100) :: msg
 
-      mpictx => mpi_context_ptr(ctx)
-      testcase => div_n_failure_ptr(ctx%testcase)
-      if (mod(mpictx%myrank, testcase%div) == testcase%rem) then
-        write(msg, "(a, i0)") "This has failed on purpose on rank ", mpictx%myrank
-        call ctx%check(.false., trim(msg))
+      if (mod(ctx%mpi%rank, mycase%div) == mycase%rem) then
+        write(msg, "(a, i0)") "This has failed on purpose on rank ", ctx%mpi%rank
+        call ctx%check(.false., msg=trim(msg))
       else
         call ctx%check(.true.)
       end if
 
-    end subroutine test_3
+    end subroutine test_divnfailure
 
 
-    subroutine div_n_failure_get_status_str(this, state)
-      class(div_n_failure), intent(in) :: this
-      character(:), allocatable, intent(out) :: state
+    subroutine div_n_failure_run(this, ctx)
+      class(div_n_failure), intent(inout) :: this
+      class(test_context), pointer, intent(in) :: ctx
 
-      character(100) :: buffer
+      class(mpi_context), pointer :: mpictx
+      mpictx => mpi_context_ptr(ctx)
+      call this%testproc(mpictx, this)
 
-      write(buffer, "(a, i0, a, i0)") "d=", this%div, ",r=", this%rem
-      state = trim(buffer)
+    end subroutine div_n_failure_run
 
-    end subroutine div_n_failure_get_status_str
-
-
-    function div_n_failure_ptr(testcase) result(mycase)
-      class(test_case), pointer, intent(in) :: testcase
-      type(div_n_failure), pointer :: mycase
-
-      select type (testcase)
-      type is (div_n_failure)
-        mycase => testcase
-      class default
-        error stop "Internal error, expected div_n_failure, received something else"
-      end select
-
-    end function div_n_failure_ptr
+  end module testsuite_mpi_simple
 
 
-  end module test_mpi_simple
-
-
-  program test_simple_driver
+  program testdriver_mpi_simple
     use fortuno_mpi, only : mpi_driver
-    use test_mpi_simple, only : new_test_suite
+    use testsuite_mpi_simple, only : new_test_suite
     implicit none
 
     type(mpi_driver), allocatable :: driver
@@ -131,4 +105,4 @@ module test_mpi_simple
     driver = mpi_driver([new_test_suite()])
     call driver%run()
 
-  end program test_simple_driver
+  end program testdriver_mpi_simple

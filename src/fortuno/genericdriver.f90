@@ -4,7 +4,6 @@ module fortuno_genericdriver
   use fortuno_contextfactory, only : context_factory
   use fortuno_testlogger, only : driver_result, test_logger, test_status, init_test_status
   use fortuno_testerror, only : test_error
-  use fortuno_utils, only : dyn_char
   implicit none
 
   private
@@ -326,13 +325,8 @@ contains
 
         call ctxfact%create_context(testsuite, testcase, ctx)
         ctxptr => ctx
-        testrunner: block
-          call testcase%set_up(ctxptr)
-          if (ctx%failed()) exit testrunner
-          call testcase%get_status_str(testrepr)
-          call testcase%run(ctxptr)
-          call testcase%tear_down(ctxptr)
-        end block testrunner
+        call testcase%run(ctxptr)
+        call testcase%get_status_str(testrepr)
         success = .not. ctx%failed()
         call logger%short_log_result(testsuite%name, testcase%name, success)
         call init_test_status(caseresult, success, testcase%name, testrepr, ctx)

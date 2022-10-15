@@ -1,10 +1,7 @@
-module test_simple
+module testsuite_simple
   use mylib, only : factorial
-  use fortuno, only : test_suite, test_case, test_context
+  use fortuno, only : context => serial_context, test => simple_test, test_suite
   implicit none
-
-  private
-  public :: new_test_suite
 
 contains
 
@@ -12,17 +9,17 @@ contains
     type(test_suite) :: testsuite
 
     testsuite = test_suite("simple", [&
-        & test_case("factorial(0)", test_factorial0),&
-        & test_case("factorial(1)", test_factorial1),&
-        & test_case("factorial(2,3)", test_factorial23),&
-        & test_case("factorial(4,5)", test_factorial45)&
+        & test("factorial(0)", test_factorial0),&
+        & test("factorial(1)", test_factorial1),&
+        & test("factorial(2,3)", test_factorial23),&
+        & test("factorial(4,5)", test_factorial45)&
         & ])
 
   end function new_test_suite
 
 
   subroutine test_factorial0(ctx)
-    class(test_context), pointer, intent(in) :: ctx
+    class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(0) == 1)
 
@@ -30,7 +27,7 @@ contains
 
 
   subroutine test_factorial1(ctx)
-    class(test_context), pointer, intent(in) :: ctx
+    class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(1) == 1)
 
@@ -38,7 +35,7 @@ contains
 
 
   subroutine test_factorial23(ctx)
-    class(test_context), pointer, intent(in) :: ctx
+    class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(2) == 2)
     ! Note, if first check failed, further tests would be executed but not recorded
@@ -48,7 +45,7 @@ contains
 
 
   subroutine test_factorial45(ctx)
-    class(test_context), pointer, intent(in) :: ctx
+    class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(4) == 24)
     ! Here we skip further tests if the first failed
@@ -58,12 +55,12 @@ contains
   end subroutine test_factorial45
 
 
-end module test_simple
+end module testsuite_simple
 
 
-program test_simple_driver
+program testdriver_simple
   use fortuno, only : serial_driver
-  use test_simple, only : new_test_suite
+  use testsuite_simple, only : new_test_suite
   implicit none
 
   type(serial_driver), allocatable :: driver
@@ -71,4 +68,4 @@ program test_simple_driver
   driver = serial_driver([new_test_suite()])
   call driver%run()
 
-end program test_simple_driver
+end program testdriver_simple

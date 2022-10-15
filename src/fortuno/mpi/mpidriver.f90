@@ -1,9 +1,9 @@
 module fortuno_mpi_mpidriver
   use iso_fortran_env, only : stderr => error_unit
   use mpi_f08, only : MPI_Comm, MPI_Comm_rank, MPI_Comm_size, MPI_COMM_WORLD, MPI_Finalize, MPI_Init
-  use fortuno_basetypes, only : test_context, test_options, test_suite, test_suite_cls
+  use fortuno_basetypes, only : test_context, test_suite, test_suite_cls
   use fortuno_contextfactory, only : context_factory
-  use fortuno_mpi_mpicontext, only : mpi_context, mpi_context_factory
+  use fortuno_mpi_mpicontext, only : mpi_context, mpi_context_factory, mpi_env
   use fortuno_mpi_mpilogger, only : mpi_logger
   use fortuno_serialdriver, only : serial_driver
   use fortuno_testerror, only : test_error
@@ -68,7 +68,8 @@ contains
     class(mpi_driver), intent(in) :: this
     class(context_factory), allocatable, intent(out) :: ctxfact
 
-    ctxfact = mpi_context_factory(comm=this%mpicomm, myrank=this%myrank, commsize=this%commsize)
+    ctxfact = mpi_context_factory(&
+        & mpi_env(comm=this%mpicomm, rank=this%myrank, commsize=this%commsize))
 
   end subroutine create_context_factory
 

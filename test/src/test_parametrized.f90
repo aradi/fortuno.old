@@ -1,18 +1,13 @@
-module parametrizedests
+module testsuite_parametrized
   use mylib, only : factorial
-  use fortuno, only : test_case, test_suite, test_context, testroutine_ifc
+  use fortuno, only : test_case, test_suite, test_context
   implicit none
 
-  private
-  public :: new_test_suite
 
-  type :: calc
-    integer :: arg
-    integer :: res
-  end type
-
-  type, extends(test_case) :: parametrized
-    type(calc) :: factcalc
+  type, extends(test_case) :: factcalc_test
+    integer :: arg, res
+  contains
+    procedure :: run
   end type
 
 
@@ -22,47 +17,30 @@ contains
     type(test_suite) :: testsuite
 
     testsuite = test_suite("param", [&
-        & parametrized("factorial(0)", test_fact_calc, factcalc=calc(0, 1)),&
-        & parametrized("factorial(1)", test_fact_calc, factcalc=calc(1, 1)),&
-        & parametrized("factorial(2)", test_fact_calc, factcalc=calc(2, 2)),&
-        & parametrized("factorial(3)", test_fact_calc, factcalc=calc(3, 6)),&
-        & parametrized("factorial(4)", test_fact_calc, factcalc=calc(4, 24))&
+        & factcalc_test("factorial(0)", 0, 1),&
+        & factcalc_test("factorial(1)", 1, 1),&
+        & factcalc_test("factorial(2)", 2, 2),&
+        & factcalc_test("factorial(3)", 3, 6),&
+        & factcalc_test("factorial(4)", 4, 24)&
         & ])
 
   end function new_test_suite
 
 
-  subroutine test_fact_calc(ctx)
+  subroutine run(this, ctx)
+    class(factcalc_test), intent(inout) :: this
     class(test_context), pointer, intent(in) :: ctx
 
-    type(parametrized), pointer :: caseptr
-    caseptr => parametrized_ptr(ctx%testcase)
+    call ctx%check(factorial(this%arg) == this%res)
 
-    call ctx%check(factorial(caseptr%factcalc%arg) == caseptr%factcalc%res)
+  end subroutine run
 
-  end subroutine test_fact_calc
-
-
-  function parametrized_ptr(testcase) result(mycase)
-    class(test_case), pointer, intent(in) :: testcase
-    type(parametrized), pointer :: mycase
-
-    select type (testcase)
-    type is (parametrized)
-      mycase => testcase
-    class default
-      error stop "Internal error, expected parametrized, received something else"
-    end select
-
-  end function parametrized_ptr
+end module testsuite_parametrized
 
 
-end module parametrizedests
-
-
-program test_driver
+program testdriver_parameterized
   use fortuno, only : serial_driver
-  use parametrizedests, only : new_test_suite
+  use testsuite_parametrized, only : new_test_suite
   implicit none
 
   type(serial_driver), allocatable :: driver
@@ -70,4 +48,4 @@ program test_driver
   driver = serial_driver([new_test_suite()])
   call driver%run()
 
-end program test_driver
+end program testdriver_parameterized

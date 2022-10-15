@@ -1,10 +1,7 @@
-module multiple1
+module testsuite_multiple1
   use mylib, only : factorial
-  use fortuno, only : test_suite, test_case, test_context
+  use fortuno, only : context => serial_context, test => simple_test, test_suite
   implicit none
-
-  private
-  public :: new_test_suite
 
 contains
 
@@ -12,29 +9,26 @@ contains
     type(test_suite) :: testsuite
 
     testsuite = test_suite("multiple1", [&
-        & test_case("factorial(0)", test_0)&
+        & test("factorial(0)", test_0)&
         & ])
 
   end function new_test_suite
 
 
   subroutine test_0(ctx)
-    class(test_context), pointer, intent(in) :: ctx
+    class(context), pointer, intent(in) :: ctx
 
     call ctx%check(factorial(0) == 1)
 
   end subroutine test_0
 
-end module multiple1
+end module testsuite_multiple1
 
 
-module multiple2
+module testsuite_multiple2
   use mylib, only : factorial
-  use fortuno, only : test_suite, test_case, test_context
+  use fortuno, only : context => serial_context, test => simple_test, test_suite
   implicit none
-
-  private
-  public :: new_test_suite
 
 contains
 
@@ -42,35 +36,34 @@ contains
     type(test_suite) :: testsuite
 
     testsuite = test_suite("multiple2", [&
-        & test_case("factorial(0)", test_0)&
+        & test("factorial(0)", test_0)&
         & ])
 
   end function new_test_suite
 
 
   subroutine test_0(ctx)
-    class(test_context), pointer, intent(in) :: ctx
+    class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(0) == 0, msg="Failing on purpose")
 
   end subroutine test_0
 
 
-  end module multiple2
+end module testsuite_multiple2
 
 
+program test_driver
+  use fortuno, only : serial_driver
+  use testsuite_multiple1, only : new_multiple1_suite => new_test_suite
+  use testsuite_multiple2, only : new_multiple2_suite => new_test_suite
+  implicit none
 
-  program test_driver
-    use fortuno, only : serial_driver
-    use multiple1, only : multiple1_suite => new_test_suite
-    use multiple2, only : multiple2_suite => new_test_suite
-    implicit none
+  type(serial_driver), allocatable :: driver
 
-    type(serial_driver), allocatable :: driver
+  driver = serial_driver([&
+      & new_multiple1_suite(), new_multiple2_suite()&
+      & ])
+  call driver%run()
 
-    driver = serial_driver([&
-        & multiple1_suite(), multiple2_suite()&
-        & ])
-    call driver%run()
-
-  end program test_driver
+end program test_driver

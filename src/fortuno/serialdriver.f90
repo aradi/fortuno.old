@@ -3,6 +3,7 @@ module fortuno_serialdriver
   use fortuno_basetypes, only : test_suite, test_suite_cls, test_context, test_case
   use fortuno_contextfactory, only : context_factory
   use fortuno_genericdriver, only : generic_driver
+  use fortuno_serialcontext, only : serial_context
   use fortuno_seriallogger, only : serial_logger
   use fortuno_testlogger, only : driver_result, test_logger, test_status, init_test_status
   use fortuno_testerror, only : test_error
@@ -30,10 +31,6 @@ module fortuno_serialdriver
   contains
     procedure :: create_context => create_context
   end type serial_context_factory
-
-
-  type, extends(test_context) :: serial_context
-  end type serial_context
 
 
 contains

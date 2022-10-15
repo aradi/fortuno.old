@@ -1,37 +1,75 @@
-module random_tests
+module testsuite_fixtured
   use mylib, only : factorial
-  use fortuno, only : test_case, test_context, test_suite, testroutine_ifc
+  use fortuno, only : test_case, test_context, test_suite
   implicit none
 
-  private
-  public :: new_test_suite
 
   type, extends(test_case) :: random_test
+    procedure(test_recursion_down), nopass, pointer :: testroutine
     integer :: nn = -1
   contains
-    procedure, nopass :: set_up => random_test_set_up
-    procedure :: get_status_str => random_test_get_status_str
+    procedure:: set_up
+    procedure :: run
+    procedure :: get_status_str
   end type
-
 
 contains
 
-  subroutine random_test_set_up(ctx)
-    class(test_context), pointer, intent(in) :: ctx
+  function new_test_suite() result(testsuite)
+    type(test_suite) :: testsuite
 
-    type(random_test), pointer :: testcase
-    real :: rand
-
-    testcase => random_test_ptr(ctx%testcase)
+    integer :: ii
 
     call random_seed()
+
+    testsuite = test_suite("fixtured", [&
+        & [(random_test("recursion_down", test_recursion_down), ii = 1, 10)],&
+        & [(random_test("recursion_up", test_recursion_down), ii = 1, 10)]&
+        & ])
+
+  end function new_test_suite
+
+
+  subroutine test_recursion_down(ctx, mycase)
+    class(test_context), intent(inout) :: ctx
+    class(random_test), intent(in) :: mycase
+
+    call ctx%check(factorial(mycase%nn) == mycase%nn * factorial(mycase%nn - 1))
+
+  end subroutine test_recursion_down
+
+
+  subroutine test_recursion_up(ctx, mycase)
+    class(test_context), intent(inout) :: ctx
+    class(random_test), intent(in) :: mycase
+
+    call ctx%check(factorial(mycase%nn + 1) == (mycase%nn + 1) * factorial(mycase%nn))
+
+  end subroutine test_recursion_up
+
+
+  subroutine set_up(this)
+    class(random_test), intent(inout) :: this
+
+    real :: rand
+
     call random_number(rand)
-    testcase%nn = int(20.0 * rand) + 1
+    this%nn = int(20.0 * rand) + 1
 
-  end subroutine random_test_set_up
+  end subroutine set_up
 
 
-  subroutine random_test_get_status_str(this, state)
+  subroutine run(this, ctx)
+    class(random_test), intent(inout) :: this
+    class(test_context), pointer, intent(in) :: ctx
+
+    call this%set_up()
+    call this%testroutine(ctx, this)
+
+  end subroutine run
+
+
+  subroutine get_status_str(this, state)
     class(random_test), intent(in) :: this
     character(:), allocatable, intent(out) :: state
 
@@ -40,51 +78,15 @@ contains
     write(buffer, "(a, i2.2)") "n=", this%nn
     state = trim(buffer)
 
-  end subroutine random_test_get_status_str
+  end subroutine get_status_str
 
 
-  function new_test_suite() result(testsuite)
-    type(test_suite) :: testsuite
-
-    integer :: ii
-
-    testsuite = test_suite("fixtured", [&
-        & (random_test("random_recursion", test_recursion), ii = 1, 10)&
-        & ])
-
-  end function new_test_suite
+end module testsuite_fixtured
 
 
-  subroutine test_recursion(ctx)
-    class(test_context), pointer, intent(in) :: ctx
-
-    type(random_test), pointer :: testcase
-
-    testcase => random_test_ptr(ctx%testcase)
-    call ctx%check(factorial(testcase%nn) == testcase%nn * factorial(testcase%nn - 1))
-
-  end subroutine test_recursion
-
-
-  function random_test_ptr(testcase) result(mycase)
-    class(test_case), pointer, intent(in) :: testcase
-    type(random_test), pointer :: mycase
-
-    select type (testcase)
-    type is (random_test)
-      mycase => testcase
-    class default
-      error stop "Internal error, expected random_test, received something else"
-    end select
-
-  end function random_test_ptr
-
-end module random_tests
-
-
-program test_driver
+program testdriver_fixtured
   use fortuno, only : serial_driver
-  use random_tests, only : new_test_suite
+  use testsuite_fixtured, only : new_test_suite
   implicit none
 
   type(serial_driver), allocatable :: driver
@@ -92,4 +94,4 @@ program test_driver
   driver = serial_driver([new_test_suite()])
   call driver%run()
 
-end program test_driver
+end program testdriver_fixtured

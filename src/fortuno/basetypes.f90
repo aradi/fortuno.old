@@ -5,34 +5,17 @@ module fortuno_basetypes
   implicit none
 
   private
-  public :: check_result
   public :: test_case, test_case_cls
   public :: test_context
-  public :: test_options
   public :: test_suite, test_suite_cls
-  public :: testroutine_ifc
 
 
-  type :: test_options
-    logical :: should_fail = .false.
-  end type test_options
-
-
-  type :: test_case
+  type, abstract :: test_case
     character(:), allocatable :: name
-    procedure(testroutine_ifc), nopass, pointer :: testroutine
-    class(test_options), allocatable :: options
   contains
-    procedure, nopass :: set_up => test_case_set_up
-    procedure, nopass :: run => test_case_run
-    procedure, nopass :: tear_down => test_case_tear_down
+    procedure(test_case_run_iface), deferred :: run
     procedure :: get_status_str => test_case_get_status_str
   end type test_case
-
-
-  interface test_case
-    module procedure new_test_case
-  end interface test_case
 
 
   type :: test_case_cls
@@ -44,8 +27,8 @@ module fortuno_basetypes
     character(:), allocatable :: name
     type(test_case_cls), allocatable :: testcases(:)
   contains
-    procedure, private :: add_test_case_single => test_suite_add_test_case_single
-    procedure, private :: add_test_case_array => test_suite_add_test_case_array
+    procedure :: add_test_case_single => test_suite_add_test_case_single
+    procedure :: add_test_case_array => test_suite_add_test_case_array
     generic :: add_test_case => add_test_case_single, add_test_case_array
     procedure :: set_up => test_suite_set_up
     procedure :: tear_down => test_suite_tear_down
@@ -77,30 +60,7 @@ module fortuno_basetypes
   end type test_context
 
 
-interface
-
-    module function new_test_case(name, testroutine, options) result(this)
-      implicit none
-      character(*), intent(in) :: name
-      procedure(testroutine_ifc), pointer, intent(in) :: testroutine
-      type(test_options), optional, intent(in) :: options
-      type(test_case) :: this
-    end function new_test_case
-
-    module subroutine test_case_set_up(ctx)
-      implicit none
-      class(test_context), pointer, intent(in) :: ctx
-    end subroutine test_case_set_up
-
-    module subroutine test_case_run(ctx)
-      implicit none
-      class(test_context), pointer, intent(in) :: ctx
-    end subroutine test_case_run
-
-    module subroutine test_case_tear_down(ctx)
-      implicit none
-      class(test_context), pointer, intent(in) :: ctx
-    end subroutine test_case_tear_down
+  interface
 
     module subroutine test_case_get_status_str(this, state)
       implicit none
@@ -173,18 +133,12 @@ interface
 
   abstract interface
 
-    subroutine failure_details_write_formatted(this, unit)
-      import :: failure_details
+    subroutine test_case_run_iface(this, ctx)
+      import :: test_case, test_context
       implicit none
-      class(failure_details), intent(in) :: this
-      integer, intent(in) :: unit
-    end subroutine failure_details_write_formatted
-
-    subroutine testroutine_ifc(ctx)
-      import :: test_context
-      implicit none
+      class(test_case), intent(inout) :: this
       class(test_context), pointer, intent(in) :: ctx
-    end subroutine testroutine_ifc
+    end subroutine test_case_run_iface
 
   end interface
 

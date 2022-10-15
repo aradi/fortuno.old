@@ -8,12 +8,17 @@ module fortuno_mpi_mpicontext
   private
   public :: mpi_context, mpi_context_ptr
   public :: mpi_context_factory
+  public :: mpi_env
+
+  type :: mpi_env
+    type(mpi_comm) :: comm
+    integer :: rank
+    integer :: commsize
+  end type mpi_env
 
 
   type, extends(test_context) :: mpi_context
-    type(mpi_comm) :: comm
-    integer :: myrank
-    integer :: commsize
+    type(mpi_env) :: mpi
     logical, allocatable :: failedranks(:)
   contains
     procedure :: check_logical => mpi_context_check_logical
@@ -21,9 +26,7 @@ module fortuno_mpi_mpicontext
 
 
   type, extends(context_factory) :: mpi_context_factory
-    type(mpi_comm) :: comm
-    integer :: myrank
-    integer :: commsize
+    type(mpi_env) :: mpi
   contains
     procedure :: create_context => mpi_context_factory_create_context
   end type mpi_context_factory
@@ -39,13 +42,14 @@ contains
     integer, optional, intent(in) :: line
 
     type(mpi_failure_info), allocatable :: failureinfo
-    logical :: globalcond(0 : this%commsize - 1)
+    logical :: globalcond(0 : this%mpi%commsize - 1)
 
     this%nchecks = this%nchecks + 1
 
     globalcond(:) = .true.
-    globalcond(this%myrank) = cond
-    call mpi_allreduce(MPI_IN_PLACE, globalcond, this%commsize, MPI_LOGICAL, MPI_LAND, this%comm)
+    globalcond(this%mpi%rank) = cond
+    call mpi_allreduce(MPI_IN_PLACE, globalcond, this%mpi%commsize, MPI_LOGICAL, MPI_LAND, &
+        & this%mpi%comm)
     if (all(globalcond)) return
     call this%mark_as_failed()
     allocate(failureinfo)
@@ -84,9 +88,7 @@ contains
     allocate(mpictx)
     mpictx%testsuite => testsuite
     mpictx%testcase => testcase
-    mpictx%comm = this%comm
-    mpictx%commsize = this%commsize
-    mpictx%myrank = this%myrank
+    mpictx%mpi = this%mpi
     call move_alloc(mpictx, ctx)
 
   end subroutine mpi_context_factory_create_context
