@@ -1,7 +1,5 @@
 module fortuno_testlogger
-  use iso_fortran_env, only : stderr => error_unit
-  use fortuno_basetypes, only : test_suite, test_suite_cls, test_context, test_case
-  use fortuno_failuredetails, only : failure_details
+  use fortuno_basetypes, only : test_context
   use fortuno_failureinfo, only : failure_info
   implicit none
 

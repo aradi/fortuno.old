@@ -1,8 +1,7 @@
 module fortuno_genericdriver
-  use iso_fortran_env, only : stderr => error_unit
   use fortuno_basetypes, only : test_suite, test_suite_cls, test_context, test_case
   use fortuno_contextfactory, only : context_factory
-  use fortuno_testlogger, only : driver_result, test_logger, test_status, init_test_status
+  use fortuno_testlogger, only : driver_result, test_logger, init_test_status
   use fortuno_testerror, only : test_error
   implicit none
 

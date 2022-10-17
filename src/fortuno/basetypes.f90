@@ -1,6 +1,5 @@
 module fortuno_basetypes
   use fortuno_checkresult, only : check_result
-  use fortuno_failuredetails, only : failure_details
   use fortuno_failureinfo, only : failure_info
   implicit none
 

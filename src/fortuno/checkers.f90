@@ -34,8 +34,6 @@ contains
     integer, intent(in) :: obtained, expected
     type(check_result) :: checkresult
 
-    type(i0_i0_details), allocatable :: details
-
     checkresult%success = obtained == expected
     if (checkresult%success) return
     checkresult%failuredet = i0_i0_details(obtained, expected)

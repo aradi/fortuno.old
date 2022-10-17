@@ -1,13 +1,12 @@
 module fortuno_serialdriver
   use iso_fortran_env, only : stderr => error_unit
-  use fortuno_basetypes, only : test_suite, test_suite_cls, test_context, test_case
+  use fortuno_basetypes, only : test_suite, test_context, test_case
   use fortuno_contextfactory, only : context_factory
   use fortuno_genericdriver, only : generic_driver, test_case_runner
   use fortuno_serialcontext, only : serial_context
   use fortuno_seriallogger, only : serial_logger
-  use fortuno_testlogger, only : driver_result, test_logger, test_status, init_test_status
+  use fortuno_testlogger, only : test_logger
   use fortuno_testerror, only : test_error
-  use fortuno_utils, only : dyn_char
   implicit none
 
   private

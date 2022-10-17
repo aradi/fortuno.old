@@ -1,6 +1,5 @@
 module fortuno_simpletest
-  use fortuno_basetypes, only : test_case, test_context
-  use fortuno_serialcontext, only : serial_context, serial_context_ptr
+  use fortuno_serialcontext, only : serial_context
   use fortuno_serialdriver, only : serial_test_case
   implicit none
 

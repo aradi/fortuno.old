@@ -1,8 +1,5 @@
 module fortuno_seriallogger
   use iso_fortran_env, only : stdout => output_unit
-  use fortuno_basetypes, only : test_context
-  use fortuno_failuredetails, only : failure_details
-  use fortuno_failureinfo, only : failure_info
   use fortuno_testlogger, only : driver_result, test_logger, test_name_str, test_status
   use fortuno_utils, only : nr_digits
   implicit none
