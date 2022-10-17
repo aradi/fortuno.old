@@ -27,7 +27,7 @@ contains
       totalfailed = count(this%failedimages, dim=1)
       if (totalfailed > 1) then
         write(unit, "(a, t12, i0, a, i0, a)") "Image:", firstfailed, "  (+ ", totalfailed - 1,&
-            & " others)"
+            & " more)"
       else
         write(unit, "(a, t12, i0)") "Image:", firstfailed
       end if

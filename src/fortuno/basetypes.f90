@@ -47,14 +47,16 @@ module fortuno_basetypes
     class(test_case), pointer :: testcase => null()
     class(test_suite), pointer :: testsuite => null()
     logical, private :: failure = .false.
+    logical, private :: check_failure = .false.
     integer :: nchecks = 0
     class(failure_info), allocatable :: failureinfo
   contains
     procedure :: check_logical => test_context_check_logical
     procedure :: check_detailed => test_context_check_detailed
     generic :: check => check_logical, check_detailed
+    procedure :: register_check => test_context_register_check
     procedure :: failed => test_context_failed
-    procedure :: mark_as_failed => test_context_mark_as_failed
+    procedure :: check_failed => test_context_check_failed
   end type test_context
 
 
@@ -115,16 +117,23 @@ module fortuno_basetypes
       integer, optional, intent(in) :: line
     end subroutine test_context_check_detailed
 
+    module subroutine test_context_register_check(this, succeeded)
+      implicit none
+      class(test_context), intent(inout) :: this
+      logical, intent(in) :: succeeded
+    end subroutine test_context_register_check
+
     module function test_context_failed(this) result(failed)
       implicit none
       class(test_context), intent(in) :: this
       logical :: failed
     end function test_context_failed
 
-    module subroutine test_context_mark_as_failed(this)
+    module function test_context_check_failed(this) result(failed)
       implicit none
-      class(test_context), intent(inout) :: this
-    end subroutine test_context_mark_as_failed
+      class(test_context), intent(in) :: this
+      logical :: failed
+    end function test_context_check_failed
 
   end interface
 

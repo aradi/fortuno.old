@@ -12,14 +12,14 @@ contains
 
     type(failure_info), allocatable :: failureinfo
 
-    this%nchecks = this%nchecks + 1
+    call this%register_check(cond)
     if (cond) return
-    call this%mark_as_failed()
     allocate(failureinfo)
     failureinfo%checknr = this%nchecks
     if (present(msg)) failureinfo%message = msg
     if (present(file)) failureinfo%file = file
     if (present(line)) failureinfo%line = line
+    if (allocated(this%failureinfo)) call move_alloc(this%failureinfo, failureinfo%previous)
     call move_alloc(failureinfo, this%failureinfo)
 
   end subroutine test_context_check_logical
@@ -39,6 +39,17 @@ contains
   end subroutine test_context_check_detailed
 
 
+  module subroutine test_context_register_check(this, succeeded)
+    class(test_context), intent(inout) :: this
+    logical, intent(in) :: succeeded
+
+    this%nchecks = this%nchecks + 1
+    this%check_failure = .not. succeeded
+    this%failure = this%failure .or. this%check_failure
+
+  end subroutine test_context_register_check
+
+
   module function test_context_failed(this) result(failed)
     class(test_context), intent(in) :: this
     logical :: failed
@@ -48,12 +59,13 @@ contains
   end function test_context_failed
 
 
-  module subroutine test_context_mark_as_failed(this)
-    class(test_context), intent(inout) :: this
+  module function test_context_check_failed(this) result(failed)
+    class(test_context), intent(in) :: this
+    logical :: failed
 
-    this%failure = .true.
+    failed = this%check_failure
 
-  end subroutine test_context_mark_as_failed
+  end function test_context_check_failed
 
 
 end submodule testcontext

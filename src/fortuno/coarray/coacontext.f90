@@ -35,8 +35,6 @@ contains
     logical, allocatable :: globalcond(:)[:]
     integer :: iimg
 
-    this%nchecks = this%nchecks + 1
-
     allocate(globalcond(num_images())[*], source=.true.)
     globalcond(this_image()) = cond
     sync all
@@ -52,15 +50,16 @@ contains
       globalcond(:) = globalcond(:)[1]
     end do
 
-    if (all(globalcond)) return
+    call this%register_check(all(globalcond))
+    if (.not. this%check_failed()) return
 
-    call this%mark_as_failed()
     allocate(failureinfo)
     failureinfo%checknr = this%nchecks
     if (present(msg)) failureinfo%message = msg
     if (present(file)) failureinfo%file = file
     if (present(line)) failureinfo%line = line
     failureinfo%failedimages = .not. globalcond
+    if (allocated(this%failureinfo)) call move_alloc(this%failureinfo, failureinfo%previous)
     call move_alloc(failureinfo, this%failureinfo)
 
   end subroutine coa_context_check_logical

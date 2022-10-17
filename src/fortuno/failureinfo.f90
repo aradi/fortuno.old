@@ -12,6 +12,7 @@ module fortuno_failureinfo
     integer :: line = 0
     integer :: checknr = 0
     class(failure_details), allocatable :: failuredet
+    class(failure_info), allocatable :: previous
   contains
     procedure :: write_formatted
   end type failure_info
@@ -27,13 +28,13 @@ contains
     if (allocated(this%file)) then
       write(unit, "(a, t12, 2a, i0)") "Location:", this%file, ":", this%line
     else if (this%checknr /= 0) then
-      write(unit, "(a, t12, i0)") "Check nr.:", this%checknr
+      write(unit, "(a, t12, i0)") "Check:", this%checknr
     end if
     if (allocated(this%message)) then
       write(unit, "(a, t12, a)") "Message: ", this%message
     end if
     if (allocated(this%failuredet)) then
-      write(unit, "()")
+      write(unit, "(a)") "::"
       call this%failuredet%write_formatted(unit)
     end if
 

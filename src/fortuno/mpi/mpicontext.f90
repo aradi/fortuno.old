@@ -42,22 +42,21 @@ contains
     integer, optional, intent(in) :: line
 
     type(mpi_failure_info), allocatable :: failureinfo
-    logical :: globalcond(0 : this%mpi%commsize - 1)
-
-    this%nchecks = this%nchecks + 1
+    logical :: globalcond(this%mpi%commsize)
 
     globalcond(:) = .true.
-    globalcond(this%mpi%rank) = cond
-    call mpi_allreduce(MPI_IN_PLACE, globalcond, this%mpi%commsize, MPI_LOGICAL, MPI_LAND, &
+    globalcond(this%mpi%rank + 1) = cond
+    call mpi_allreduce(MPI_IN_PLACE, globalcond, this%mpi%commsize, MPI_LOGICAL, MPI_LAND,&
         & this%mpi%comm)
-    if (all(globalcond)) return
-    call this%mark_as_failed()
+    call this%register_check(all(globalcond))
+    if (.not. this%check_failed()) return
     allocate(failureinfo)
     failureinfo%checknr = this%nchecks
     if (present(msg)) failureinfo%message = msg
     if (present(file)) failureinfo%file = file
     if (present(line)) failureinfo%line = line
     failureinfo%failedranks = .not. globalcond
+    if (allocated(this%failureinfo)) call move_alloc(this%failureinfo, failureinfo%previous)
     call move_alloc(failureinfo, this%failureinfo)
 
   end subroutine mpi_context_check_logical

@@ -3,6 +3,7 @@ module fortuno_utils
 
   private
   public :: dyn_char
+  public :: findloc_logical
   public :: nr_digits, string
 
   interface string
@@ -124,5 +125,18 @@ contains
     if (val < 0) ndigits = ndigits + 1
 
   end function nr_digits
+
+
+  pure function findloc_logical(array, value) result(loc)
+    logical, intent(in) :: array(:)
+    logical, intent(in) :: value
+    integer :: loc
+
+    do loc = 1, size(array)
+      if (array(loc) .eqv. value) return
+    end do
+    loc = 0
+
+  end function findloc_logical
 
 end module fortuno_utils

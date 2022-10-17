@@ -1,6 +1,6 @@
 module testsuite_coa_simple
   use mylib, only : factorial
-  use fortuno, only : test_suite, test_case, test_context
+  use fortuno, only : is_equal, test_suite, test_case, test_context
   use fortuno_coarray, only : coa_context, coa_context_ptr, coa_test, coa_test_case
   implicit none
 
@@ -88,6 +88,20 @@ contains
       call ctx%check(.false., msg=trim(msg))
     else
       call ctx%check(.true.)
+    end if
+
+    if (mod(this_image() - 2, mycase%divisor) == mycase%remainder) then
+      write(msg, "(a, i0)") "This has failed on purpose (the 2nd time) on image ", this_image()
+      call ctx%check(is_equal(3, 2), msg=trim(msg))
+    else
+      call ctx%check(is_equal(2, 2))
+    end if
+
+    if (mod(this_image() - 3, mycase%divisor) == mycase%remainder) then
+      write(msg, "(a, i0)") "This has failed on purpose (the 3rd time) on image ", this_image()
+      call ctx%check(is_equal(4, 3), msg=trim(msg))
+    else
+      call ctx%check(is_equal(3, 3))
     end if
 
   end subroutine test_divnfailure
