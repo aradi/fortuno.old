@@ -1,10 +1,10 @@
 module testsuite_fixtured
   use mylib, only : factorial
-  use fortuno, only : test_case, test_context, test_suite
+  use fortuno, only : serial_test_case, serial_context, test_suite
   implicit none
 
 
-  type, extends(test_case) :: random_test
+  type, extends(serial_test_case) :: random_test
     procedure(test_recursion_down), nopass, pointer :: testroutine
     integer :: nn = -1
   contains
@@ -31,7 +31,7 @@ contains
 
 
   subroutine test_recursion_down(ctx, mycase)
-    class(test_context), intent(inout) :: ctx
+    class(serial_context), intent(inout) :: ctx
     class(random_test), intent(in) :: mycase
 
     call ctx%check(factorial(mycase%nn) == mycase%nn * factorial(mycase%nn - 1))
@@ -40,7 +40,7 @@ contains
 
 
   subroutine test_recursion_up(ctx, mycase)
-    class(test_context), intent(inout) :: ctx
+    class(serial_context), intent(inout) :: ctx
     class(random_test), intent(in) :: mycase
 
     call ctx%check(factorial(mycase%nn + 1) == (mycase%nn + 1) * factorial(mycase%nn))
@@ -61,7 +61,7 @@ contains
 
   subroutine run(this, ctx)
     class(random_test), intent(inout) :: this
-    class(test_context), pointer, intent(in) :: ctx
+    class(serial_context), pointer, intent(in) :: ctx
 
     call this%set_up()
     call this%testroutine(ctx, this)

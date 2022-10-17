@@ -2,7 +2,7 @@ module fortuno_serialdriver
   use iso_fortran_env, only : stderr => error_unit
   use fortuno_basetypes, only : test_suite, test_suite_cls, test_context, test_case
   use fortuno_contextfactory, only : context_factory
-  use fortuno_genericdriver, only : generic_driver
+  use fortuno_genericdriver, only : generic_driver, test_case_runner
   use fortuno_serialcontext, only : serial_context
   use fortuno_seriallogger, only : serial_logger
   use fortuno_testlogger, only : driver_result, test_logger, test_status, init_test_status
@@ -11,11 +11,17 @@ module fortuno_serialdriver
   implicit none
 
   private
-  public :: serial_driver
+  public :: serial_test_case, serial_driver
+
+  type, extends(test_case_runner) :: serial_context_runner
+  contains
+    procedure :: run_test_case
+  end type serial_context_runner
 
 
   type, extends(generic_driver) :: serial_driver
   contains
+    procedure :: create_test_case_runner
     procedure :: create_context_factory
     procedure :: create_logger
     procedure :: stop_on_error
@@ -31,6 +37,21 @@ module fortuno_serialdriver
   contains
     procedure :: create_context => create_context
   end type serial_context_factory
+
+
+  type, extends(test_case), abstract :: serial_test_case
+  contains
+    procedure(serial_test_case_run_iface), deferred :: run
+  end type serial_test_case
+
+
+  abstract interface
+    subroutine serial_test_case_run_iface(this, ctx)
+      import :: serial_test_case, serial_context
+      class(serial_test_case), intent(inout) :: this
+      class(serial_context), pointer, intent(in) :: ctx
+    end subroutine serial_test_case_run_iface
+  end interface
 
 
 contains
@@ -83,6 +104,15 @@ contains
   end subroutine create_logger
 
 
+  subroutine create_test_case_runner(this, runner)
+    class(serial_driver), intent(in) :: this
+    class(test_case_runner), allocatable, intent(out) :: runner
+
+    allocate(serial_context_runner :: runner)
+
+  end subroutine create_test_case_runner
+
+
   subroutine create_context(this, testsuite, testcase, ctx)
     class(serial_context_factory), intent(in) :: this
     class(test_suite), pointer, intent(in) :: testsuite
@@ -94,6 +124,33 @@ contains
     ctx%testcase => testcase
 
   end subroutine create_context
+
+
+  subroutine run_test_case(this, testcase, ctx)
+    class(serial_context_runner), intent(in) :: this
+    class(test_case), pointer, intent(in) :: testcase
+    class(test_context), pointer, intent(in) :: ctx
+
+    class(serial_context), pointer :: myctx
+    class(serial_test_case), pointer :: mycase
+
+    select type(ctx)
+    class is (serial_context)
+      myctx => ctx
+    class default
+      error stop "Internal error, expected serial_context, obtained something else"
+    end select
+
+    select type(testcase)
+    class is (serial_test_case)
+      mycase => testcase
+    class default
+      error stop "Internal error, expected serial_context, obtained something else"
+    end select
+
+    call mycase%run(myctx)
+
+  end subroutine run_test_case
 
 
 end module fortuno_serialdriver

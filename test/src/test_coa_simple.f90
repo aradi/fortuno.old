@@ -1,11 +1,11 @@
 module testsuite_coa_simple
   use mylib, only : factorial
   use fortuno, only : test_suite, test_case, test_context
-  use fortuno_coarray, only : coa_context, coa_context_ptr, coa_test
+  use fortuno_coarray, only : coa_context, coa_context_ptr, coa_test, coa_test_case
   implicit none
 
 
-  type, extends(test_case) :: div_n_failure
+  type, extends(coa_test_case) :: div_n_failure
     procedure(test_divnfailure), nopass, pointer :: testproc
     integer :: divisor, remainder
   contains
@@ -95,11 +95,9 @@ contains
 
   subroutine div_n_failure_run(this, ctx)
     class(div_n_failure), intent(inout) :: this
-    class(test_context), pointer, intent(in) :: ctx
+    class(coa_context), pointer, intent(in) :: ctx
 
-    class(coa_context), pointer :: coactx
-    coactx => coa_context_ptr(ctx)
-    call this%testproc(coactx, this)
+    call this%testproc(ctx, this)
 
   end subroutine div_n_failure_run
 

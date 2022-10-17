@@ -1,13 +1,14 @@
 module fortuno_mpi_mpitest
   use fortuno_basetypes, only : test_case, test_context
   use fortuno_mpi_mpicontext, only : mpi_context, mpi_context_ptr
+  use fortuno_mpi_mpidriver, only : mpi_test_case
   implicit none
 
   private
   public :: mpi_test
 
 
-  type, extends(test_case) :: mpi_test
+  type, extends(mpi_test_case) :: mpi_test
     procedure(test_routine_iface), nopass, pointer :: testroutine
   contains
     procedure :: run
@@ -28,12 +29,9 @@ contains
 
   subroutine run(this, ctx)
     class(mpi_test), intent(inout) :: this
-    class(test_context), pointer, intent(in) :: ctx
+    class(mpi_context), pointer, intent(in) :: ctx
 
-    class(mpi_context), pointer :: mpictx
-
-    mpictx => mpi_context_ptr(ctx)
-    call this%testroutine(mpictx)
+    call this%testroutine(ctx)
 
   end subroutine run
 

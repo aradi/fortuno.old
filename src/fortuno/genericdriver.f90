@@ -7,7 +7,23 @@ module fortuno_genericdriver
   implicit none
 
   private
-  public :: generic_driver, test_name
+  public :: generic_driver, test_name, test_case_runner
+
+  type, abstract :: test_case_runner
+  contains
+    procedure(run_test_case_iface), deferred :: run_test_case
+  end type test_case_runner
+
+
+  abstract interface
+    subroutine run_test_case_iface(this, testcase, ctx)
+      import :: test_case_runner, test_case, test_context
+      implicit none
+      class(test_case_runner), intent(in) :: this
+      class(test_case), pointer, intent(in) :: testcase
+      class(test_context), pointer, intent(in) :: ctx
+    end subroutine run_test_case_iface
+  end interface
 
 
   type :: test_name
@@ -27,6 +43,7 @@ module fortuno_genericdriver
     procedure :: tear_down
     procedure(create_context_factory_iface), deferred :: create_context_factory
     procedure(create_logger_iface), deferred :: create_logger
+    procedure(create_test_case_runner_iface), deferred :: create_test_case_runner
     procedure(stop_on_error_iface), deferred :: stop_on_error
   end type generic_driver
 
@@ -53,6 +70,13 @@ module fortuno_genericdriver
       class(generic_driver), intent(in) :: this
       class(test_logger), allocatable, intent(out) :: logger
     end subroutine create_logger_iface
+
+
+    subroutine create_test_case_runner_iface(this, runner)
+      import :: generic_driver, test_case_runner
+      class(generic_driver), intent(in) :: this
+      class(test_case_runner), allocatable, intent(out) :: runner
+    end subroutine create_test_case_runner_iface
 
   end interface
 
@@ -92,6 +116,7 @@ contains
     type(driver_result), allocatable, optional, intent(out) :: driverresult
 
     class(test_logger), allocatable :: logger
+    class(test_case_runner), allocatable :: runner
     type(test_error), allocatable :: error0
     type(driver_result), allocatable :: driverresult0
     class(context_factory), allocatable :: ctxfact
@@ -101,8 +126,9 @@ contains
 
     call this%create_context_factory(ctxfact)
     call this%create_logger(logger)
+    call this%create_test_case_runner(runner)
     call get_test_indices_(this%testsuites, testinds, testnames=testnames)
-    call run_tests_(this%testsuites, testinds, ctxfact, logger, driverresult0)
+    call run_tests_(this%testsuites, testinds, ctxfact, logger, runner, driverresult0)
 
     if (driverresult0%failed) error0 = test_error(code=1, message="Some tests failed")
     if (present(error)) call move_alloc(error0, error)
@@ -194,17 +220,18 @@ contains
   end subroutine get_test_indices_
 
 
-  subroutine run_tests_(testsuites, testinds, ctxfact, logger, driverresult)
+  subroutine run_tests_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     type(test_suite_cls), target, intent(inout) :: testsuites(:)
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
+    class(test_case_runner), intent(in) :: runner
     type(driver_result), allocatable, intent(out) :: driverresult
 
     call allocate_driver_result_(testsuites, testinds, driverresult)
     call initialize_suites_(testsuites, testinds, ctxfact, driverresult)
     call logger%begin_short_log()
-    call execute_tests_(testsuites, testinds, ctxfact, logger, driverresult)
+    call execute_tests_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     call logger%end_short_log()
     call finalize_suites_(testsuites, testinds, ctxfact, driverresult)
 
@@ -294,11 +321,12 @@ contains
   end subroutine finalize_suites_
 
 
-  subroutine execute_tests_(testsuites, testinds, ctxfact, logger, driverresult)
+  subroutine execute_tests_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     type(test_suite_cls), target, intent(inout) :: testsuites(:)
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
+    class(test_case_runner), intent(in) :: runner
     type(driver_result), intent(inout) :: driverresult
 
     class(test_context), allocatable, target :: ctx
@@ -325,7 +353,7 @@ contains
 
         call ctxfact%create_context(testsuite, testcase, ctx)
         ctxptr => ctx
-        call testcase%run(ctxptr)
+        call runner%run_test_case(testcase, ctxptr)
         call testcase%get_status_str(testrepr)
         success = .not. ctx%failed()
         call logger%short_log_result(testsuite%name, testcase%name, success)

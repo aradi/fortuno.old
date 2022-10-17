@@ -1,8 +1,9 @@
 module fortuno_mpi_mpidriver
   use iso_fortran_env, only : stderr => error_unit
   use mpi_f08, only : MPI_Comm, MPI_Comm_rank, MPI_Comm_size, MPI_COMM_WORLD, MPI_Finalize, MPI_Init
-  use fortuno_basetypes, only : test_context, test_suite, test_suite_cls
+  use fortuno_basetypes, only : test_case, test_context, test_suite, test_suite_cls
   use fortuno_contextfactory, only : context_factory
+  use fortuno_genericdriver, only : test_case_runner
   use fortuno_mpi_mpicontext, only : mpi_context, mpi_context_factory, mpi_env
   use fortuno_mpi_mpilogger, only : mpi_logger
   use fortuno_serialdriver, only : serial_driver
@@ -12,7 +13,13 @@ module fortuno_mpi_mpidriver
   implicit none
 
   private
-  public :: mpi_driver
+  public :: mpi_driver, mpi_test_case
+
+
+  type, extends(test_case_runner) :: mpi_context_runner
+  contains
+    procedure :: run_test_case
+  end type mpi_context_runner
 
 
   type, extends(serial_driver) :: mpi_driver
@@ -24,12 +31,28 @@ module fortuno_mpi_mpidriver
     procedure :: tear_down
     procedure :: create_context_factory
     procedure :: create_logger
+    procedure :: create_test_case_runner
     procedure :: stop_on_error
   end type
 
 
   interface mpi_driver
     module procedure new_mpi_driver
+  end interface
+
+
+  type, extends(test_case), abstract :: mpi_test_case
+  contains
+    procedure(mpi_test_case_run_iface), deferred :: run
+  end type mpi_test_case
+
+
+  abstract interface
+    subroutine mpi_test_case_run_iface(this, ctx)
+      import :: mpi_test_case, mpi_context
+      class(mpi_test_case), intent(inout) :: this
+      class(mpi_context), pointer, intent(in) :: ctx
+    end subroutine mpi_test_case_run_iface
   end interface
 
 
@@ -83,6 +106,15 @@ contains
   end subroutine create_logger
 
 
+  subroutine create_test_case_runner(this, runner)
+    class(mpi_driver), intent(in) :: this
+    class(test_case_runner), allocatable, intent(out) :: runner
+
+    allocate(mpi_context_runner :: runner)
+
+  end subroutine create_test_case_runner
+
+
   subroutine stop_on_error(this, error)
     class(mpi_driver), intent(inout) :: this
     type(test_error), allocatable, intent(in) :: error
@@ -93,6 +125,33 @@ contains
     error stop 1, quiet = .true.
 
   end subroutine stop_on_error
+
+
+  subroutine run_test_case(this, testcase, ctx)
+    class(mpi_context_runner), intent(in) :: this
+    class(test_case), pointer, intent(in) :: testcase
+    class(test_context), pointer, intent(in) :: ctx
+
+    class(mpi_context), pointer :: myctx
+    class(mpi_test_case), pointer :: mycase
+
+    select type(ctx)
+    class is (mpi_context)
+      myctx => ctx
+    class default
+      error stop "Internal error, expected serial_context, obtained something else"
+    end select
+
+    select type(testcase)
+    class is (mpi_test_case)
+      mycase => testcase
+    class default
+      error stop "Internal error, expected serial_context, obtained something else"
+    end select
+
+    call mycase%run(myctx)
+
+  end subroutine run_test_case
 
 
 end module fortuno_mpi_mpidriver

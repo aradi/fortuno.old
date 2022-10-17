@@ -13,7 +13,6 @@ module fortuno_basetypes
   type, abstract :: test_case
     character(:), allocatable :: name
   contains
-    procedure(test_case_run_iface), deferred :: run
     procedure :: get_status_str => test_case_get_status_str
   end type test_case
 
@@ -129,18 +128,5 @@ module fortuno_basetypes
     end subroutine test_context_mark_as_failed
 
   end interface
-
-
-  abstract interface
-
-    subroutine test_case_run_iface(this, ctx)
-      import :: test_case, test_context
-      implicit none
-      class(test_case), intent(inout) :: this
-      class(test_context), pointer, intent(in) :: ctx
-    end subroutine test_case_run_iface
-
-  end interface
-
 
 end module fortuno_basetypes

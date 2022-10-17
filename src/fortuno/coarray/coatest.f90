@@ -1,13 +1,14 @@
 module fortuno_coarray_coatest
   use fortuno_basetypes, only : test_case, test_context
   use fortuno_coarray_coacontext, only : coa_context, coa_context_ptr
+  use fortuno_coarray_coadriver, only : coa_test_case
   implicit none
 
   private
   public :: coa_test
 
 
-  type, extends(test_case) :: coa_test
+  type, extends(coa_test_case) :: coa_test
     procedure(test_routine_iface), nopass, pointer :: testroutine
   contains
     procedure :: run
@@ -28,12 +29,9 @@ contains
 
   subroutine run(this, ctx)
     class(coa_test), intent(inout) :: this
-    class(test_context), pointer, intent(in) :: ctx
+    class(coa_context), pointer, intent(in) :: ctx
 
-    class(coa_context), pointer :: coactx
-
-    coactx => coa_context_ptr(ctx)
-    call this%testroutine(coactx)
+    call this%testroutine(ctx)
 
   end subroutine run
 

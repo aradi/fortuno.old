@@ -1,11 +1,11 @@
 module testsuite_mpi_simple
     use mpi_f08, only : MPI_Allreduce, MPI_Bcast, MPI_INTEGER, MPI_SUM
     use fortuno, only : test_suite, test_case, test_context
-    use fortuno_mpi, only : mpi_context, mpi_context_ptr, mpi_test
+    use fortuno_mpi, only : mpi_context, mpi_context_ptr, mpi_test, mpi_test_case
     implicit none
 
 
-    type, extends(test_case) :: div_n_failure
+    type, extends(mpi_test_case) :: div_n_failure
       procedure(test_divnfailure), nopass, pointer :: testproc
       integer :: div, rem
     contains
@@ -84,11 +84,9 @@ module testsuite_mpi_simple
 
     subroutine div_n_failure_run(this, ctx)
       class(div_n_failure), intent(inout) :: this
-      class(test_context), pointer, intent(in) :: ctx
+      class(mpi_context), pointer, intent(in) :: ctx
 
-      class(mpi_context), pointer :: mpictx
-      mpictx => mpi_context_ptr(ctx)
-      call this%testproc(mpictx, this)
+      call this%testproc(ctx, this)
 
     end subroutine div_n_failure_run
 

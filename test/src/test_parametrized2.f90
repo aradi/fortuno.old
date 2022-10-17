@@ -1,6 +1,6 @@
 module testsuite_parametrized2
   use mylib, only : factorial
-  use fortuno, only : test_case, test_suite, test_context
+  use fortuno, only : serial_test_case, test_suite, serial_context
   implicit none
 
 
@@ -14,7 +14,7 @@ module testsuite_parametrized2
       & ]
 
 
-  type, extends(test_case) :: factcalc_test
+  type, extends(serial_test_case) :: factcalc_test
     type(calc) :: factcalc
   contains
     procedure :: run
@@ -41,7 +41,7 @@ contains
 
   subroutine test_fact_calc(this, ctx)
     class(factcalc_test), intent(in) :: this
-    class(test_context), intent(inout) :: ctx
+    class(serial_context), intent(inout) :: ctx
 
     call ctx%check(factorial(this%factcalc%arg) == this%factcalc%res)
 
@@ -50,7 +50,7 @@ contains
 
   subroutine run(this, ctx)
     class(factcalc_test), intent(inout) :: this
-    class(test_context), pointer, intent(in) :: ctx
+    class(serial_context), pointer, intent(in) :: ctx
 
     call this%test_fact_calc(ctx)
 
