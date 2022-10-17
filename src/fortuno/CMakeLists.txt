@@ -13,15 +13,12 @@ list(
     "${curdir}/failuredetails.f90"
     "${curdir}/failureinfo.f90"
     "${curdir}/genericdriver.f90"
-    "${curdir}/serialcontext.f90"
-    "${curdir}/serialdriver.f90"
-    "${curdir}/seriallogger.f90"
-    "${curdir}/simpletest.f90"
     "${curdir}/testerror.f90"
     "${curdir}/testlogger.f90"
     "${curdir}/utils.f90"
     "${curdir}/version.f90"
 )
+add_subdirectory(serial)
 
 list(
     APPEND mpi-f90-sources

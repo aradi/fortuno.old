@@ -6,7 +6,7 @@ module fortuno_mpi_mpidriver
   use fortuno_genericdriver, only : test_case_runner
   use fortuno_mpi_mpicontext, only : mpi_context, mpi_context_factory, mpi_env
   use fortuno_mpi_mpilogger, only : mpi_logger
-  use fortuno_serialdriver, only : serial_driver
+  use fortuno_serial_serialdriver, only : serial_driver
   use fortuno_testerror, only : test_error
   use fortuno_testlogger, only : test_logger
   use fortuno_utils, only : string

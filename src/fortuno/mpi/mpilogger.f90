@@ -1,7 +1,7 @@
 module fortuno_mpi_mpilogger
     use iso_fortran_env, only : stdout => output_unit
     use mpi_f08, only : MPI_Barrier, MPI_Comm
-    use fortuno_seriallogger, only : serial_logger
+    use fortuno_serial_seriallogger, only : serial_logger
     use fortuno_mpi_mpifailureinfo, only : mpi_failure_info
     use fortuno_testlogger, only : driver_result, test_status, test_name_str
     use fortuno_utils, only : nr_digits

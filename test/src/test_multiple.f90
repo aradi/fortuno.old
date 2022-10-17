@@ -1,6 +1,6 @@
 module testsuite_multiple1
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, test => simple_test, test_suite
+  use fortuno, only : context => serial_context, test => serial_test, test_suite
   implicit none
 
 contains
@@ -27,7 +27,7 @@ end module testsuite_multiple1
 
 module testsuite_multiple2
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, test => simple_test, test_suite
+  use fortuno, only : context => serial_context, test => serial_test, test_suite
   implicit none
 
 contains

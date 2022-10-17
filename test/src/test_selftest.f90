@@ -1,6 +1,6 @@
 module testsuite_selftest
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, test => simple_test, test_suite
+  use fortuno, only : context => serial_context, test => serial_test, test_suite
   implicit none
 
 contains
@@ -54,7 +54,7 @@ end module testsuite_selftest
 
 
 module testsuite_selftest_tester
-  use fortuno, only : driver_result, is_equal, serial_driver, test => simple_test,&
+  use fortuno, only : driver_result, is_equal, serial_driver, test => serial_test,&
       & context => test_context, test_name, test_suite
   use testsuite_selftest, only : new_selftest_suite => new_test_suite
   implicit none
@@ -67,7 +67,7 @@ contains
     type(test_suite) :: testsuite
 
     call set_up_module()
-    testsuite = test_suite("simple_tester", [&
+    testsuite = test_suite("serial_tester", [&
         & test("nr_of_entries", test_nr_of_entries),&
         & test("results", test_results)&
         & ])

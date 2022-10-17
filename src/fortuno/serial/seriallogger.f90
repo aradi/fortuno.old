@@ -1,4 +1,4 @@
-module fortuno_seriallogger
+module fortuno_serial_seriallogger
   use iso_fortran_env, only : stdout => output_unit
   use fortuno_testlogger, only : driver_result, test_logger, test_name_str, test_status
   use fortuno_utils, only : nr_digits
@@ -112,4 +112,4 @@ contains
   end subroutine log_summary
 
 
-end module fortuno_seriallogger
+end module fortuno_serial_seriallogger

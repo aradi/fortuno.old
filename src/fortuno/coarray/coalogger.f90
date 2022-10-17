@@ -1,7 +1,7 @@
 module fortuno_coarray_coalogger
   use iso_fortran_env, only : stdout => output_unit
   use fortuno_coarray_coafailureinfo, only : coa_failure_info
-  use fortuno_seriallogger, only : serial_logger
+  use fortuno_serial_seriallogger, only : serial_logger
   use fortuno_testlogger, only : driver_result, test_status, test_name_str
   use fortuno_utils, only : nr_digits
   implicit none

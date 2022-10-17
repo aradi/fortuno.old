@@ -1,4 +1,4 @@
-module fortuno_serialcontext
+module fortuno_serial_serialcontext
   use fortuno_basetypes, only : test_context
   implicit none
 
@@ -24,4 +24,4 @@ contains
 
   end function serial_context_ptr
 
-end module fortuno_serialcontext
+end module fortuno_serial_serialcontext

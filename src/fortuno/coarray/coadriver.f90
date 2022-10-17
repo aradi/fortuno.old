@@ -5,7 +5,7 @@ module fortuno_coarray_coadriver
   use fortuno_coarray_coacontext, only : coa_context, coa_context_factory
   use fortuno_coarray_coalogger, only : coa_logger
   use fortuno_genericdriver, only : test_case_runner
-  use fortuno_serialdriver, only : serial_driver
+  use fortuno_serial_serialdriver, only : serial_driver
   use fortuno_testerror, only : test_error
   use fortuno_testlogger, only : test_logger
   use fortuno_utils, only : string

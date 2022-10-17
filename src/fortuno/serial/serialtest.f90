@@ -1,17 +1,17 @@
-module fortuno_simpletest
-  use fortuno_serialcontext, only : serial_context
-  use fortuno_serialdriver, only : serial_test_case
+module fortuno_serial_serialtest
+  use fortuno_serial_serialcontext, only : serial_context
+  use fortuno_serial_serialdriver, only : serial_test_case
   implicit none
 
   private
-  public :: simple_test
+  public :: serial_test
 
 
-  type, extends(serial_test_case) :: simple_test
+  type, extends(serial_test_case) :: serial_test
     procedure(test_routine_iface), nopass, pointer :: testroutine
   contains
     procedure :: run
-  end type simple_test
+  end type serial_test
 
 
   abstract interface
@@ -27,7 +27,7 @@ contains
 
 
   subroutine run(this, ctx)
-    class(simple_test), intent(inout) :: this
+    class(serial_test), intent(inout) :: this
     class(serial_context), pointer, intent(in) :: ctx
 
     call this%testroutine(ctx)
@@ -35,4 +35,4 @@ contains
   end subroutine run
 
 
-end module fortuno_simpletest
+end module fortuno_serial_serialtest
