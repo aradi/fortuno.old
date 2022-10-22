@@ -37,6 +37,31 @@ The development can be followed on the `Fortuno project page
 <https://github.com/aradi/fortuno>`_  on GitHub.
 
 
+Known issues
+============
+
+In order to be expressive, elegant and simple, Fortuno uses modern Fortran
+constructs quite extensively. Unfortunately, this seems to be challenging for
+several compilers, as shown in the compiler table below.
+
++------------------------+-----------------------------------------------------+
+| Compiler               | Status                                              |
++========================+=====================================================+
+| Intel 2021.7           | * serial: OK                                        |
+| (x86_64/Linux)         | * mpi: OK (Intel MPI)                               |
+|                        | * coarray: OK                                       |
++------------------------+-----------------------------------------------------+
+| NAG 7.1 (build 7111,   | * serial: Terminated by OS (testlogger.f90)         |
+| x86_64/Linux)          |                                                     |
++------------------------+-----------------------------------------------------+
+| GNU 12.1               | * serial: Internal compiler error (failureinfo.f90) |
+| (x86_64/Linux)         |                                                     |
++------------------------+-----------------------------------------------------+
+
+If you are aware of other compilers being able to build Fortuno, open an issue
+or a pull request, so that the table can be updated accordingly.
+
+
 License
 =======
 
