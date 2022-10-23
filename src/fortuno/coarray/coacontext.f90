@@ -5,7 +5,7 @@ module fortuno_coarray_coacontext
   implicit none
 
   private
-  public :: coa_context, coa_context_ptr
+  public :: coa_context
   public :: coa_context_factory
 
 
@@ -63,20 +63,6 @@ contains
     call move_alloc(failureinfo, this%failureinfo)
 
   end subroutine coa_context_check_logical
-
-
-  function coa_context_ptr(trg) result(ptr)
-    class(test_context), pointer, intent(in) :: trg
-    type(coa_context), pointer :: ptr
-
-    select type (trg)
-    type is (coa_context)
-      ptr => trg
-    class default
-      error stop "Internal error, expected coa_context, received something else"
-    end select
-
-  end function coa_context_ptr
 
 
   subroutine coa_context_factory_create_context(this, testsuite, testcase, ctx)

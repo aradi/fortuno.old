@@ -6,7 +6,7 @@ module fortuno_mpi_mpicontext
   implicit none
 
   private
-  public :: mpi_context, mpi_context_ptr
+  public :: mpi_context
   public :: mpi_context_factory
   public :: mpi_env
 
@@ -60,20 +60,6 @@ contains
     call move_alloc(failureinfo, this%failureinfo)
 
   end subroutine mpi_context_check_logical
-
-
-  function mpi_context_ptr(trg) result(ptr)
-    class(test_context), pointer, intent(in) :: trg
-    type(mpi_context), pointer :: ptr
-
-    select type (trg)
-    type is (mpi_context)
-      ptr => trg
-    class default
-      error stop "Internal error, expected mpi_context, received something else"
-    end select
-
-  end function mpi_context_ptr
 
 
   subroutine mpi_context_factory_create_context(this, testsuite, testcase, ctx)

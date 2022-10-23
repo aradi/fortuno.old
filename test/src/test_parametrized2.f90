@@ -50,7 +50,7 @@ contains
 
   subroutine run(this, ctx)
     class(factcalc_test), intent(inout) :: this
-    class(serial_context), pointer, intent(in) :: ctx
+    class(serial_context), intent(inout) :: ctx
 
     call this%test_fact_calc(ctx)
 

@@ -1,14 +1,12 @@
 module fortuno_coarray_coadriver
   use iso_fortran_env, only : stderr => error_unit
-  use fortuno_basetypes, only : test_case, test_context, test_suite, test_suite_cls
+  use fortuno_basetypes, only : test_case, test_context, test_suite
   use fortuno_contextfactory, only : context_factory
   use fortuno_coarray_coacontext, only : coa_context, coa_context_factory
   use fortuno_coarray_coalogger, only : coa_logger
-  use fortuno_genericdriver, only : test_case_runner
-  use fortuno_serial_serialdriver, only : serial_driver
+  use fortuno_genericdriver, only : generic_driver, test_case_runner
   use fortuno_testerror, only : test_error
   use fortuno_testlogger, only : test_logger
-  use fortuno_utils, only : string
   implicit none
 
   private
@@ -21,7 +19,7 @@ module fortuno_coarray_coadriver
   end type coa_context_runner
 
 
-  type, extends(serial_driver) :: coa_driver
+  type, extends(generic_driver) :: coa_driver
   contains
     procedure :: create_context_factory
     procedure :: create_logger
@@ -45,7 +43,7 @@ module fortuno_coarray_coadriver
     subroutine coa_test_case_run_iface(this, ctx)
       import :: coa_test_case, coa_context
       class(coa_test_case), intent(inout) :: this
-      class(coa_context), pointer, intent(in) :: ctx
+      class(coa_context), intent(inout) :: ctx
     end subroutine coa_test_case_run_iface
   end interface
 

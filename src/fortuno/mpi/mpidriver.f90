@@ -3,10 +3,9 @@ module fortuno_mpi_mpidriver
   use mpi_f08, only : MPI_Comm, MPI_Comm_rank, MPI_Comm_size, MPI_COMM_WORLD, MPI_Finalize, MPI_Init
   use fortuno_basetypes, only : test_case, test_context, test_suite, test_suite_cls
   use fortuno_contextfactory, only : context_factory
-  use fortuno_genericdriver, only : test_case_runner
+  use fortuno_genericdriver, only : generic_driver, test_case_runner
   use fortuno_mpi_mpicontext, only : mpi_context, mpi_context_factory, mpi_env
   use fortuno_mpi_mpilogger, only : mpi_logger
-  use fortuno_serial_serialdriver, only : serial_driver
   use fortuno_testerror, only : test_error
   use fortuno_testlogger, only : test_logger
   use fortuno_utils, only : string
@@ -22,7 +21,7 @@ module fortuno_mpi_mpidriver
   end type mpi_context_runner
 
 
-  type, extends(serial_driver) :: mpi_driver
+  type, extends(generic_driver) :: mpi_driver
     type(MPI_Comm) :: mpicomm
     integer :: commsize
     integer :: myrank
@@ -51,7 +50,7 @@ module fortuno_mpi_mpidriver
     subroutine mpi_test_case_run_iface(this, ctx)
       import :: mpi_test_case, mpi_context
       class(mpi_test_case), intent(inout) :: this
-      class(mpi_context), pointer, intent(in) :: ctx
+      class(mpi_context), intent(inout) :: ctx
     end subroutine mpi_test_case_run_iface
   end interface
 

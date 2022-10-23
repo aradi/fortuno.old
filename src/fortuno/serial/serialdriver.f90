@@ -48,7 +48,7 @@ module fortuno_serial_serialdriver
     subroutine serial_test_case_run_iface(this, ctx)
       import :: serial_test_case, serial_context
       class(serial_test_case), intent(inout) :: this
-      class(serial_context), pointer, intent(in) :: ctx
+      class(serial_context), intent(inout) :: ctx
     end subroutine serial_test_case_run_iface
   end interface
 

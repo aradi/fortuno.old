@@ -16,7 +16,7 @@ contains
 
 
   subroutine test_factorial0(ctx)
-    class(context), pointer, intent(in) :: ctx
+    class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(0) == 1)
 

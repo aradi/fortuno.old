@@ -40,21 +40,21 @@ The development can be followed on the `Fortuno project page
 Known issues
 ============
 
-In order to be expressive, elegant and simple, Fortuno uses modern Fortran
+In order to be flexible, expressive and simple, Fortuno uses modern Fortran
 constructs quite extensively. Unfortunately, this seems to be challenging for
-several compilers, as shown in the compiler table below.
+some compilers, as shown in the compiler table below.
 
 +------------------------+-----------------------------------------------------+
 | Compiler               | Status                                              |
 +========================+=====================================================+
 | Intel 2021.7           | * serial: OK                                        |
-| (x86_64/Linux)         | * mpi: OK (Intel MPI)                               |
+| (x86_64/Linux)         | * mpi (with Intel MPI): OK                          |
 |                        | * coarray: OK                                       |
 +------------------------+-----------------------------------------------------+
-| NAG 7.1 (build 7111,   | * serial: Terminated by OS (testlogger.f90)         |
-| x86_64/Linux)          |                                                     |
+| NAG 7.1 (build 7111,   | * serial: OK (Release mode only)                    |
+| x86_64/Linux)          | * coarray: OK (Release mode only)                   |
 +------------------------+-----------------------------------------------------+
-| GNU 12.1               | * serial: Internal compiler error (failureinfo.f90) |
+| GNU 12.2               | * serial: Internal compiler error (failureinfo.f90) |
 | (x86_64/Linux)         |                                                     |
 +------------------------+-----------------------------------------------------+
 

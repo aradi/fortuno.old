@@ -1,7 +1,7 @@
 module testsuite_mpi_simple
   use mpi_f08, only : MPI_Allreduce, MPI_Bcast, MPI_INTEGER, MPI_SUM
   use fortuno, only : test_suite, test_case, test_context
-  use fortuno_mpi, only : mpi_context, mpi_context_ptr, mpi_test, mpi_test_case
+  use fortuno_mpi, only : mpi_context, mpi_test, mpi_test_case
   implicit none
 
 
@@ -97,7 +97,7 @@ contains
 
   subroutine div_n_failure_run(this, ctx)
     class(div_n_failure), intent(inout) :: this
-    class(mpi_context), pointer, intent(in) :: ctx
+    class(mpi_context), intent(inout) :: ctx
 
     call this%testproc(ctx, this)
 

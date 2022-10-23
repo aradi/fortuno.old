@@ -61,7 +61,7 @@ contains
 
   subroutine run(this, ctx)
     class(random_test), intent(inout) :: this
-    class(serial_context), pointer, intent(in) :: ctx
+    class(serial_context), intent(inout) :: ctx
 
     call this%set_up()
     call this%testroutine(ctx, this)

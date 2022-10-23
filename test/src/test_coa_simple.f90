@@ -1,7 +1,7 @@
 module testsuite_coa_simple
   use mylib, only : factorial
-  use fortuno, only : is_equal, test_suite, test_case, test_context
-  use fortuno_coarray, only : coa_context, coa_context_ptr, coa_test, coa_test_case
+  use fortuno, only : is_equal, test_suite
+  use fortuno_coarray, only : coa_context, coa_test, coa_test_case
   implicit none
 
 
@@ -109,7 +109,7 @@ contains
 
   subroutine div_n_failure_run(this, ctx)
     class(div_n_failure), intent(inout) :: this
-    class(coa_context), pointer, intent(in) :: ctx
+    class(coa_context), intent(inout) :: ctx
 
     call this%testproc(ctx, this)
 
