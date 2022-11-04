@@ -1,13 +1,13 @@
 module fortuno_serial_serialtest
   use fortuno_serial_serialcontext, only : serial_context
-  use fortuno_serial_serialdriver, only : serial_test_case
+  use fortuno_serial_serialdriver, only : serial_test_base
   implicit none
 
   private
   public :: serial_test
 
 
-  type, extends(serial_test_case) :: serial_test
+  type, extends(serial_test_base) :: serial_test
     procedure(test_routine_iface), nopass, pointer :: testroutine
   contains
     procedure :: run

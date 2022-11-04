@@ -12,9 +12,9 @@ module fortuno_coarray_coalogger
     procedure :: begin_short_log
     procedure :: short_log_result
     procedure :: end_short_log
-    procedure :: begin_test_case_failure_log
-    procedure :: log_test_case_failure
-    procedure :: end_test_case_failure_log
+    procedure :: begin_test_base_failure_log
+    procedure :: log_test_base_failure
+    procedure :: end_test_base_failure_log
     procedure :: log_summary
   end type coa_logger
 
@@ -51,27 +51,27 @@ contains
   end subroutine short_log_result
 
 
-  subroutine begin_test_case_failure_log(this, suiteresult, caseresult)
+  subroutine begin_test_base_failure_log(this, suiteresult, caseresult)
     class(coa_logger), intent(inout) :: this
     type(test_status), intent(in) :: suiteresult, caseresult
 
     if (this_image() /= 1) return
-    call this%serial_logger%begin_test_case_failure_log(suiteresult, caseresult)
+    call this%serial_logger%begin_test_base_failure_log(suiteresult, caseresult)
 
-  end subroutine begin_test_case_failure_log
+  end subroutine begin_test_base_failure_log
 
 
-  subroutine end_test_case_failure_log(this)
+  subroutine end_test_base_failure_log(this)
     class(coa_logger), intent(inout) :: this
 
     sync all
     if (this_image() /= 1) return
-    call this%serial_logger%end_test_case_failure_log()
+    call this%serial_logger%end_test_base_failure_log()
 
-  end subroutine end_test_case_failure_log
+  end subroutine end_test_base_failure_log
 
 
-  recursive subroutine log_test_case_failure(this, failureinfo)
+  recursive subroutine log_test_base_failure(this, failureinfo)
     class(coa_logger), intent(inout) :: this
     class(failure_info), intent(in) :: failureinfo
 
@@ -80,7 +80,7 @@ contains
 
     writesepline = .false.
     if (allocated(failureinfo%previous)) then
-      call this%log_test_case_failure(failureinfo%previous)
+      call this%log_test_base_failure(failureinfo%previous)
       writesepline = .true.
     end if
     sync all
@@ -93,7 +93,7 @@ contains
       end if
     end select
 
-  end subroutine log_test_case_failure
+  end subroutine log_test_base_failure
 
 
   subroutine log_summary(this, nsucceeded, nfailed)

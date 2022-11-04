@@ -1,11 +1,11 @@
 module testsuite_mpi_simple
   use mpi_f08, only : MPI_Allreduce, MPI_Bcast, MPI_INTEGER, MPI_SUM
-  use fortuno, only : test_suite, test_case, test_context
-  use fortuno_mpi, only : mpi_context, mpi_test, mpi_test_case
+  use fortuno, only : suite_base, test_base, context_base
+  use fortuno_mpi, only : mpi_context, mpi_test, mpi_test_base
   implicit none
 
 
-  type, extends(mpi_test_case) :: div_n_failure
+  type, extends(mpi_test_base) :: div_n_failure
     procedure(test_divnfailure), nopass, pointer :: testproc
     integer :: div, rem
   contains
@@ -14,17 +14,17 @@ module testsuite_mpi_simple
 
 contains
 
-  function new_test_suite() result(testsuite)
-    type(test_suite) :: testsuite
+  function new_suite_base() result(testsuite)
+    type(suite_base) :: testsuite
 
-    testsuite = test_suite("mpi_simple", [&
+    testsuite = suite_base("mpi_simple", [&
         & mpi_test("broadcast", test_broadcast),&
         & mpi_test("allreduce", test_allreduce)&
         & ])
-    call testsuite%add_test_case(&
+    call testsuite%add_test(&
         & div_n_failure("divnfailure(3, 0)", test_divnfailure, div=3, rem=0))
 
-  end function new_test_suite
+  end function new_suite_base
 
 
   subroutine test_broadcast(ctx)
@@ -108,12 +108,12 @@ end module testsuite_mpi_simple
 
 program testdriver_mpi_simple
   use fortuno_mpi, only : mpi_driver
-  use testsuite_mpi_simple, only : new_test_suite
+  use testsuite_mpi_simple, only : new_suite_base
   implicit none
 
   type(mpi_driver), allocatable :: driver
 
-  driver = mpi_driver([new_test_suite()])
+  driver = mpi_driver([new_suite_base()])
   call driver%run()
 
 end program testdriver_mpi_simple

@@ -1,13 +1,13 @@
 module fortuno_coarray_coatest
   use fortuno_coarray_coacontext, only : coa_context
-  use fortuno_coarray_coadriver, only : coa_test_case
+  use fortuno_coarray_coadriver, only : coa_test_base
   implicit none
 
   private
   public :: coa_test
 
 
-  type, extends(coa_test_case) :: coa_test
+  type, extends(coa_test_base) :: coa_test
     procedure(test_routine_iface), nopass, pointer :: testroutine
   contains
     procedure :: run

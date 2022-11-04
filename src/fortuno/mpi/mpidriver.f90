@@ -1,9 +1,9 @@
 module fortuno_mpi_mpidriver
   use iso_fortran_env, only : stderr => error_unit
   use mpi_f08, only : MPI_Comm, MPI_Comm_rank, MPI_Comm_size, MPI_COMM_WORLD, MPI_Finalize, MPI_Init
-  use fortuno_basetypes, only : test_case, test_context, test_suite, test_suite_cls
+  use fortuno_basetypes, only : test_base, context_base, suite_base, suite_base_cls
   use fortuno_contextfactory, only : context_factory
-  use fortuno_genericdriver, only : generic_driver, test_case_runner
+  use fortuno_genericdriver, only : generic_driver, test_base_runner
   use fortuno_mpi_mpicontext, only : mpi_context, mpi_context_factory, mpi_env
   use fortuno_mpi_mpilogger, only : mpi_logger
   use fortuno_testerror, only : test_error
@@ -12,12 +12,12 @@ module fortuno_mpi_mpidriver
   implicit none
 
   private
-  public :: mpi_driver, mpi_test_case
+  public :: mpi_driver, mpi_test_base
 
 
-  type, extends(test_case_runner) :: mpi_context_runner
+  type, extends(test_base_runner) :: mpi_context_runner
   contains
-    procedure :: run_test_case
+    procedure :: run_test_base
   end type mpi_context_runner
 
 
@@ -30,7 +30,7 @@ module fortuno_mpi_mpidriver
     procedure :: tear_down
     procedure :: create_context_factory
     procedure :: create_logger
-    procedure :: create_test_case_runner
+    procedure :: create_test_base_runner
     procedure :: stop_on_error
   end type
 
@@ -40,18 +40,18 @@ module fortuno_mpi_mpidriver
   end interface
 
 
-  type, extends(test_case), abstract :: mpi_test_case
+  type, extends(test_base), abstract :: mpi_test_base
   contains
-    procedure(mpi_test_case_run_iface), deferred :: run
-  end type mpi_test_case
+    procedure(mpi_test_base_run_iface), deferred :: run
+  end type mpi_test_base
 
 
   abstract interface
-    subroutine mpi_test_case_run_iface(this, ctx)
-      import :: mpi_test_case, mpi_context
-      class(mpi_test_case), intent(inout) :: this
+    subroutine mpi_test_base_run_iface(this, ctx)
+      import :: mpi_test_base, mpi_context
+      class(mpi_test_base), intent(inout) :: this
       class(mpi_context), intent(inout) :: ctx
-    end subroutine mpi_test_case_run_iface
+    end subroutine mpi_test_base_run_iface
   end interface
 
 
@@ -59,10 +59,10 @@ contains
 
 
   function new_mpi_driver(testsuites) result(this)
-    class(test_suite), optional, intent(in) :: testsuites(:)
+    class(suite_base), optional, intent(in) :: testsuites(:)
     type(mpi_driver) :: this
 
-    if (present(testsuites)) call this%add_test_suite(testsuites)
+    if (present(testsuites)) call this%add_suite_base(testsuites)
 
   end function new_mpi_driver
 
@@ -105,13 +105,13 @@ contains
   end subroutine create_logger
 
 
-  subroutine create_test_case_runner(this, runner)
+  subroutine create_test_base_runner(this, runner)
     class(mpi_driver), intent(in) :: this
-    class(test_case_runner), allocatable, intent(out) :: runner
+    class(test_base_runner), allocatable, intent(out) :: runner
 
     allocate(mpi_context_runner :: runner)
 
-  end subroutine create_test_case_runner
+  end subroutine create_test_base_runner
 
 
   subroutine stop_on_error(this, error)
@@ -126,13 +126,13 @@ contains
   end subroutine stop_on_error
 
 
-  subroutine run_test_case(this, testcase, ctx)
+  subroutine run_test_base(this, testcase, ctx)
     class(mpi_context_runner), intent(in) :: this
-    class(test_case), pointer, intent(in) :: testcase
-    class(test_context), pointer, intent(in) :: ctx
+    class(test_base), pointer, intent(in) :: testcase
+    class(context_base), pointer, intent(in) :: ctx
 
     class(mpi_context), pointer :: myctx
-    class(mpi_test_case), pointer :: mycase
+    class(mpi_test_base), pointer :: mycase
 
     select type(ctx)
     class is (mpi_context)
@@ -142,7 +142,7 @@ contains
     end select
 
     select type(testcase)
-    class is (mpi_test_case)
+    class is (mpi_test_base)
       mycase => testcase
     class default
       error stop "Internal error, expected serial_context, obtained something else"
@@ -150,7 +150,7 @@ contains
 
     call mycase%run(myctx)
 
-  end subroutine run_test_case
+  end subroutine run_test_base
 
 
 end module fortuno_mpi_mpidriver

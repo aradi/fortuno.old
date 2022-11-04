@@ -1,5 +1,5 @@
 module fortuno_coarray_coacontext
-  use fortuno_basetypes, only : test_case, test_context, test_suite
+  use fortuno_basetypes, only : test_base, context_base, suite_base
   use fortuno_contextfactory, only : context_factory
   use fortuno_coarray_coafailureinfo, only : coa_failure_info
   implicit none
@@ -9,7 +9,7 @@ module fortuno_coarray_coacontext
   public :: coa_context_factory
 
 
-  type, extends(test_context) :: coa_context
+  type, extends(context_base) :: coa_context
     logical, allocatable :: failedimages(:)
   contains
     procedure :: check_logical => coa_context_check_logical
@@ -67,9 +67,9 @@ contains
 
   subroutine coa_context_factory_create_context(this, testsuite, testcase, ctx)
     class(coa_context_factory), intent(in) :: this
-    class(test_suite), pointer, intent(in) :: testsuite
-    class(test_case), pointer, intent(in) :: testcase
-    class(test_context), allocatable, intent(out) :: ctx
+    class(suite_base), pointer, intent(in) :: testsuite
+    class(test_base), pointer, intent(in) :: testcase
+    class(context_base), allocatable, intent(out) :: ctx
 
     type(coa_context), allocatable :: coactx
 

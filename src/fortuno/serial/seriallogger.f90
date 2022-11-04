@@ -15,9 +15,9 @@ module fortuno_serial_seriallogger
     procedure :: short_log_result
     procedure :: end_short_log
     procedure :: log_results
-    procedure :: begin_test_case_failure_log
-    procedure :: log_test_case_failure
-    procedure :: end_test_case_failure_log
+    procedure :: begin_test_base_failure_log
+    procedure :: log_test_base_failure
+    procedure :: end_test_base_failure_log
     procedure :: log_summary
   end type serial_logger
 
@@ -70,11 +70,11 @@ contains
           &)
         if (.not. caseresult%success) then
           nfailed = nfailed + 1
-          call this%begin_test_case_failure_log(suiteresult, caseresult)
+          call this%begin_test_base_failure_log(suiteresult, caseresult)
           if (allocated(caseresult%failureinfo)) then
-            call this%log_test_case_failure(caseresult%failureinfo)
+            call this%log_test_base_failure(caseresult%failureinfo)
           end if
-          call this%end_test_case_failure_log()
+          call this%end_test_base_failure_log()
         else
           nsucceeded = nsucceeded + 1
         end if
@@ -86,34 +86,34 @@ contains
   end subroutine log_results
 
 
-  subroutine begin_test_case_failure_log(this, suiteresult, caseresult)
+  subroutine begin_test_base_failure_log(this, suiteresult, caseresult)
     class(serial_logger), intent(inout) :: this
     type(test_status), intent(in) :: suiteresult, caseresult
 
     write(stdout, "(a, t12, a, /)") "# FAILED: ", test_name_str(suiteresult, caseresult)
 
-  end subroutine begin_test_case_failure_log
+  end subroutine begin_test_base_failure_log
 
 
-  recursive subroutine log_test_case_failure(this, failureinfo)
+  recursive subroutine log_test_base_failure(this, failureinfo)
     class(serial_logger), intent(inout) :: this
     class(failure_info), intent(in) :: failureinfo
 
     if (allocated(failureinfo%previous)) then
-      call this%log_test_case_failure(failureinfo%previous)
+      call this%log_test_base_failure(failureinfo%previous)
       write(stdout, "()")
     end if
     call failureinfo%write_formatted(stdout)
 
-  end subroutine log_test_case_failure
+  end subroutine log_test_base_failure
 
 
-  subroutine end_test_case_failure_log(this)
+  subroutine end_test_base_failure_log(this)
     class(serial_logger), intent(inout) :: this
 
     write(stdout, "(/)")
 
-  end subroutine end_test_case_failure_log
+  end subroutine end_test_base_failure_log
 
 
   subroutine log_summary(this, nsucceeded, nfailed)

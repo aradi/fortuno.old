@@ -1,11 +1,11 @@
 module testsuite_coa_simple
   use mylib, only : factorial
-  use fortuno, only : is_equal, test_suite
-  use fortuno_coarray, only : coa_context, coa_test, coa_test_case
+  use fortuno, only : is_equal, suite_base
+  use fortuno_coarray, only : coa_context, coa_test, coa_test_base
   implicit none
 
 
-  type, extends(coa_test_case) :: div_n_failure
+  type, extends(coa_test_base) :: div_n_failure
     procedure(test_divnfailure), nopass, pointer :: testproc
     integer :: divisor, remainder
   contains
@@ -15,17 +15,17 @@ module testsuite_coa_simple
 contains
 
 
-  function new_test_suite() result(testsuite)
-    type(test_suite) :: testsuite
+  function new_suite_base() result(testsuite)
+    type(suite_base) :: testsuite
 
-    testsuite = test_suite("coa_simple", [&
+    testsuite = suite_base("coa_simple", [&
         & coa_test("broadcast", test_broadcast),&
         & coa_test("allreduce", test_allreduce)&
         & ])
-    call testsuite%add_test_case(&
+    call testsuite%add_test(&
         & div_n_failure("divnfailure(3, 0)", test_divnfailure, divisor=3, remainder=0))
 
-  end function new_test_suite
+  end function new_suite_base
 
 
   subroutine test_broadcast(ctx)
@@ -120,12 +120,12 @@ end module testsuite_coa_simple
 
 program testdriver_coa_simple
   use fortuno_coarray, only : coa_driver
-  use testsuite_coa_simple, only : new_test_suite
+  use testsuite_coa_simple, only : new_suite_base
   implicit none
 
   type(coa_driver), allocatable :: driver
 
-  driver = coa_driver([new_test_suite()])
+  driver = coa_driver([new_suite_base()])
   call driver%run()
 
 end program testdriver_coa_simple

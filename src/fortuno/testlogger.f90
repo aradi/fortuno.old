@@ -1,5 +1,5 @@
 module fortuno_testlogger
-  use fortuno_basetypes, only : test_context
+  use fortuno_basetypes, only : context_base
   use fortuno_failureinfo, only : failure_info
   implicit none
 
@@ -77,7 +77,7 @@ contains
     logical, intent(in) :: success
     character(*), intent(in) :: name
     character(:), allocatable, intent(in) :: repr
-    class(test_context), intent(inout) :: ctx
+    class(context_base), intent(inout) :: ctx
     type(test_status) :: this
 
     call init_test_status(this, success, name, repr, ctx)
@@ -90,7 +90,7 @@ contains
     logical, intent(in) :: success
     character(*), intent(in) :: name
     character(:), allocatable, intent(in) :: repr
-    class(test_context), intent(inout) :: ctx
+    class(context_base), intent(inout) :: ctx
 
     this%success = success
     this%name = name

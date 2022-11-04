@@ -1,21 +1,21 @@
 module testsuite_selftest
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, test => serial_test, test_suite
+  use fortuno, only : context => serial_context, test => serial_test, suite_base
   implicit none
 
 contains
 
-  function new_test_suite() result(testsuite)
-    type(test_suite) :: testsuite
+  function new_suite_base() result(testsuite)
+    type(suite_base) :: testsuite
 
-    testsuite = test_suite("simple", [&
+    testsuite = suite_base("simple", [&
         & test("factorial(0)", test_factorial0),&
         & test("factorial(1)", test_factorial1),&
         & test("factorial(2)", test_factorial2),&
         & test("factorial_fail", test_factorialfail)&
         & ])
 
-  end function new_test_suite
+  end function new_suite_base
 
 
   subroutine test_factorial0(ctx)
@@ -55,24 +55,24 @@ end module testsuite_selftest
 
 module testsuite_selftest_tester
   use fortuno, only : driver_result, is_equal, serial_driver, test => serial_test,&
-      & context => test_context, test_name, test_suite
-  use testsuite_selftest, only : new_selftest_suite => new_test_suite
+      & context => context_base, test_name, suite_base
+  use testsuite_selftest, only : new_selfsuite_base => new_suite_base
   implicit none
 
   type(driver_result), allocatable :: drvres
 
 contains
 
-  function new_test_suite() result(testsuite)
-    type(test_suite) :: testsuite
+  function new_suite_base() result(testsuite)
+    type(suite_base) :: testsuite
 
     call set_up_module()
-    testsuite = test_suite("serial_tester", [&
+    testsuite = suite_base("serial_tester", [&
         & test("nr_of_entries", test_nr_of_entries),&
         & test("results", test_results)&
         & ])
 
-  end function new_test_suite
+  end function new_suite_base
 
 
   subroutine test_nr_of_entries(ctx)
@@ -97,7 +97,7 @@ contains
   subroutine set_up_module()
     type(serial_driver), allocatable :: driver
 
-    driver = serial_driver([new_selftest_suite()])
+    driver = serial_driver([new_selfsuite_base()])
 
     call driver%run(driverresult=drvres,&
             & testnames=[test_name("simple", "factorial(0)"), test_name("simple", "factorial(1)")])
@@ -109,13 +109,13 @@ end module testsuite_selftest_tester
 
 program testdriver_selftest_tester
   use fortuno, only : argument_parser, serial_driver
-  use testsuite_selftest_tester, only : new_test_suite
+  use testsuite_selftest_tester, only : new_suite_base
   implicit none
 
   type(serial_driver), allocatable :: driver
   type(argument_parser), allocatable :: argparser
 
-  driver = serial_driver([new_test_suite()])
+  driver = serial_driver([new_suite_base()])
   argparser = argument_parser()
   call driver%run(testnames=argparser%get_test_names())
 

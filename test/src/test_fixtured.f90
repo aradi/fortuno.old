@@ -1,33 +1,33 @@
 module testsuite_fixtured
   use mylib, only : factorial
-  use fortuno, only : serial_test_case, serial_context, test_suite
+  use fortuno, only : serial_test_base, serial_context, suite_base
   implicit none
 
 
-  type, extends(serial_test_case) :: random_test
+  type, extends(serial_test_base) :: random_test
     procedure(test_recursion_down), nopass, pointer :: testroutine
     integer :: nn = -1
   contains
     procedure:: set_up
     procedure :: run
-    procedure :: get_status_str
+    procedure :: get_char_repr
   end type
 
 contains
 
-  function new_test_suite() result(testsuite)
-    type(test_suite) :: testsuite
+  function new_suite_base() result(testsuite)
+    type(suite_base) :: testsuite
 
     integer :: ii
 
     call random_seed()
 
-    testsuite = test_suite("fixtured", [&
+    testsuite = suite_base("fixtured", [&
         & [(random_test("recursion_down", test_recursion_down), ii = 1, 10)],&
         & [(random_test("recursion_up", test_recursion_down), ii = 1, 10)]&
         & ])
 
-  end function new_test_suite
+  end function new_suite_base
 
 
   subroutine test_recursion_down(ctx, mycase)
@@ -69,7 +69,7 @@ contains
   end subroutine run
 
 
-  subroutine get_status_str(this, state)
+  subroutine get_char_repr(this, state)
     class(random_test), intent(in) :: this
     character(:), allocatable, intent(out) :: state
 
@@ -78,7 +78,7 @@ contains
     write(buffer, "(a, i2.2)") "n=", this%nn
     state = trim(buffer)
 
-  end subroutine get_status_str
+  end subroutine get_char_repr
 
 
 end module testsuite_fixtured
@@ -86,12 +86,12 @@ end module testsuite_fixtured
 
 program testdriver_fixtured
   use fortuno, only : serial_driver
-  use testsuite_fixtured, only : new_test_suite
+  use testsuite_fixtured, only : new_suite_base
   implicit none
 
   type(serial_driver), allocatable :: driver
 
-  driver = serial_driver([new_test_suite()])
+  driver = serial_driver([new_suite_base()])
   call driver%run()
 
 end program testdriver_fixtured

@@ -4,9 +4,6 @@ list(
     APPEND f90-sources
     "${curdir}/argumentparser.f90"
     "${curdir}/basetypes.f90"
-    "${curdir}/basetypes_testcontext.f90"
-    "${curdir}/basetypes_testcase.f90"
-    "${curdir}/basetypes_testsuite.f90"
     "${curdir}/checkers.f90"
     "${curdir}/checkresult.f90"
     "${curdir}/contextfactory.f90"

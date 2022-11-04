@@ -1,13 +1,13 @@
 module fortuno_mpi_mpitest
   use fortuno_mpi_mpicontext, only : mpi_context
-  use fortuno_mpi_mpidriver, only : mpi_test_case
+  use fortuno_mpi_mpidriver, only : mpi_test_base
   implicit none
 
   private
   public :: mpi_test
 
 
-  type, extends(mpi_test_case) :: mpi_test
+  type, extends(mpi_test_base) :: mpi_test
     procedure(test_routine_iface), nopass, pointer :: testroutine
   contains
     procedure :: run

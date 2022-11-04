@@ -1,10 +1,10 @@
 module testsuite_parametrized
   use mylib, only : factorial
-  use fortuno, only : serial_test_case, test_suite, serial_context
+  use fortuno, only : serial_test_base, suite_base, serial_context
   implicit none
 
 
-  type, extends(serial_test_case) :: factcalc_test
+  type, extends(serial_test_base) :: factcalc_test
     integer :: arg, res
   contains
     procedure :: run
@@ -13,10 +13,10 @@ module testsuite_parametrized
 
 contains
 
-  function new_test_suite() result(testsuite)
-    type(test_suite) :: testsuite
+  function new_suite_base() result(testsuite)
+    type(suite_base) :: testsuite
 
-    testsuite = test_suite("param", [&
+    testsuite = suite_base("param", [&
         & factcalc_test("factorial(0)", 0, 1),&
         & factcalc_test("factorial(1)", 1, 1),&
         & factcalc_test("factorial(2)", 2, 2),&
@@ -24,7 +24,7 @@ contains
         & factcalc_test("factorial(4)", 4, 24)&
         & ])
 
-  end function new_test_suite
+  end function new_suite_base
 
 
   subroutine run(this, ctx)
@@ -40,12 +40,12 @@ end module testsuite_parametrized
 
 program testdriver_parameterized
   use fortuno, only : serial_driver
-  use testsuite_parametrized, only : new_test_suite
+  use testsuite_parametrized, only : new_suite_base
   implicit none
 
   type(serial_driver), allocatable :: driver
 
-  driver = serial_driver([new_test_suite()])
+  driver = serial_driver([new_suite_base()])
   call driver%run()
 
 end program testdriver_parameterized

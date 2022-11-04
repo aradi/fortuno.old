@@ -1,6 +1,6 @@
 module fortuno_mpi_mpicontext
   use mpi_f08, only : mpi_comm, mpi_allreduce, MPI_IN_PLACE, MPI_LOGICAL, MPI_LAND
-  use fortuno_basetypes, only : test_case, test_context, test_suite
+  use fortuno_basetypes, only : test_base, context_base, suite_base
   use fortuno_contextfactory, only : context_factory
   use fortuno_mpi_mpifailureinfo, only : mpi_failure_info
   implicit none
@@ -17,7 +17,7 @@ module fortuno_mpi_mpicontext
   end type mpi_env
 
 
-  type, extends(test_context) :: mpi_context
+  type, extends(context_base) :: mpi_context
     type(mpi_env) :: mpi
     logical, allocatable :: failedranks(:)
   contains
@@ -64,9 +64,9 @@ contains
 
   subroutine mpi_context_factory_create_context(this, testsuite, testcase, ctx)
     class(mpi_context_factory), intent(in) :: this
-    class(test_suite), pointer, intent(in) :: testsuite
-    class(test_case), pointer, intent(in) :: testcase
-    class(test_context), allocatable, intent(out) :: ctx
+    class(suite_base), pointer, intent(in) :: testsuite
+    class(test_base), pointer, intent(in) :: testcase
+    class(context_base), allocatable, intent(out) :: ctx
 
     type(mpi_context), allocatable :: mpictx
 
