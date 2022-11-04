@@ -23,8 +23,7 @@ if("GNU" STREQUAL "${CMAKE_Fortran_COMPILER_ID}")
 
     # Specific settings for the GNU compiler
 
-    set(Fortran_FLAGS
-        "${CMAKE_Fortran_FLAGS} ${COARRAY_FLAG} -std=f2018"
+    set(Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -std=f2018"
         CACHE STRING "General Fortran compiler flags")
 
     set(Fortran_FLAGS_RELEASE "-O3 -funroll-all-loops"

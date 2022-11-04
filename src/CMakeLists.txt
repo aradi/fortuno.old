@@ -30,6 +30,8 @@ if(WITH_COARRAY)
     add_library(Fortuno_Coarray ${coa-f90-sources})
     set_target_properties(Fortuno_Coarray PROPERTIES OUTPUT_NAME fortuno-coarray)
     target_compile_definitions(Fortuno_Coarray PRIVATE WITH_COARRAY)
+    target_compile_options(Fortuno_Coarray PUBLIC ${Fortran_COARRAY_FLAG})
+    target_link_options(Fortuno_Coarray PUBLIC ${Fortran_COARRAY_FLAG})
     target_link_libraries(Fortuno_Coarray Fortuno)
 endif()
 
