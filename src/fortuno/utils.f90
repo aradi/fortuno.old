@@ -6,45 +6,47 @@ module fortuno_utils
   public :: findloc_logical
   public :: nr_digits, string
 
+
   interface string
     module procedure string_from_integer
   end interface
+
 
   type :: dyn_char
     private
     character(:), allocatable :: content
   contains
-    procedure, private :: assign_from_char => dyn_char_assign_from_char
-    procedure, pass(this), private :: assign_to_char => dyn_char_assign_to_char
+    procedure, private :: assign_from_char => dyn_char__assign_from_char
+    procedure, pass(this), private :: assign_to_char => dyn_char__assign_to_char
     generic :: assignment(=) => assign_from_char, assign_to_char
-    procedure :: as_char => dyn_char_as_char
-    procedure, private :: get_repr_len => dyn_char_get_repr_len
-    procedure :: has_content => dyn_char_has_content
-    procedure :: starts_with => dyn_char_starts_with
+    procedure :: as_char => dyn_char__as_char
+    procedure, private :: get_repr_len => dyn_char__get_repr_len
+    procedure :: has_content => dyn_char__has_content
+    procedure :: starts_with => dyn_char__starts_with
   end type dyn_char
-
 
 contains
 
-  subroutine dyn_char_assign_from_char(this, rhs)
+
+  subroutine dyn_char__assign_from_char(this, rhs)
     class(dyn_char), intent(out) :: this
     character(*), intent(in) :: rhs
 
     this%content = rhs
 
-  end subroutine dyn_char_assign_from_char
+  end subroutine dyn_char__assign_from_char
 
 
-  subroutine dyn_char_assign_to_char(lhs, this)
+  subroutine dyn_char__assign_to_char(lhs, this)
     character(*), intent(out) :: lhs
     class(dyn_char), intent(in) :: this
 
     lhs = this%content
 
-  end subroutine dyn_char_assign_to_char
+  end subroutine dyn_char__assign_to_char
 
 
-  pure function dyn_char_get_repr_len(this) result(reprlen)
+  pure function dyn_char__get_repr_len(this) result(reprlen)
     class(dyn_char), intent(in) :: this
     integer :: reprlen
 
@@ -54,28 +56,28 @@ contains
       reprlen = 0
     end if
 
-  end function dyn_char_get_repr_len
+  end function dyn_char__get_repr_len
 
 
-  pure function dyn_char_as_char(this) result(chr)
+  pure function dyn_char__as_char(this) result(chr)
     class(dyn_char), intent(in) :: this
     character(len=this%get_repr_len()) :: chr
 
     if (len(chr) > 0) chr = this%content
 
-  end function dyn_char_as_char
+  end function dyn_char__as_char
 
 
-  pure function dyn_char_has_content(this) result(hascontent)
+  pure function dyn_char__has_content(this) result(hascontent)
     class(dyn_char), intent(in) :: this
     logical :: hascontent
 
     hascontent = allocated(this%content)
 
-  end function dyn_char_has_content
+  end function dyn_char__has_content
 
 
-  pure function dyn_char_starts_with(this, str) result(starts_with)
+  pure function dyn_char__starts_with(this, str) result(starts_with)
     class(dyn_char), intent(in) :: this
     character(*), intent(in) :: str
     logical :: starts_with
@@ -88,7 +90,7 @@ contains
     if (len(this%content) < strlen) return
     starts_with = (this%content(1:strlen) == str)
 
-  end function dyn_char_starts_with
+  end function dyn_char__starts_with
 
 
   function string_from_integer(val, maxval) result(str)

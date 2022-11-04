@@ -25,5 +25,4 @@ module fortuno_contextfactory
 
   end interface
 
-
 end module fortuno_contextfactory

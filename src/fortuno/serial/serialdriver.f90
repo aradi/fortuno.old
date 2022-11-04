@@ -12,6 +12,7 @@ module fortuno_serial_serialdriver
   private
   public :: serial_test_base, serial_driver
 
+
   type, extends(test_base_runner) :: serial_context_runner
   contains
     procedure :: run_test_base
@@ -51,7 +52,6 @@ module fortuno_serial_serialdriver
       class(serial_context), intent(inout) :: ctx
     end subroutine serial_test_base_run_iface
   end interface
-
 
 contains
 
@@ -150,6 +150,5 @@ contains
     call mycase%run(myctx)
 
   end subroutine run_test_base
-
 
 end module fortuno_serial_serialdriver

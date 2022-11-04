@@ -14,6 +14,7 @@ module fortuno_testerror
 
 contains
 
+
   subroutine write_formatted(this, unit, iotype, vlist, iostat, iomsg)
     class(test_error), intent(in) :: this
     integer, intent(in) :: unit

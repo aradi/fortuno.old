@@ -21,7 +21,6 @@ module fortuno_serial_seriallogger
     procedure :: log_summary
   end type serial_logger
 
-
 contains
 
 
@@ -135,6 +134,5 @@ contains
     write(stdout, "()")
 
   end subroutine log_summary
-
 
 end module fortuno_serial_seriallogger

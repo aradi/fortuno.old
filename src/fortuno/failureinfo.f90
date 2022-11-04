@@ -17,7 +17,6 @@ module fortuno_failureinfo
     procedure :: write_formatted
   end type failure_info
 
-
 contains
 
 

@@ -13,7 +13,6 @@ module fortuno_mpi_mpifailureinfo
     procedure :: write_formatted
   end type mpi_failure_info
 
-
 contains
 
 

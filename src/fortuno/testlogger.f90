@@ -73,6 +73,7 @@ module fortuno_testlogger
 
 contains
 
+
   function new_test_status(success, name, repr, ctx) result(this)
     logical, intent(in) :: success
     character(*), intent(in) :: name
@@ -108,6 +109,5 @@ contains
     if (allocated(casestatus%repr)) testname = testname // "{" // casestatus%repr // "}"
 
   end function test_name_str
-
 
 end module fortuno_testlogger

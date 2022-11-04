@@ -5,6 +5,7 @@ module testsuite_selftest
 
 contains
 
+
   function new_suite_base() result(testsuite)
     type(suite_base) :: testsuite
 
@@ -49,7 +50,6 @@ contains
 
   end subroutine test_factorialfail
 
-
 end module testsuite_selftest
 
 
@@ -62,6 +62,7 @@ module testsuite_selftest_tester
   type(driver_result), allocatable :: drvres
 
 contains
+
 
   function new_suite_base() result(testsuite)
     type(suite_base) :: testsuite

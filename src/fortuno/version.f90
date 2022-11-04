@@ -8,6 +8,7 @@ module fortuno_version
 
 contains
 
+
   subroutine get_version(major, minor, patch)
     integer, intent(out) :: major, minor, patch
 

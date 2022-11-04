@@ -10,8 +10,8 @@ module testsuite_parametrized
     procedure :: run
   end type
 
-
 contains
+
 
   function new_suite_base() result(testsuite)
     type(suite_base) :: testsuite

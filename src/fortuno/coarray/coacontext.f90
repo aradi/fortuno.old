@@ -12,19 +12,19 @@ module fortuno_coarray_coacontext
   type, extends(context_base) :: coa_context
     logical, allocatable :: failedimages(:)
   contains
-    procedure :: check_logical => coa_context_check_logical
+    procedure :: check_logical => coa_context__check_logical
   end type coa_context
 
 
   type, extends(context_factory) :: coa_context_factory
   contains
-    procedure :: create_context => coa_context_factory_create_context
+    procedure :: create_context => coa_context_factory__create_context
   end type coa_context_factory
-
 
 contains
 
-  subroutine coa_context_check_logical(this, cond, msg, file, line)
+
+  subroutine coa_context__check_logical(this, cond, msg, file, line)
     class(coa_context), intent(inout) :: this
     logical, intent(in) :: cond
     character(*), optional, intent(in) :: msg
@@ -62,10 +62,10 @@ contains
     if (allocated(this%failureinfo)) call move_alloc(this%failureinfo, failureinfo%previous)
     call move_alloc(failureinfo, this%failureinfo)
 
-  end subroutine coa_context_check_logical
+  end subroutine coa_context__check_logical
 
 
-  subroutine coa_context_factory_create_context(this, testsuite, testcase, ctx)
+  subroutine coa_context_factory__create_context(this, testsuite, testcase, ctx)
     class(coa_context_factory), intent(in) :: this
     class(suite_base), pointer, intent(in) :: testsuite
     class(test_base), pointer, intent(in) :: testcase
@@ -78,7 +78,6 @@ contains
     coactx%testcase => testcase
     call move_alloc(coactx, ctx)
 
-  end subroutine coa_context_factory_create_context
-
+  end subroutine coa_context_factory__create_context
 
 end module fortuno_coarray_coacontext

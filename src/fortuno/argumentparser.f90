@@ -21,6 +21,7 @@ module fortuno_argumentparser
 
 contains
 
+
   function new_argument_parser(args) result(this)
     type(dyn_char), optional, intent(in) :: args(:)
     type(argument_parser) :: this
@@ -97,6 +98,5 @@ contains
     testname%casename = arg(seppos + 1 :)
 
   end subroutine get_test_name_from_arg_
-
 
 end module fortuno_argumentparser

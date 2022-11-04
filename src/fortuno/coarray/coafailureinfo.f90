@@ -12,7 +12,6 @@ module fortuno_coarray_coafailureinfo
     procedure :: write_formatted
   end type coa_failure_info
 
-
 contains
 
 

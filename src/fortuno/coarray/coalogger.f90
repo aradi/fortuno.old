@@ -18,7 +18,6 @@ module fortuno_coarray_coalogger
     procedure :: log_summary
   end type coa_logger
 
-
 contains
 
 

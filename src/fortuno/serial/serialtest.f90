@@ -34,5 +34,4 @@ contains
 
   end subroutine run
 
-
 end module fortuno_serial_serialtest

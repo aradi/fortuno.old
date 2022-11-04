@@ -9,7 +9,7 @@ module testsuite_coa_simple
     procedure(test_divnfailure), nopass, pointer :: testproc
     integer :: divisor, remainder
   contains
-    procedure :: run => div_n_failure_run
+    procedure :: run => div_n_failure__run
   end type
 
 contains
@@ -107,13 +107,13 @@ contains
   end subroutine test_divnfailure
 
 
-  subroutine div_n_failure_run(this, ctx)
+  subroutine div_n_failure__run(this, ctx)
     class(div_n_failure), intent(inout) :: this
     class(coa_context), intent(inout) :: ctx
 
     call this%testproc(ctx, this)
 
-  end subroutine div_n_failure_run
+  end subroutine div_n_failure__run
 
 end module testsuite_coa_simple
 

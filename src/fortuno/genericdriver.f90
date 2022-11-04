@@ -8,6 +8,7 @@ module fortuno_genericdriver
   private
   public :: generic_driver, test_name, test_base_runner
 
+
   type, abstract :: test_base_runner
   contains
     procedure(run_test_base_iface), deferred :: run_test_base
@@ -78,7 +79,6 @@ module fortuno_genericdriver
     end subroutine create_test_base_runner_iface
 
   end interface
-
 
 contains
 
@@ -434,6 +434,5 @@ contains
     end do
 
   end subroutine allocate_driver_result_
-
 
 end module fortuno_genericdriver

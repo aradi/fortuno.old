@@ -8,7 +8,6 @@ module testsuite_parametrized2
     integer :: arg, res
   end type
 
-
   type(calc), parameter :: factcalcs(*) = [&
       & calc(0, 1), calc(1, 1), calc(2, 2), calc(3, 6), calc(4, 24)&
       & ]

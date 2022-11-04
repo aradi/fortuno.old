@@ -5,6 +5,7 @@ module testsuite_multiple1
 
 contains
 
+
   function new_suite_base() result(testsuite)
     type(suite_base) :: testsuite
 
@@ -31,6 +32,7 @@ module testsuite_multiple2
   implicit none
 
 contains
+
 
   function new_suite_base() result(testsuite)
     type(suite_base) :: testsuite
@@ -61,8 +63,6 @@ contains
     call ctx%check(factorial(5) == 120, msg="You should never see this, as this test should pass")
 
   end subroutine test_factorial_1to5_failing
-
-
 
 end module testsuite_multiple2
 

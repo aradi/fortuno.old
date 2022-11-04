@@ -5,6 +5,7 @@ module testsuite_simple
 
 contains
 
+
   function new_suite_base() result(testsuite)
     type(suite_base) :: testsuite
 

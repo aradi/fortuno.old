@@ -54,7 +54,6 @@ module fortuno_mpi_mpidriver
     end subroutine mpi_test_base_run_iface
   end interface
 
-
 contains
 
 
@@ -151,6 +150,5 @@ contains
     call mycase%run(myctx)
 
   end subroutine run_test_base
-
 
 end module fortuno_mpi_mpidriver

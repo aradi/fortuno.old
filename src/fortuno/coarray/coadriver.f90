@@ -47,7 +47,6 @@ module fortuno_coarray_coadriver
     end subroutine coa_test_base_run_iface
   end interface
 
-
 contains
 
 

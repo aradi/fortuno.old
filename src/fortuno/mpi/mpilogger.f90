@@ -8,6 +8,10 @@ module fortuno_mpi_mpilogger
   use fortuno_utils, only : findloc_logical, nr_digits
   implicit none
 
+  private
+  public :: mpi_logger
+
+
   type, extends(serial_logger) :: mpi_logger
     type(MPI_Comm) :: mpicomm
     integer :: myrank = 0
@@ -20,7 +24,6 @@ module fortuno_mpi_mpilogger
     procedure :: end_test_base_failure_log
     procedure :: log_summary
   end type mpi_logger
-
 
 contains
 

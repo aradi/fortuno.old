@@ -9,10 +9,11 @@ module testsuite_mpi_simple
     procedure(test_divnfailure), nopass, pointer :: testproc
     integer :: div, rem
   contains
-    procedure :: run => div_n_failure_run
+    procedure :: run => div_n_failure__run
   end type
 
 contains
+
 
   function new_suite_base() result(testsuite)
     type(suite_base) :: testsuite
@@ -95,13 +96,13 @@ contains
   end subroutine test_divnfailure
 
 
-  subroutine div_n_failure_run(this, ctx)
+  subroutine div_n_failure__run(this, ctx)
     class(div_n_failure), intent(inout) :: this
     class(mpi_context), intent(inout) :: ctx
 
     call this%testproc(ctx, this)
 
-  end subroutine div_n_failure_run
+  end subroutine div_n_failure__run
 
 end module testsuite_mpi_simple
 
