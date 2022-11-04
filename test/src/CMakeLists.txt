@@ -3,6 +3,7 @@ add_library(mylib mylib.f90)
 set(
     serial-positive-tests
     fixtured
+    fixturedsuite
     parametrized
     parametrized2
     simple

@@ -1,6 +1,6 @@
 module testsuite_fixtured
   use mylib, only : factorial
-  use fortuno, only : serial_test_base, serial_context, suite_base
+  use fortuno, only : context => serial_context, suite => serial_suite, serial_test_base
   implicit none
 
 
@@ -16,23 +16,23 @@ module testsuite_fixtured
 contains
 
 
-  function new_suite_base() result(testsuite)
-    type(suite_base) :: testsuite
+  function test_suite() result(testsuite)
+    type(suite) :: testsuite
 
     integer :: ii
 
     call random_seed()
 
-    testsuite = suite_base("fixtured", [&
+    testsuite = suite("fixtured", [&
         & [(random_test("recursion_down", test_recursion_down), ii = 1, 10)],&
         & [(random_test("recursion_up", test_recursion_down), ii = 1, 10)]&
         & ])
 
-  end function new_suite_base
+  end function test_suite
 
 
   subroutine test_recursion_down(ctx, mycase)
-    class(serial_context), intent(inout) :: ctx
+    class(context), intent(inout) :: ctx
     class(random_test), intent(in) :: mycase
 
     call ctx%check(factorial(mycase%nn) == mycase%nn * factorial(mycase%nn - 1))
@@ -41,7 +41,7 @@ contains
 
 
   subroutine test_recursion_up(ctx, mycase)
-    class(serial_context), intent(inout) :: ctx
+    class(context), intent(inout) :: ctx
     class(random_test), intent(in) :: mycase
 
     call ctx%check(factorial(mycase%nn + 1) == (mycase%nn + 1) * factorial(mycase%nn))
@@ -62,7 +62,7 @@ contains
 
   subroutine run(this, ctx)
     class(random_test), intent(inout) :: this
-    class(serial_context), intent(inout) :: ctx
+    class(context), intent(inout) :: ctx
 
     call this%set_up()
     call this%testroutine(ctx, this)
@@ -81,18 +81,17 @@ contains
 
   end subroutine get_char_repr
 
-
 end module testsuite_fixtured
 
 
 program testdriver_fixtured
   use fortuno, only : serial_driver
-  use testsuite_fixtured, only : new_suite_base
+  use testsuite_fixtured, only : test_suite
   implicit none
 
   type(serial_driver), allocatable :: driver
 
-  driver = serial_driver([new_suite_base()])
+  driver = serial_driver([test_suite()])
   call driver%run()
 
 end program testdriver_fixtured

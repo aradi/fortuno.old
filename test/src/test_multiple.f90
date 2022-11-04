@@ -1,19 +1,19 @@
 module testsuite_multiple1
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, test => serial_test, suite_base
+  use fortuno, only : context => serial_context, suite => serial_suite, test => serial_test
   implicit none
 
 contains
 
 
-  function new_suite_base() result(testsuite)
-    type(suite_base) :: testsuite
+  function test_suite() result(testsuite)
+    type(suite) :: testsuite
 
-    testsuite = suite_base("multiple1", [&
+    testsuite = suite("multiple1", [&
         & test("factorial(0)", test_factorial0)&
         & ])
 
-  end function new_suite_base
+  end function test_suite
 
 
   subroutine test_factorial0(ctx)
@@ -28,21 +28,21 @@ end module testsuite_multiple1
 
 module testsuite_multiple2
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, test => serial_test, suite_base
+  use fortuno, only : context => serial_context, test => serial_test, suite => serial_suite
   implicit none
 
 contains
 
 
-  function new_suite_base() result(testsuite)
-    type(suite_base) :: testsuite
+  function test_suite() result(testsuite)
+    type(suite) :: testsuite
 
-    testsuite = suite_base("multiple2", [&
+    testsuite = suite("multiple2", [&
         & test("factorial(0)", test_factorial0_failing),&
         & test("factorial(1-5)", test_factorial_1to5_failing)&
         & ])
 
-  end function new_suite_base
+  end function test_suite
 
 
   subroutine test_factorial0_failing(ctx)
@@ -69,15 +69,13 @@ end module testsuite_multiple2
 
 program test_driver
   use fortuno, only : serial_driver
-  use testsuite_multiple1, only : new_multiple1_suite => new_suite_base
-  use testsuite_multiple2, only : new_multiple2_suite => new_suite_base
+  use testsuite_multiple1, only : test_suite_1 => test_suite
+  use testsuite_multiple2, only : test_suite_2 => test_suite
   implicit none
 
   type(serial_driver), allocatable :: driver
 
-  driver = serial_driver([&
-      & new_multiple1_suite(), new_multiple2_suite()&
-      & ])
+  driver = serial_driver([test_suite_1(), test_suite_2()])
   call driver%run()
 
 end program test_driver

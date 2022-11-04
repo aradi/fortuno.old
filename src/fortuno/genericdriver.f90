@@ -6,23 +6,45 @@ module fortuno_genericdriver
   implicit none
 
   private
-  public :: generic_driver, test_name, test_base_runner
+  public :: generic_driver, test_name, test_runner
 
 
-  type, abstract :: test_base_runner
+  type, abstract :: test_runner
   contains
-    procedure(run_test_base_iface), deferred :: run_test_base
-  end type test_base_runner
+    procedure(set_up_suite_iface), deferred :: set_up_suite
+    procedure(tear_down_suite_iface), deferred :: tear_down_suite
+    procedure(run_test_iface), deferred :: run_test
+  end type test_runner
 
 
   abstract interface
-    subroutine run_test_base_iface(this, testcase, ctx)
-      import :: test_base_runner, test_base, context_base
+
+    subroutine set_up_suite_iface(this, testsuite, ctx)
+      import :: test_runner, suite_base, context_base
       implicit none
-      class(test_base_runner), intent(in) :: this
+      class(test_runner), intent(in) :: this
+      class(suite_base), pointer, intent(in) :: testsuite
+      class(context_base), pointer, intent(in) :: ctx
+    end subroutine set_up_suite_iface
+
+
+    subroutine tear_down_suite_iface(this, testsuite, ctx)
+      import :: test_runner, suite_base, context_base
+      implicit none
+      class(test_runner), intent(in) :: this
+      class(suite_base), pointer, intent(in) :: testsuite
+      class(context_base), pointer, intent(in) :: ctx
+    end subroutine tear_down_suite_iface
+
+
+    subroutine run_test_iface(this, testcase, ctx)
+      import :: test_runner, test_base, context_base
+      implicit none
+      class(test_runner), intent(in) :: this
       class(test_base), pointer, intent(in) :: testcase
       class(context_base), pointer, intent(in) :: ctx
-    end subroutine run_test_base_iface
+    end subroutine run_test_iface
+
   end interface
 
 
@@ -43,7 +65,7 @@ module fortuno_genericdriver
     procedure :: tear_down
     procedure(create_context_factory_iface), deferred :: create_context_factory
     procedure(create_logger_iface), deferred :: create_logger
-    procedure(create_test_base_runner_iface), deferred :: create_test_base_runner
+    procedure(create_test_runner_iface), deferred :: create_test_runner
     procedure(stop_on_error_iface), deferred :: stop_on_error
   end type generic_driver
 
@@ -72,11 +94,11 @@ module fortuno_genericdriver
     end subroutine create_logger_iface
 
 
-    subroutine create_test_base_runner_iface(this, runner)
-      import :: generic_driver, test_base_runner
+    subroutine create_test_runner_iface(this, runner)
+      import :: generic_driver, test_runner
       class(generic_driver), intent(in) :: this
-      class(test_base_runner), allocatable, intent(out) :: runner
-    end subroutine create_test_base_runner_iface
+      class(test_runner), allocatable, intent(out) :: runner
+    end subroutine create_test_runner_iface
 
   end interface
 
@@ -115,7 +137,7 @@ contains
     type(driver_result), allocatable, optional, intent(out) :: driverresult
 
     class(test_logger), allocatable :: logger
-    class(test_base_runner), allocatable :: runner
+    class(test_runner), allocatable :: runner
     type(test_error), allocatable :: error0
     type(driver_result), allocatable :: driverresult0
     class(context_factory), allocatable :: ctxfact
@@ -125,7 +147,7 @@ contains
 
     call this%create_context_factory(ctxfact)
     call this%create_logger(logger)
-    call this%create_test_base_runner(runner)
+    call this%create_test_runner(runner)
     call get_test_indices_(this%testsuites, testinds, testnames=testnames)
     call run_tests_(this%testsuites, testinds, ctxfact, logger, runner, driverresult0)
 
@@ -224,15 +246,15 @@ contains
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
-    class(test_base_runner), intent(in) :: runner
+    class(test_runner), intent(in) :: runner
     type(driver_result), allocatable, intent(out) :: driverresult
 
     call allocate_driver_result_(testsuites, testinds, driverresult)
-    call initialize_suites_(testsuites, testinds, ctxfact, driverresult)
+    call initialize_suites_(testsuites, testinds, ctxfact, runner, driverresult)
     call logger%begin_short_log()
     call execute_tests_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     call logger%end_short_log()
-    call finalize_suites_(testsuites, testinds, ctxfact, driverresult)
+    call finalize_suites_(testsuites, testinds, ctxfact, runner, driverresult)
 
     driverresult%failed = .not. (all(driverresult%suiteresults(:)%success) &
         & .and. all(driverresult%caseresults(:)%success))
@@ -240,10 +262,11 @@ contains
   end subroutine run_tests_
 
 
-  subroutine initialize_suites_(testsuites, testinds, ctxfact, driverresult)
+  subroutine initialize_suites_(testsuites, testinds, ctxfact, runner, driverresult)
     type(suite_base_cls), target, intent(inout) :: testsuites(:)
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
+    class(test_runner), intent(in) :: runner
     type(driver_result), intent(inout) :: driverresult
 
     class(context_base), allocatable, target :: ctx
@@ -267,7 +290,7 @@ contains
 
         call ctxfact%create_context(testsuite, null(), ctx)
         ctxptr => ctx
-        call testsuite%set_up(ctxptr)
+        call runner%set_up_suite(testsuite, ctxptr)
         call init_test_status(suiteresult, .not. ctx%failed(), testsuite%name, repr, ctx)
         done(isuite) = .true.
 
@@ -277,10 +300,11 @@ contains
   end subroutine initialize_suites_
 
 
-  subroutine finalize_suites_(testsuites, testinds, ctxfact, driverresult)
+  subroutine finalize_suites_(testsuites, testinds, ctxfact, runner, driverresult)
     type(suite_base_cls), target, intent(inout) :: testsuites(:)
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
+    class(test_runner), intent(in) :: runner
     type(driver_result), intent(inout) :: driverresult
 
     class(context_base), allocatable, target :: ctx
@@ -310,7 +334,7 @@ contains
 
         call ctxfact%create_context(testsuite, null(), ctx)
         ctxptr => ctx
-        call testsuite%tear_down(ctxptr)
+        call runner%tear_down_suite(testsuite, ctxptr)
         call init_test_status(suiteresult, .not. ctx%failed(), testsuite%name, repr, ctx)
         done(isuite) = .true.
 
@@ -325,7 +349,7 @@ contains
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
-    class(test_base_runner), intent(in) :: runner
+    class(test_runner), intent(in) :: runner
     type(driver_result), intent(inout) :: driverresult
 
     class(context_base), allocatable, target :: ctx
@@ -352,7 +376,7 @@ contains
 
         call ctxfact%create_context(testsuite, testcase, ctx)
         ctxptr => ctx
-        call runner%run_test_base(testcase, ctxptr)
+        call runner%run_test(testcase, ctxptr)
         call testcase%get_char_repr(testrepr)
         success = .not. ctx%failed()
         call logger%short_log_result(testsuite%name, testcase%name, success)

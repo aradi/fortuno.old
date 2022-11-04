@@ -5,6 +5,7 @@ list(
     "${curdir}/serialcontext.f90"
     "${curdir}/serialdriver.f90"
     "${curdir}/seriallogger.f90"
+    "${curdir}/serialsuite.f90"
     "${curdir}/serialtest.f90"
 )
 

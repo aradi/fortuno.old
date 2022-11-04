@@ -3,22 +3,26 @@ module fortuno_mpi_mpidriver
   use mpi_f08, only : MPI_Comm, MPI_Comm_rank, MPI_Comm_size, MPI_COMM_WORLD, MPI_Finalize, MPI_Init
   use fortuno_basetypes, only : test_base, context_base, suite_base, suite_base_cls
   use fortuno_contextfactory, only : context_factory
-  use fortuno_genericdriver, only : generic_driver, test_base_runner
+  use fortuno_genericdriver, only : generic_driver, test_runner
   use fortuno_mpi_mpicontext, only : mpi_context, mpi_context_factory, mpi_env
   use fortuno_mpi_mpilogger, only : mpi_logger
+  use fortuno_mpi_mpisuite, only : mpi_suite_base
+  use fortuno_mpi_mpitest, only : mpi_test_base
   use fortuno_testerror, only : test_error
   use fortuno_testlogger, only : test_logger
   use fortuno_utils, only : string
   implicit none
 
   private
-  public :: mpi_driver, mpi_test_base
+  public :: mpi_driver
 
 
-  type, extends(test_base_runner) :: mpi_context_runner
+  type, extends(test_runner) :: mpi_runner
   contains
-    procedure :: run_test_base
-  end type mpi_context_runner
+    procedure :: set_up_suite
+    procedure :: tear_down_suite
+    procedure :: run_test
+  end type mpi_runner
 
 
   type, extends(generic_driver) :: mpi_driver
@@ -30,28 +34,13 @@ module fortuno_mpi_mpidriver
     procedure :: tear_down
     procedure :: create_context_factory
     procedure :: create_logger
-    procedure :: create_test_base_runner
+    procedure :: create_test_runner
     procedure :: stop_on_error
   end type
 
 
   interface mpi_driver
     module procedure new_mpi_driver
-  end interface
-
-
-  type, extends(test_base), abstract :: mpi_test_base
-  contains
-    procedure(mpi_test_base_run_iface), deferred :: run
-  end type mpi_test_base
-
-
-  abstract interface
-    subroutine mpi_test_base_run_iface(this, ctx)
-      import :: mpi_test_base, mpi_context
-      class(mpi_test_base), intent(inout) :: this
-      class(mpi_context), intent(inout) :: ctx
-    end subroutine mpi_test_base_run_iface
   end interface
 
 contains
@@ -104,13 +93,13 @@ contains
   end subroutine create_logger
 
 
-  subroutine create_test_base_runner(this, runner)
+  subroutine create_test_runner(this, runner)
     class(mpi_driver), intent(in) :: this
-    class(test_base_runner), allocatable, intent(out) :: runner
+    class(test_runner), allocatable, intent(out) :: runner
 
-    allocate(mpi_context_runner :: runner)
+    allocate(mpi_runner :: runner)
 
-  end subroutine create_test_base_runner
+  end subroutine create_test_runner
 
 
   subroutine stop_on_error(this, error)
@@ -125,8 +114,62 @@ contains
   end subroutine stop_on_error
 
 
-  subroutine run_test_base(this, testcase, ctx)
-    class(mpi_context_runner), intent(in) :: this
+  subroutine set_up_suite(this, testsuite, ctx)
+    class(mpi_runner), intent(in) :: this
+    class(suite_base), pointer, intent(in) :: testsuite
+    class(context_base), pointer, intent(in) :: ctx
+
+    class(mpi_context), pointer :: myctx
+    class(mpi_suite_base), pointer :: mysuite
+
+    select type(ctx)
+    class is (mpi_context)
+      myctx => ctx
+    class default
+      error stop "Internal error, expected mpi_context, obtained something else"
+    end select
+
+    select type(testsuite)
+    class is (mpi_suite_base)
+      mysuite => testsuite
+    class default
+      error stop "Internal error, expected mpi_context, obtained something else"
+    end select
+
+    call mysuite%set_up(myctx)
+
+  end subroutine set_up_suite
+
+
+  subroutine tear_down_suite(this, testsuite, ctx)
+    class(mpi_runner), intent(in) :: this
+    class(suite_base), pointer, intent(in) :: testsuite
+    class(context_base), pointer, intent(in) :: ctx
+
+    class(mpi_context), pointer :: myctx
+    class(mpi_suite_base), pointer :: mysuite
+
+    select type(ctx)
+    class is (mpi_context)
+      myctx => ctx
+    class default
+      error stop "Internal error, expected mpi_context, obtained something else"
+    end select
+
+    select type(testsuite)
+    class is (mpi_suite_base)
+      mysuite => testsuite
+    class default
+      error stop "Internal error, expected mpi_suite_base, obtained something else"
+    end select
+
+    call mysuite%tear_down(myctx)
+
+  end subroutine tear_down_suite
+
+
+  subroutine run_test(this, testcase, ctx)
+    class(mpi_runner), intent(in) :: this
     class(test_base), pointer, intent(in) :: testcase
     class(context_base), pointer, intent(in) :: ctx
 
@@ -149,6 +192,6 @@ contains
 
     call mycase%run(myctx)
 
-  end subroutine run_test_base
+  end subroutine run_test
 
 end module fortuno_mpi_mpidriver

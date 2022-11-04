@@ -6,6 +6,7 @@ list(
     "${curdir}/coadriver.f90"
     "${curdir}/coafailureinfo.f90"
     "${curdir}/coalogger.f90"
+    "${curdir}/coasuite.f90"
     "${curdir}/coatest.f90"
 )
 

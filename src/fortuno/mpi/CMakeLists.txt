@@ -6,6 +6,7 @@ list(
     "${curdir}/mpidriver.f90"
     "${curdir}/mpifailureinfo.f90"
     "${curdir}/mpilogger.f90"
+    "${curdir}/mpisuite.f90"
     "${curdir}/mpitest.f90"
 )
 

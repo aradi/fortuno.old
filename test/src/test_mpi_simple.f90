@@ -1,7 +1,7 @@
 module testsuite_mpi_simple
   use mpi_f08, only : MPI_Allreduce, MPI_Bcast, MPI_INTEGER, MPI_SUM
-  use fortuno, only : suite_base, test_base, context_base
-  use fortuno_mpi, only : mpi_context, mpi_test, mpi_test_base
+  use fortuno_mpi, only : context => mpi_context, suite => mpi_suite, test => mpi_test,&
+      & mpi_test_base
   implicit none
 
 
@@ -9,27 +9,27 @@ module testsuite_mpi_simple
     procedure(test_divnfailure), nopass, pointer :: testproc
     integer :: div, rem
   contains
-    procedure :: run => div_n_failure__run
+    procedure :: run => div_n_failure_run
   end type
 
 contains
 
 
-  function new_suite_base() result(testsuite)
-    type(suite_base) :: testsuite
+  function test_suite() result(testsuite)
+    type(suite) :: testsuite
 
-    testsuite = suite_base("mpi_simple", [&
-        & mpi_test("broadcast", test_broadcast),&
-        & mpi_test("allreduce", test_allreduce)&
+    testsuite = suite("mpi_simple", [&
+        & test("broadcast", test_broadcast),&
+        & test("allreduce", test_allreduce)&
         & ])
     call testsuite%add_test(&
         & div_n_failure("divnfailure(3, 0)", test_divnfailure, div=3, rem=0))
 
-  end function new_suite_base
+  end function test_suite
 
 
   subroutine test_broadcast(ctx)
-    class(mpi_context), intent(inout) :: ctx
+    class(context), intent(inout) :: ctx
 
     integer :: buffer
 
@@ -53,7 +53,7 @@ contains
 
 
   subroutine test_allreduce(ctx)
-    class(mpi_context),intent(inout) :: ctx
+    class(context),intent(inout) :: ctx
 
     integer :: send, recv, expected
 
@@ -67,7 +67,7 @@ contains
 
 
   subroutine test_divnfailure(ctx, mycase)
-    class(mpi_context), intent(inout) :: ctx
+    class(context), intent(inout) :: ctx
     class(div_n_failure), intent(in) :: mycase
 
     character(100) :: msg
@@ -96,25 +96,25 @@ contains
   end subroutine test_divnfailure
 
 
-  subroutine div_n_failure__run(this, ctx)
+  subroutine div_n_failure_run(this, ctx)
     class(div_n_failure), intent(inout) :: this
-    class(mpi_context), intent(inout) :: ctx
+    class(context), intent(inout) :: ctx
 
     call this%testproc(ctx, this)
 
-  end subroutine div_n_failure__run
+  end subroutine div_n_failure_run
 
 end module testsuite_mpi_simple
 
 
 program testdriver_mpi_simple
   use fortuno_mpi, only : mpi_driver
-  use testsuite_mpi_simple, only : new_suite_base
+  use testsuite_mpi_simple, only : test_suite
   implicit none
 
   type(mpi_driver), allocatable :: driver
 
-  driver = mpi_driver([new_suite_base()])
+  driver = mpi_driver([test_suite()])
   call driver%run()
 
 end program testdriver_mpi_simple

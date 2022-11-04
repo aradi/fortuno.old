@@ -1,10 +1,25 @@
 module fortuno_mpi_mpitest
+  use fortuno_basetypes, only : test_base
   use fortuno_mpi_mpicontext, only : mpi_context
-  use fortuno_mpi_mpidriver, only : mpi_test_base
   implicit none
 
   private
-  public :: mpi_test
+  public :: mpi_test, mpi_test_base
+
+
+  type, extends(test_base), abstract :: mpi_test_base
+  contains
+    procedure(mpi_test_base_run_iface), deferred :: run
+  end type mpi_test_base
+
+
+  abstract interface
+    subroutine mpi_test_base_run_iface(this, ctx)
+      import :: mpi_test_base, mpi_context
+      class(mpi_test_base), intent(inout) :: this
+      class(mpi_context), intent(inout) :: ctx
+    end subroutine mpi_test_base_run_iface
+  end interface
 
 
   type, extends(mpi_test_base) :: mpi_test

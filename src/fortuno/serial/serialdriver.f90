@@ -2,26 +2,22 @@ module fortuno_serial_serialdriver
   use iso_fortran_env, only : stderr => error_unit
   use fortuno_basetypes, only : suite_base, context_base, test_base
   use fortuno_contextfactory, only : context_factory
-  use fortuno_genericdriver, only : generic_driver, test_base_runner
+  use fortuno_genericdriver, only : generic_driver, test_runner
   use fortuno_serial_serialcontext, only : serial_context
   use fortuno_serial_seriallogger, only : serial_logger
+  use fortuno_serial_serialsuite, only : serial_suite_base
+  use fortuno_serial_serialtest, only : serial_test_base
   use fortuno_testlogger, only : test_logger
   use fortuno_testerror, only : test_error
   implicit none
 
   private
-  public :: serial_test_base, serial_driver
-
-
-  type, extends(test_base_runner) :: serial_context_runner
-  contains
-    procedure :: run_test_base
-  end type serial_context_runner
+  public :: serial_driver
 
 
   type, extends(generic_driver) :: serial_driver
   contains
-    procedure :: create_test_base_runner
+    procedure :: create_test_runner
     procedure :: create_context_factory
     procedure :: create_logger
     procedure :: stop_on_error
@@ -33,25 +29,18 @@ module fortuno_serial_serialdriver
   end interface
 
 
+  type, extends(test_runner) :: serial_runner
+  contains
+    procedure :: set_up_suite
+    procedure :: tear_down_suite
+    procedure :: run_test
+  end type serial_runner
+
+
   type, extends(context_factory) :: serial_context_factory
   contains
-    procedure :: create_context => create_context
+    procedure :: create_context
   end type serial_context_factory
-
-
-  type, extends(test_base), abstract :: serial_test_base
-  contains
-    procedure(serial_test_base_run_iface), deferred :: run
-  end type serial_test_base
-
-
-  abstract interface
-    subroutine serial_test_base_run_iface(this, ctx)
-      import :: serial_test_base, serial_context
-      class(serial_test_base), intent(inout) :: this
-      class(serial_context), intent(inout) :: ctx
-    end subroutine serial_test_base_run_iface
-  end interface
 
 contains
 
@@ -103,13 +92,13 @@ contains
   end subroutine create_logger
 
 
-  subroutine create_test_base_runner(this, runner)
+  subroutine create_test_runner(this, runner)
     class(serial_driver), intent(in) :: this
-    class(test_base_runner), allocatable, intent(out) :: runner
+    class(test_runner), allocatable, intent(out) :: runner
 
-    allocate(serial_context_runner :: runner)
+    allocate(serial_runner :: runner)
 
-  end subroutine create_test_base_runner
+  end subroutine create_test_runner
 
 
   subroutine create_context(this, testsuite, testcase, ctx)
@@ -125,8 +114,62 @@ contains
   end subroutine create_context
 
 
-  subroutine run_test_base(this, testcase, ctx)
-    class(serial_context_runner), intent(in) :: this
+  subroutine set_up_suite(this, testsuite, ctx)
+    class(serial_runner), intent(in) :: this
+    class(suite_base), pointer, intent(in) :: testsuite
+    class(context_base), pointer, intent(in) :: ctx
+
+    class(serial_context), pointer :: myctx
+    class(serial_suite_base), pointer :: mysuite
+
+    select type(ctx)
+    class is (serial_context)
+      myctx => ctx
+    class default
+      error stop "Internal error, expected serial_context, obtained something else"
+    end select
+
+    select type(testsuite)
+    class is (serial_suite_base)
+      mysuite => testsuite
+    class default
+      error stop "Internal error, expected serial_context, obtained something else"
+    end select
+
+    call mysuite%set_up(myctx)
+
+  end subroutine set_up_suite
+
+
+  subroutine tear_down_suite(this, testsuite, ctx)
+    class(serial_runner), intent(in) :: this
+    class(suite_base), pointer, intent(in) :: testsuite
+    class(context_base), pointer, intent(in) :: ctx
+
+    class(serial_context), pointer :: myctx
+    class(serial_suite_base), pointer :: mysuite
+
+    select type(ctx)
+    class is (serial_context)
+      myctx => ctx
+    class default
+      error stop "Internal error, expected serial_context, obtained something else"
+    end select
+
+    select type(testsuite)
+    class is (serial_suite_base)
+      mysuite => testsuite
+    class default
+      error stop "Internal error, expected serial_suite_base, obtained something else"
+    end select
+
+    call mysuite%tear_down(myctx)
+
+  end subroutine tear_down_suite
+
+
+  subroutine run_test(this, testcase, ctx)
+    class(serial_runner), intent(in) :: this
     class(test_base), pointer, intent(in) :: testcase
     class(context_base), pointer, intent(in) :: ctx
 
@@ -149,6 +192,7 @@ contains
 
     call mycase%run(myctx)
 
-  end subroutine run_test_base
+  end subroutine run_test
+
 
 end module fortuno_serial_serialdriver

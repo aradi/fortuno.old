@@ -1,7 +1,8 @@
 module testsuite_coa_simple
   use mylib, only : factorial
   use fortuno, only : is_equal, suite_base
-  use fortuno_coarray, only : coa_context, coa_test, coa_test_base
+  use fortuno_coarray, only : context => coa_context, suite => coa_suite, test => coa_test,&
+      & coa_test_base
   implicit none
 
 
@@ -9,27 +10,27 @@ module testsuite_coa_simple
     procedure(test_divnfailure), nopass, pointer :: testproc
     integer :: divisor, remainder
   contains
-    procedure :: run => div_n_failure__run
+    procedure :: run => div_n_failure_run
   end type
 
 contains
 
 
-  function new_suite_base() result(testsuite)
-    type(suite_base) :: testsuite
+  function test_suite() result(testsuite)
+    type(suite) :: testsuite
 
-    testsuite = suite_base("coa_simple", [&
-        & coa_test("broadcast", test_broadcast),&
-        & coa_test("allreduce", test_allreduce)&
+    testsuite = suite("coa_simple", [&
+        & test("broadcast", test_broadcast),&
+        & test("allreduce", test_allreduce)&
         & ])
     call testsuite%add_test(&
         & div_n_failure("divnfailure(3, 0)", test_divnfailure, divisor=3, remainder=0))
 
-  end function new_suite_base
+  end function test_suite
 
 
   subroutine test_broadcast(ctx)
-    class(coa_context), intent(inout) :: ctx
+    class(context), intent(inout) :: ctx
 
     integer, allocatable :: buffer[:]
 
@@ -54,7 +55,7 @@ contains
 
 
   subroutine test_allreduce(ctx)
-    class(coa_context), intent(inout) :: ctx
+    class(context), intent(inout) :: ctx
 
     integer, allocatable :: buffer[:]
     integer :: iimg, expected
@@ -78,7 +79,7 @@ contains
 
 
   subroutine test_divnfailure(ctx, mycase)
-    class(coa_context), intent(inout) :: ctx
+    class(context), intent(inout) :: ctx
     class(div_n_failure), intent(in) :: mycase
 
     character(100) :: msg
@@ -107,25 +108,25 @@ contains
   end subroutine test_divnfailure
 
 
-  subroutine div_n_failure__run(this, ctx)
+  subroutine div_n_failure_run(this, ctx)
     class(div_n_failure), intent(inout) :: this
-    class(coa_context), intent(inout) :: ctx
+    class(context), intent(inout) :: ctx
 
     call this%testproc(ctx, this)
 
-  end subroutine div_n_failure__run
+  end subroutine div_n_failure_run
 
 end module testsuite_coa_simple
 
 
 program testdriver_coa_simple
   use fortuno_coarray, only : coa_driver
-  use testsuite_coa_simple, only : new_suite_base
+  use testsuite_coa_simple, only : test_suite
   implicit none
 
   type(coa_driver), allocatable :: driver
 
-  driver = coa_driver([new_suite_base()])
+  driver = coa_driver([test_suite()])
   call driver%run()
 
 end program testdriver_coa_simple

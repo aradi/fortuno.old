@@ -1,22 +1,22 @@
 module testsuite_simple
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, test => serial_test, suite_base
+  use fortuno, only : context => serial_context, suite => serial_suite, test => serial_test
   implicit none
 
 contains
 
 
-  function new_suite_base() result(testsuite)
-    type(suite_base) :: testsuite
+  function test_suite() result(testsuite)
+    type(suite) :: testsuite
 
-    testsuite = suite_base("simple", [&
+    testsuite = suite("simple", [&
         & test("factorial(0)", test_factorial0),&
         & test("factorial(1)", test_factorial1),&
         & test("factorial(2,3)", test_factorial23),&
         & test("factorial(4,5)", test_factorial45)&
         & ])
 
-  end function new_suite_base
+  end function test_suite
 
 
   subroutine test_factorial0(ctx)
@@ -58,12 +58,12 @@ end module testsuite_simple
 
 program testdriver_simple
   use fortuno, only : serial_driver
-  use testsuite_simple, only : new_suite_base
+  use testsuite_simple, only : test_suite
   implicit none
 
   type(serial_driver), allocatable :: driver
 
-  driver = serial_driver([new_suite_base()])
+  driver = serial_driver([test_suite()])
   call driver%run()
 
 end program testdriver_simple
