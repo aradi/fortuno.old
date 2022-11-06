@@ -11,39 +11,39 @@ module fortuno_genericdriver
 
   type, abstract :: test_runner
   contains
-    procedure(set_up_suite_iface), deferred :: set_up_suite
-    procedure(tear_down_suite_iface), deferred :: tear_down_suite
-    procedure(run_test_iface), deferred :: run_test
+    procedure(set_up_suite_i), deferred :: set_up_suite
+    procedure(tear_down_suite_i), deferred :: tear_down_suite
+    procedure(run_test_i), deferred :: run_test
   end type test_runner
 
 
   abstract interface
 
-    subroutine set_up_suite_iface(this, testsuite, ctx)
+    subroutine set_up_suite_i(this, testsuite, ctx)
       import :: test_runner, suite_base, context_base
       implicit none
       class(test_runner), intent(in) :: this
       class(suite_base), pointer, intent(in) :: testsuite
       class(context_base), pointer, intent(in) :: ctx
-    end subroutine set_up_suite_iface
+    end subroutine set_up_suite_i
 
 
-    subroutine tear_down_suite_iface(this, testsuite, ctx)
+    subroutine tear_down_suite_i(this, testsuite, ctx)
       import :: test_runner, suite_base, context_base
       implicit none
       class(test_runner), intent(in) :: this
       class(suite_base), pointer, intent(in) :: testsuite
       class(context_base), pointer, intent(in) :: ctx
-    end subroutine tear_down_suite_iface
+    end subroutine tear_down_suite_i
 
 
-    subroutine run_test_iface(this, testcase, ctx)
+    subroutine run_test_i(this, testcase, ctx)
       import :: test_runner, test_base, context_base
       implicit none
       class(test_runner), intent(in) :: this
       class(test_base), pointer, intent(in) :: testcase
       class(context_base), pointer, intent(in) :: ctx
-    end subroutine run_test_iface
+    end subroutine run_test_i
 
   end interface
 
@@ -57,62 +57,62 @@ module fortuno_genericdriver
   type, abstract :: generic_driver
     type(suite_base_cls), allocatable :: testsuites(:)
   contains
-    procedure :: add_suite_base_single
+    procedure :: add_suite_base_scalar
     procedure :: add_suite_base_array
-    generic :: add_suite_base => add_suite_base_single, add_suite_base_array
+    generic :: add_suite_base => add_suite_base_scalar, add_suite_base_array
     procedure :: run
     procedure :: set_up
     procedure :: tear_down
-    procedure(create_context_factory_iface), deferred :: create_context_factory
-    procedure(create_logger_iface), deferred :: create_logger
-    procedure(create_test_runner_iface), deferred :: create_test_runner
-    procedure(stop_on_error_iface), deferred :: stop_on_error
+    procedure(create_context_factory_i), deferred :: create_context_factory
+    procedure(create_logger_i), deferred :: create_logger
+    procedure(create_test_runner_i), deferred :: create_test_runner
+    procedure(stop_on_error_i), deferred :: stop_on_error
   end type generic_driver
 
 
   abstract interface
 
-    subroutine stop_on_error_iface(this, error)
+    subroutine stop_on_error_i(this, error)
       import :: generic_driver, test_error
       implicit none
       class(generic_driver), intent(inout) :: this
       type(test_error), allocatable, intent(in) :: error
-    end subroutine stop_on_error_iface
+    end subroutine stop_on_error_i
 
-    subroutine create_context_factory_iface(this, ctxfact)
+    subroutine create_context_factory_i(this, ctxfact)
       import :: generic_driver, context_factory
       implicit none
       class(generic_driver), intent(in) :: this
       class(context_factory), allocatable, intent(out) :: ctxfact
-    end subroutine create_context_factory_iface
+    end subroutine create_context_factory_i
 
-    subroutine create_logger_iface(this, logger)
+    subroutine create_logger_i(this, logger)
       import :: generic_driver, test_logger
       implicit none
       class(generic_driver), intent(in) :: this
       class(test_logger), allocatable, intent(out) :: logger
-    end subroutine create_logger_iface
+    end subroutine create_logger_i
 
 
-    subroutine create_test_runner_iface(this, runner)
+    subroutine create_test_runner_i(this, runner)
       import :: generic_driver, test_runner
       class(generic_driver), intent(in) :: this
       class(test_runner), allocatable, intent(out) :: runner
-    end subroutine create_test_runner_iface
+    end subroutine create_test_runner_i
 
   end interface
 
 contains
 
 
-  subroutine add_suite_base_single(this, testsuite)
+  subroutine add_suite_base_scalar(this, testsuite)
     class(generic_driver), intent(inout) :: this
     class(suite_base), intent(in) :: testsuite
 
     call add_slots_(this%testsuites, 1)
     this%testsuites(size(this%testsuites))%instance = testsuite
 
-  end subroutine add_suite_base_single
+  end subroutine add_suite_base_scalar
 
 
   subroutine add_suite_base_array(this, testsuites)

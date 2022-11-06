@@ -12,10 +12,10 @@ module fortuno_testlogger
 
   type, abstract :: test_logger
   contains
-    procedure(begin_short_log_iface), deferred :: begin_short_log
-    procedure(short_log_result_iface), deferred :: short_log_result
-    procedure(end_short_log_iface), deferred :: end_short_log
-    procedure(log_results_iface), deferred :: log_results
+    procedure(begin_short_log_i), deferred :: begin_short_log
+    procedure(short_log_result_i), deferred :: short_log_result
+    procedure(end_short_log_i), deferred :: end_short_log
+    procedure(log_results_i), deferred :: log_results
   end type test_logger
 
 
@@ -42,32 +42,32 @@ module fortuno_testlogger
 
   abstract interface
 
-    subroutine begin_short_log_iface(this)
+    subroutine begin_short_log_i(this)
       import :: test_logger
       implicit none
       class(test_logger), intent(inout) :: this
-    end subroutine begin_short_log_iface
+    end subroutine begin_short_log_i
 
-    subroutine end_short_log_iface(this)
+    subroutine end_short_log_i(this)
       import :: test_logger
       implicit none
       class(test_logger), intent(inout) :: this
-    end subroutine end_short_log_iface
+    end subroutine end_short_log_i
 
-    subroutine short_log_result_iface(this, suitename, casename, success)
+    subroutine short_log_result_i(this, suitename, casename, success)
       import :: test_logger
       implicit none
       class(test_logger), intent(inout) :: this
       character(*), intent(in) :: suitename, casename
       logical, intent(in) :: success
-    end subroutine short_log_result_iface
+    end subroutine short_log_result_i
 
-    subroutine log_results_iface(this, driverresult)
+    subroutine log_results_i(this, driverresult)
       import :: test_logger, driver_result
       implicit none
       class(test_logger), intent(inout) :: this
       type(driver_result), intent(in) :: driverresult
-    end subroutine log_results_iface
+    end subroutine log_results_i
 
   end interface
 

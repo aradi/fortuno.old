@@ -26,9 +26,9 @@ module fortuno_basetypes
     type(test_base_cls), allocatable :: testcases(:)
   contains
     procedure :: set_name => suite_base_set_name
-    procedure :: add_test_single => suite_base_add_test_single
+    procedure :: add_test_scalar => suite_base_add_test_scalar
     procedure :: add_test_array => suite_base_add_test_array
-    generic :: add_test => add_test_single, add_test_array
+    generic :: add_test => add_test_scalar, add_test_array
   end type suite_base
 
 
@@ -145,14 +145,14 @@ contains
 
   end subroutine suite_base_set_name
 
-  subroutine suite_base_add_test_single(this, testcase)
+  subroutine suite_base_add_test_scalar(this, testcase)
     class(suite_base), intent(inout) :: this
     class(test_base), intent(in) :: testcase
 
     call add_slots_(this%testcases, 1)
     this%testcases(size(this%testcases))%instance = testcase
 
-  end subroutine suite_base_add_test_single
+  end subroutine suite_base_add_test_scalar
 
 
   subroutine suite_base_add_test_array(this, testcases)

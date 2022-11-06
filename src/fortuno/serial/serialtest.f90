@@ -9,31 +9,31 @@ module fortuno_serial_serialtest
 
   type, extends(test_base), abstract :: serial_test_base
   contains
-    procedure(serial_test_base_run_iface), deferred :: run
+    procedure(serial_test_base_run_i), deferred :: run
   end type serial_test_base
 
 
   abstract interface
-    subroutine serial_test_base_run_iface(this, ctx)
+    subroutine serial_test_base_run_i(this, ctx)
       import :: serial_test_base, serial_context
       class(serial_test_base), intent(inout) :: this
       class(serial_context), intent(inout) :: ctx
-    end subroutine serial_test_base_run_iface
+    end subroutine serial_test_base_run_i
   end interface
 
 
   type, extends(serial_test_base) :: serial_test
-    procedure(serial_test_testroutine_iface), nopass, pointer :: testroutine
+    procedure(serial_test_testroutine_i), nopass, pointer :: testroutine
   contains
     procedure :: run
   end type serial_test
 
 
   abstract interface
-    subroutine serial_test_testroutine_iface(ctx)
+    subroutine serial_test_testroutine_i(ctx)
       import :: serial_context
       class(serial_context), intent(inout) :: ctx
-    end subroutine serial_test_testroutine_iface
+    end subroutine serial_test_testroutine_i
   end interface
 
 contains
