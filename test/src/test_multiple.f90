@@ -1,4 +1,4 @@
-module testsuite_multiple1
+module testmod_multiple1
   use mylib, only : factorial
   use fortuno, only : context => serial_context, suite => serial_suite, test => serial_test
   implicit none
@@ -23,10 +23,10 @@ contains
 
   end subroutine test_factorial0
 
-end module testsuite_multiple1
+end module testmod_multiple1
 
 
-module testsuite_multiple2
+module testmod_multiple2
   use mylib, only : factorial
   use fortuno, only : context => serial_context, test => serial_test, suite => serial_suite
   implicit none
@@ -64,18 +64,18 @@ contains
 
   end subroutine test_factorial_1to5_failing
 
-end module testsuite_multiple2
+end module testmod_multiple2
 
 
 program test_driver
-  use fortuno, only : serial_driver
-  use testsuite_multiple1, only : test_suite_1 => test_suite
-  use testsuite_multiple2, only : test_suite_2 => test_suite
+  use fortuno, only : serial_app
+  use testmod_multiple1, only : test_suite_1 => test_suite
+  use testmod_multiple2, only : test_suite_2 => test_suite
   implicit none
 
-  type(serial_driver), allocatable :: driver
+  type(serial_app), allocatable :: app
 
-  driver = serial_driver([test_suite_1(), test_suite_2()])
-  call driver%run()
+  app = serial_app([test_suite_1(), test_suite_2()])
+  call app%run()
 
 end program test_driver

@@ -1,4 +1,4 @@
-module testsuite_coa_simple
+module testmod_coa_simple
   use mylib, only : factorial
   use fortuno, only : is_equal, suite_base
   use fortuno_coarray, only : context => coa_context, suite => coa_suite, test => coa_test,&
@@ -116,17 +116,17 @@ contains
 
   end subroutine div_n_failure_run
 
-end module testsuite_coa_simple
+end module testmod_coa_simple
 
 
-program testdriver_coa_simple
-  use fortuno_coarray, only : coa_driver
-  use testsuite_coa_simple, only : test_suite
+program testapp_coa_simple
+  use fortuno_coarray, only : coa_app
+  use testmod_coa_simple, only : test_suite
   implicit none
 
-  type(coa_driver), allocatable :: driver
+  type(coa_app), allocatable :: app
 
-  driver = coa_driver([test_suite()])
-  call driver%run()
+  app = coa_app([test_suite()])
+  call app%run()
 
-end program testdriver_coa_simple
+end program testapp_coa_simple

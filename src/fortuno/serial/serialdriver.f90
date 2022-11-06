@@ -25,7 +25,7 @@ module fortuno_serial_serialdriver
 
 
   interface serial_driver
-    module procedure new_serial_driver_single, new_serial_driver_array
+    module procedure new_serial_driver
   end interface
 
 
@@ -45,22 +45,13 @@ module fortuno_serial_serialdriver
 contains
 
 
-  function new_serial_driver_single(testsuite) result(this)
-    class(suite_base), optional, intent(in) :: testsuite
+  function new_serial_driver(testsuites) result(this)
+    class(suite_base), optional, intent(in) :: testsuites(:)
     type(serial_driver) :: this
 
-    if (present(testsuite)) call this%add_suite_base(testsuite)
+    if (present(testsuites)) call this%add_suite_base(testsuites)
 
-  end function new_serial_driver_single
-
-
-  function new_serial_driver_array(testsuites) result(this)
-    class(suite_base), intent(in) :: testsuites(:)
-    type(serial_driver) :: this
-
-    call this%add_suite_base(testsuites)
-
-  end function new_serial_driver_array
+  end function new_serial_driver
 
 
   subroutine stop_on_error(this, error)

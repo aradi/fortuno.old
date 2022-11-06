@@ -4,6 +4,7 @@ module fortuno
   use fortuno_checkers, only : is_equal
   use fortuno_genericdriver, only : test_name
   use fortuno_testerror, only : test_error
+  use fortuno_serial_serialapp, only : serial_app
   use fortuno_serial_serialcontext, only : serial_context
   use fortuno_serial_serialtest, only : serial_test, serial_test_base
   use fortuno_serial_serialdriver, only : serial_driver
@@ -17,6 +18,7 @@ module fortuno
   public :: driver_result
   public :: get_version
   public :: is_equal
+  public :: serial_app
   public :: serial_context
   public :: serial_driver
   public :: serial_suite, serial_suite_base

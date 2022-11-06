@@ -2,6 +2,7 @@ set(curdir "${CMAKE_CURRENT_SOURCE_DIR}")
 
 list(
     APPEND mpi-f90-sources
+    "${curdir}/mpiapp.f90"
     "${curdir}/mpicontext.f90"
     "${curdir}/mpidriver.f90"
     "${curdir}/mpifailureinfo.f90"

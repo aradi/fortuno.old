@@ -1,4 +1,4 @@
-module testsuite_selftest
+module testmod_selftest
   use mylib, only : factorial
   use fortuno, only : context => serial_context, suite => serial_suite, test => serial_test
   implicit none
@@ -50,13 +50,13 @@ contains
 
   end subroutine test_factorialfail
 
-end module testsuite_selftest
+end module testmod_selftest
 
 
-module testsuite_selftest_tester
+module testmod_selftest_tester
   use fortuno, only : driver_result, is_equal, serial_driver, test => serial_test,&
       & context => serial_context, test_name, suite => serial_suite
-  use testsuite_selftest, only : test_suite_selftest => test_suite
+  use testmod_selftest, only : test_suite_selftest => test_suite
   implicit none
 
   type(driver_result), allocatable :: drvres
@@ -105,19 +105,17 @@ contains
 
   end subroutine set_up_module
 
-end module testsuite_selftest_tester
+end module testmod_selftest_tester
 
 
-program testdriver_selftest_tester
-  use fortuno, only : argument_parser, serial_driver
-  use testsuite_selftest_tester, only : test_suite
+program testapp_selftest_tester
+  use fortuno, only : serial_app
+  use testmod_selftest_tester, only : test_suite
   implicit none
 
-  type(serial_driver), allocatable :: driver
-  type(argument_parser), allocatable :: argparser
+  type(serial_app), allocatable :: app
 
-  driver = serial_driver([test_suite()])
-  argparser = argument_parser()
-  call driver%run(testnames=argparser%get_test_names())
+  app = serial_app([test_suite()])
+  call app%run()
 
-end program testdriver_selftest_tester
+end program testapp_selftest_tester

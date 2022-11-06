@@ -1,4 +1,4 @@
-module testsuite_parametrized2
+module testmod_parametrized2
   use mylib, only : factorial
   use fortuno, only : context => serial_context, suite => serial_suite, serial_test_base
   implicit none
@@ -55,17 +55,17 @@ contains
 
   end subroutine run
 
-end module testsuite_parametrized2
+end module testmod_parametrized2
 
 
-program testdriver_parametrized2
-  use fortuno, only : serial_driver
-  use testsuite_parametrized2, only : test_suite
+program testapp_parametrized2
+  use fortuno, only : serial_app
+  use testmod_parametrized2, only : test_suite
   implicit none
 
-  type(serial_driver), allocatable :: driver
+  type(serial_app), allocatable :: app
 
-  driver = serial_driver([test_suite()])
-  call driver%run()
+  app = serial_app([test_suite()])
+  call app%run()
 
-end program testdriver_parametrized2
+end program testapp_parametrized2

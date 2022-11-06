@@ -1,4 +1,4 @@
-module testsuite_mpi_simple
+module testmod_mpi_simple
   use mpi_f08, only : MPI_Allreduce, MPI_Bcast, MPI_INTEGER, MPI_SUM
   use fortuno_mpi, only : context => mpi_context, suite => mpi_suite, test => mpi_test,&
       & mpi_test_base
@@ -104,17 +104,17 @@ contains
 
   end subroutine div_n_failure_run
 
-end module testsuite_mpi_simple
+end module testmod_mpi_simple
 
 
-program testdriver_mpi_simple
-  use fortuno_mpi, only : mpi_driver
-  use testsuite_mpi_simple, only : test_suite
+program testapp_mpi_simple
+  use fortuno_mpi, only : mpi_app
+  use testmod_mpi_simple, only : test_suite
   implicit none
 
-  type(mpi_driver), allocatable :: driver
+  type(mpi_app), allocatable :: app
 
-  driver = mpi_driver([test_suite()])
-  call driver%run()
+  app = mpi_app([test_suite()])
+  call app%run()
 
-end program testdriver_mpi_simple
+end program testapp_mpi_simple

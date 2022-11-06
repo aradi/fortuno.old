@@ -1,4 +1,4 @@
-module testsuite_simple
+module testmod_simple
   use mylib, only : factorial
   use fortuno, only : context => serial_context, suite => serial_suite, test => serial_test
   implicit none
@@ -53,17 +53,17 @@ contains
 
   end subroutine test_factorial45
 
-end module testsuite_simple
+end module testmod_simple
 
 
-program testdriver_simple
-  use fortuno, only : serial_driver
-  use testsuite_simple, only : test_suite
+program testapp_simple
+  use fortuno, only : serial_app
+  use testmod_simple, only : test_suite
   implicit none
 
-  type(serial_driver), allocatable :: driver
+  type(serial_app), allocatable :: app
 
-  driver = serial_driver([test_suite()])
-  call driver%run()
+  app = serial_app([test_suite()])
+  call app%run()
 
-end program testdriver_simple
+end program testapp_simple

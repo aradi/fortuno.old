@@ -1,4 +1,4 @@
-module testsuite_fixtured
+module testmod_fixtured
   use mylib, only : factorial
   use fortuno, only : context => serial_context, suite => serial_suite, serial_test_base
   implicit none
@@ -81,17 +81,17 @@ contains
 
   end subroutine get_char_repr
 
-end module testsuite_fixtured
+end module testmod_fixtured
 
 
-program testdriver_fixtured
-  use fortuno, only : serial_driver
-  use testsuite_fixtured, only : test_suite
+program testapp_fixtured
+  use fortuno, only : serial_app
+  use testmod_fixtured, only : test_suite
   implicit none
 
-  type(serial_driver), allocatable :: driver
+  type(serial_app), allocatable :: app
 
-  driver = serial_driver([test_suite()])
-  call driver%run()
+  app = serial_app([test_suite()])
+  call app%run()
 
-end program testdriver_fixtured
+end program testapp_fixtured

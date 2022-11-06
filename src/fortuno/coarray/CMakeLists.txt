@@ -2,6 +2,7 @@ set(curdir "${CMAKE_CURRENT_SOURCE_DIR}")
 
 list(
     APPEND coa-f90-sources
+    "${curdir}/coaapp.f90"
     "${curdir}/coacontext.f90"
     "${curdir}/coadriver.f90"
     "${curdir}/coafailureinfo.f90"

@@ -1,4 +1,4 @@
-module testsuite_fixturedsuite
+module testmod_fixturedsuite
   use mylib, only : factorial
   use fortuno, only : context => serial_context, suite => serial_suite, serial_suite_base,&
       & serial_test_base
@@ -80,17 +80,17 @@ contains
 
   end subroutine test_recursion_up
 
-end module testsuite_fixturedsuite
+end module testmod_fixturedsuite
 
 
-program testdriver_fixtured
-  use fortuno, only : serial_driver
-  use testsuite_fixturedsuite, only : test_suite
+program testapp_fixtured
+  use fortuno, only : serial_app
+  use testmod_fixturedsuite, only : test_suite
   implicit none
 
-  type(serial_driver), allocatable :: driver
+  type(serial_app), allocatable :: app
 
-  driver = serial_driver([test_suite()])
-  call driver%run()
+  app = serial_app([test_suite()])
+  call app%run()
 
-end program testdriver_fixtured
+end program testapp_fixtured
