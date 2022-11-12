@@ -20,7 +20,9 @@ contains
 
     testsuite = suite("mpi_simple", [&
         & test("broadcast", test_broadcast),&
-        & test("allreduce", test_allreduce)&
+        & test("allreduce", test_allreduce),&
+        & test("procs-lt-4", test_procs_lt_4),&
+        & test("procs-ge-4", test_procs_ge_4)&
         & ])
     call testsuite%add_test(&
         & div_n_failure("divnfailure(3, 0)", test_divnfailure, div=3, rem=0))
@@ -64,6 +66,30 @@ contains
     call ctx%check(recv == expected)
 
   end subroutine test_allreduce
+
+
+  subroutine test_procs_lt_4(ctx)
+    class(context), intent(inout) :: ctx
+
+    if (ctx%mpi%commsize >= 4) then
+      call ctx%skip()
+      return
+    end if
+    ! Here you can put tests, which work only up to 3 processes
+
+  end subroutine test_procs_lt_4
+
+
+  subroutine test_procs_ge_4(ctx)
+    class(context), intent(inout) :: ctx
+
+    if (ctx%mpi%commsize < 4) then
+      call ctx%skip()
+      return
+    end if
+    ! Here you can put tests, which work only for 4 processes or more
+
+  end subroutine test_procs_ge_4
 
 
   subroutine test_divnfailure(ctx, mycase)

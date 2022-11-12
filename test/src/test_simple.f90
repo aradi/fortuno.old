@@ -10,48 +10,49 @@ contains
     type(suite) :: testsuite
 
     testsuite = suite("simple", [&
-        & test("factorial(0)", test_factorial0),&
-        & test("factorial(1)", test_factorial1),&
-        & test("factorial(2,3)", test_factorial23),&
-        & test("factorial(4,5)", test_factorial45)&
+        & test("factorial_0", test_factorial_0),&
+        & test("factorial_1", test_factorial_1),&
+        & test("factorial_2_3", test_factorial_2_3),&
+        & test("factorial_4_5", test_factorial_4_5)&
         & ])
 
   end function test_suite
 
 
-  subroutine test_factorial0(ctx)
+  subroutine test_factorial_0(ctx)
     class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(0) == 1)
 
-  end subroutine test_factorial0
+  end subroutine test_factorial_0
 
 
-  subroutine test_factorial1(ctx)
+  subroutine test_factorial_1(ctx)
     class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(1) == 1)
 
-  end subroutine test_factorial1
+  end subroutine test_factorial_1
 
 
-  subroutine test_factorial23(ctx)
+  subroutine test_factorial_2_3(ctx)
     class(context), intent(inout) :: ctx
 
-    call ctx%check(factorial(2) == 2)
+    call ctx%skip()  ! Skip test (probably you should return from the test at this point)
+    call ctx%check(factorial(2) == 1) ! This won't fail as test was skipped
     call ctx%check(factorial(3) == 6)
 
-  end subroutine test_factorial23
+  end subroutine test_factorial_2_3
 
 
-  subroutine test_factorial45(ctx)
+  subroutine test_factorial_4_5(ctx)
     class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(4) == 24)
-    if (ctx%check_failed()) return  ! Skip further tests if last check failed
+    if (ctx%check_failed()) return  ! Abort this test if last check failed
     call ctx%check(factorial(5) == 120)
 
-  end subroutine test_factorial45
+  end subroutine test_factorial_4_5
 
 end module testmod_simple
 

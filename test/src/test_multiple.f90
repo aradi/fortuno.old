@@ -10,7 +10,7 @@ contains
     type(suite) :: testsuite
 
     testsuite = suite("multiple1", [&
-        & test("factorial(0)", test_factorial0)&
+        & test("factorial_0", test_factorial0)&
         & ])
 
   end function test_suite
@@ -38,19 +38,19 @@ contains
     type(suite) :: testsuite
 
     testsuite = suite("multiple2", [&
-        & test("factorial(0)", test_factorial0_failing),&
-        & test("factorial(1-5)", test_factorial_1to5_failing)&
+        & test("factorial_0_failing", test_factorial_0_failing),&
+        & test("factorial_1to5_failing", test_factorial_1to5_failing)&
         & ])
 
   end function test_suite
 
 
-  subroutine test_factorial0_failing(ctx)
+  subroutine test_factorial_0_failing(ctx)
     class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(0) == 0, msg="Failing on purpose (single check only)")
 
-  end subroutine test_factorial0_failing
+  end subroutine test_factorial_0_failing
 
 
   subroutine test_factorial_1to5_failing(ctx)

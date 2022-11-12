@@ -17,11 +17,11 @@ contains
     type(suite) :: testsuite
 
     testsuite = suite("param", [&
-        & factcalc_test("factorial(0)", 0, 1),&
-        & factcalc_test("factorial(1)", 1, 1),&
-        & factcalc_test("factorial(2)", 2, 2),&
-        & factcalc_test("factorial(3)", 3, 6),&
-        & factcalc_test("factorial(4)", 4, 24)&
+        & factcalc_test("factorial_0", 0, 1),&
+        & factcalc_test("factorial_1", 1, 1),&
+        & factcalc_test("factorial_2", 2, 2),&
+        & factcalc_test("factorial_3", 3, 6),&
+        & factcalc_test("factorial_4", 4, 24)&
         & ])
 
   end function test_suite

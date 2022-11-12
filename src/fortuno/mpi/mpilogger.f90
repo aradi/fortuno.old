@@ -4,8 +4,8 @@ module fortuno_mpi_mpilogger
   use fortuno_failureinfo, only : failure_info
   use fortuno_serial_seriallogger, only : serial_logger
   use fortuno_mpi_mpifailureinfo, only : mpi_failure_info
-  use fortuno_testlogger, only : driver_result, test_status, test_name_str
-  use fortuno_utils, only : findloc_logical, nr_digits
+  use fortuno_testlogger, only : test_result
+  use fortuno_utils, only : findloc_logical
   implicit none
 
   private
@@ -46,23 +46,26 @@ contains
   end subroutine end_short_log
 
 
-  subroutine short_log_result(this, suitename, casename, success)
+  subroutine short_log_result(this, testtype, suiteresult, caseresult)
     class(mpi_logger), intent(inout) :: this
-    character(*), intent(in) :: suitename, casename
-    logical, intent(in) :: success
+    integer, intent(in) :: testtype
+    type(test_result), intent(in) :: suiteresult
+    type(test_result), optional, intent(in) :: caseresult
 
     if (this%myrank /= 0) return
-    call this%serial_logger%short_log_result(suitename, casename, success)
+    call this%serial_logger%short_log_result(testtype, suiteresult, caseresult)
 
   end subroutine short_log_result
 
 
-  subroutine begin_test_base_failure_log(this, suiteresult, caseresult)
+  subroutine begin_test_base_failure_log(this, testtype, suiteresult, caseresult)
     class(mpi_logger), intent(inout) :: this
-    type(test_status), intent(in) :: suiteresult, caseresult
+    integer, intent(in) :: testtype
+    type(test_result), intent(in) :: suiteresult
+    type(test_result), optional, intent(in) :: caseresult
 
     if (this%myrank /= 0) return
-    call this%serial_logger%begin_test_base_failure_log(suiteresult, caseresult)
+    call this%serial_logger%begin_test_base_failure_log(testtype, suiteresult, caseresult)
 
   end subroutine begin_test_base_failure_log
 
@@ -101,13 +104,12 @@ contains
 
   end subroutine log_test_base_failure
 
-
-  subroutine log_summary(this, nsucceeded, nfailed)
+  subroutine log_summary(this, suitestats, casestats)
     class(mpi_logger), intent(inout) :: this
-    integer, intent(in) :: nsucceeded, nfailed
+    integer, intent(in) :: suitestats(:), casestats(:)
 
     if (this%myrank /= 0) return
-    call this%serial_logger%log_summary(nsucceeded, nfailed)
+    call this%serial_logger%log_summary(suitestats, casestats)
 
   end subroutine log_summary
 

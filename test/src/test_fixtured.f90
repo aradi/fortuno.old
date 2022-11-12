@@ -25,7 +25,7 @@ contains
 
     testsuite = suite("fixtured", [&
         & [(random_test("recursion_down", test_recursion_down), ii = 1, 10)],&
-        & [(random_test("recursion_up", test_recursion_down), ii = 1, 10)]&
+        & [(random_test("recursion_up", test_recursion_up), ii = 1, 10)]&
         & ])
 
   end function test_suite
@@ -44,7 +44,7 @@ contains
     class(context), intent(inout) :: ctx
     class(random_test), intent(in) :: mycase
 
-    call ctx%check(factorial(mycase%nn + 1) == (mycase%nn + 1) * factorial(mycase%nn))
+    call ctx%check(factorial(mycase%nn + 2) == (mycase%nn + 1) * factorial(mycase%nn))
 
   end subroutine test_recursion_up
 
@@ -70,14 +70,14 @@ contains
   end subroutine run
 
 
-  subroutine get_char_repr(this, state)
+  subroutine get_char_repr(this, repr)
     class(random_test), intent(in) :: this
-    character(:), allocatable, intent(out) :: state
+    character(:), allocatable, intent(out) :: repr
 
     character(5) :: buffer
 
     write(buffer, "(a, i2.2)") "n=", this%nn
-    state = trim(buffer)
+    repr = trim(buffer)
 
   end subroutine get_char_repr
 

@@ -31,7 +31,7 @@ contains
 
     testsuite = suite("param2")
     do icalc = 1, size(factcalcs)
-      write(name, "(a, i0, a)") "factorial(", factcalcs(icalc)%arg, ")"
+      write(name, "(a, i0)") "factorial_", factcalcs(icalc)%arg
       call testsuite%add_test(factcalc_test(trim(name), factcalc=factcalcs(icalc)))
     end do
 

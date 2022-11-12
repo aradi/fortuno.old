@@ -80,7 +80,7 @@ contains
     type(test_error), allocatable, intent(in) :: error
 
     if (.not. allocated(error)) return
-    if (this_image() == 1) write(stderr, "(a, dt)") "Error: ", error
+    if (allocated(error%message) .and. this_image() == 1) write(stderr, "(a)") error%message
     error stop 1, quiet = .true.
 
   end subroutine stop_on_error

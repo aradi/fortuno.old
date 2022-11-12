@@ -59,7 +59,7 @@ contains
     type(test_error), allocatable, intent(in) :: error
 
     if (.not. allocated(error)) return
-    write(stderr, "(a, dt)") "Error: ", error
+    if (allocated(error%message)) write(stderr, "(a)") error%message
     error stop 1, quiet = .true.
 
   end subroutine stop_on_error
@@ -184,6 +184,5 @@ contains
     call mycase%run(myctx)
 
   end subroutine run_test
-
 
 end module fortuno_serial_serialdriver

@@ -21,7 +21,9 @@ contains
 
     testsuite = suite("coa_simple", [&
         & test("broadcast", test_broadcast),&
-        & test("allreduce", test_allreduce)&
+        & test("allreduce", test_allreduce),&
+        & test("imgs-lt-4", test_imgs_lt_4),&
+        & test("imgs-ge-4", test_imgs_ge_4)&
         & ])
     call testsuite%add_test(&
         & div_n_failure("divnfailure(3, 0)", test_divnfailure, divisor=3, remainder=0))
@@ -76,6 +78,30 @@ contains
     call ctx%check(buffer == expected)
 
   end subroutine test_allreduce
+
+
+  subroutine test_imgs_lt_4(ctx)
+    class(context), intent(inout) :: ctx
+
+    if (num_images() >= 4) then
+      call ctx%skip()
+      return
+    end if
+    ! Here you can put tests, which work only up to 3 images
+
+  end subroutine test_imgs_lt_4
+
+
+  subroutine test_imgs_ge_4(ctx)
+    class(context), intent(inout) :: ctx
+
+    if (num_images() < 4) then
+      call ctx%skip()
+      return
+    end if
+    ! Here you can put tests, which work only for 4 images or more
+
+  end subroutine test_imgs_ge_4
 
 
   subroutine test_divnfailure(ctx, mycase)

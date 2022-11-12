@@ -1,6 +1,6 @@
 module fortuno
   use fortuno_argumentparser, only : argument_parser
-  use fortuno_basetypes, only : context_base, test_base, suite_base, init_suite_base
+  use fortuno_basetypes, only : context_base, test_base, suite_base, init_suite_base, teststatus
   use fortuno_checkers, only : is_equal
   use fortuno_genericdriver, only : test_name
   use fortuno_testerror, only : test_error
@@ -26,5 +26,6 @@ module fortuno
   public :: context_base, test_base, suite_base, init_suite_base
   public :: test_error
   public :: test_name
+  public :: teststatus
 
 end module fortuno

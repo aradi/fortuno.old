@@ -10,52 +10,52 @@ contains
     type(suite) :: testsuite
 
     testsuite = suite("simple", [&
-        & test("factorial(0)", test_factorial0),&
-        & test("factorial(1)", test_factorial1),&
-        & test("factorial(2)", test_factorial2),&
-        & test("factorial_fail", test_factorialfail)&
+        & test("factorial_0", test_factorial_0),&
+        & test("factorial_1", test_factorial_1),&
+        & test("factorial_2", test_factorial_2),&
+        & test("factorial_fail", test_factorial_fail)&
         & ])
 
   end function test_suite
 
 
-  subroutine test_factorial0(ctx)
+  subroutine test_factorial_0(ctx)
     class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(0) == 1)
 
-  end subroutine test_factorial0
+  end subroutine test_factorial_0
 
 
-  subroutine test_factorial1(ctx)
+  subroutine test_factorial_1(ctx)
     class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(1) == 1)
 
-  end subroutine test_factorial1
+  end subroutine test_factorial_1
 
 
-  subroutine test_factorial2(ctx)
+  subroutine test_factorial_2(ctx)
     class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(2) == 2)
 
-  end subroutine test_factorial2
+  end subroutine test_factorial_2
 
 
-  subroutine test_factorialfail(ctx)
+  subroutine test_factorial_fail(ctx)
     class(context), intent(inout) :: ctx
 
     call ctx%check(.false.)
 
-  end subroutine test_factorialfail
+  end subroutine test_factorial_fail
 
 end module testmod_selftest
 
 
 module testmod_selftest_tester
   use fortuno, only : driver_result, is_equal, serial_driver, test => serial_test,&
-      & context => serial_context, test_name, suite => serial_suite
+      & context => serial_context, test_name, teststatus, suite => serial_suite
   use testmod_selftest, only : test_suite_selftest => test_suite
   implicit none
 
@@ -90,7 +90,7 @@ contains
     class(context), intent(inout) :: ctx
 
     !call ctx%check(all(drvres%caseresults(:)%success .eqv. [.true., .true., .true., .false.]))
-    call ctx%check(all(drvres%caseresults(:)%success .eqv. [.true., .true.]))
+    call ctx%check(all(drvres%caseresults(:)%status == [teststatus%ok, teststatus%ok]))
 
   end subroutine test_results
 
@@ -101,7 +101,7 @@ contains
     driver = serial_driver([test_suite_selftest()])
 
     call driver%run(driverresult=drvres,&
-            & testnames=[test_name("simple", "factorial(0)"), test_name("simple", "factorial(1)")])
+            & testnames=[test_name("simple", "factorial_0"), test_name("simple", "factorial_1")])
 
   end subroutine set_up_module
 

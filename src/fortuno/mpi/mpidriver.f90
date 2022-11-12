@@ -107,7 +107,7 @@ contains
     type(test_error), allocatable, intent(in) :: error
 
     if (.not. allocated(error)) return
-    if (this%myrank == 0) write(stderr, "(a, dt)") "Error: ", error
+    if (allocated(error%message) .and. this%myrank == 0) write(stderr, "(a)") error%message
     call MPI_Finalize()
     error stop 1, quiet = .true.
 

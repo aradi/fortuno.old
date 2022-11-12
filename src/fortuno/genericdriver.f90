@@ -1,7 +1,7 @@
 module fortuno_genericdriver
-  use fortuno_basetypes, only : suite_base, suite_base_cls, context_base, test_base
+  use fortuno_basetypes, only : suite_base, suite_base_cls, context_base, test_base, teststatus
   use fortuno_contextfactory, only : context_factory
-  use fortuno_testlogger, only : driver_result, test_logger, init_test_status
+  use fortuno_testlogger, only : driver_result, test_logger, init_test_result, testtypes
   use fortuno_testerror, only : test_error
   implicit none
 
@@ -93,7 +93,6 @@ module fortuno_genericdriver
       class(test_logger), allocatable, intent(out) :: logger
     end subroutine create_logger_i
 
-
     subroutine create_test_runner_i(this, runner)
       import :: generic_driver, test_runner
       class(generic_driver), intent(in) :: this
@@ -151,7 +150,7 @@ contains
     call get_test_indices_(this%testsuites, testinds, testnames=testnames)
     call run_tests_(this%testsuites, testinds, ctxfact, logger, runner, driverresult0)
 
-    if (driverresult0%failed) error0 = test_error(code=1, message="Some tests failed")
+    if (driverresult0%failed) error0 = test_error(code=1, message="Some checks failed")
     if (present(error)) call move_alloc(error0, error)
     if (present(driverresult)) call move_alloc(driverresult0, driverresult)
     if (present(error) .or. present(driverresult)) return
@@ -250,22 +249,23 @@ contains
     type(driver_result), allocatable, intent(out) :: driverresult
 
     call allocate_driver_result_(testsuites, testinds, driverresult)
-    call initialize_suites_(testsuites, testinds, ctxfact, runner, driverresult)
     call logger%begin_short_log()
+    call initialize_suites_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     call execute_tests_(testsuites, testinds, ctxfact, logger, runner, driverresult)
+    call finalize_suites_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     call logger%end_short_log()
-    call finalize_suites_(testsuites, testinds, ctxfact, runner, driverresult)
 
-    driverresult%failed = .not. (all(driverresult%suiteresults(:)%success) &
-        & .and. all(driverresult%caseresults(:)%success))
+    driverresult%failed = any(driverresult%suiteresults(:,:)%status == teststatus%failed) &
+        & .or. any(driverresult%caseresults(:)%status == teststatus%failed)
 
   end subroutine run_tests_
 
 
-  subroutine initialize_suites_(testsuites, testinds, ctxfact, runner, driverresult)
+  subroutine initialize_suites_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     type(suite_base_cls), target, intent(inout) :: testsuites(:)
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
+    class(test_logger), intent(inout) :: logger
     class(test_runner), intent(in) :: runner
     type(driver_result), intent(inout) :: driverresult
 
@@ -286,12 +286,14 @@ contains
 
       associate (&
           & testsuite => testsuites(isuite)%instance,&
-          & suiteresult => driverresult%suiteresults(isuiteres))
+          & suiteresult => driverresult%suiteresults(1, isuiteres))
 
         call ctxfact%create_context(testsuite, null(), ctx)
         ctxptr => ctx
         call runner%set_up_suite(testsuite, ctxptr)
-        call init_test_status(suiteresult, .not. ctx%failed(), testsuite%name, repr, ctx)
+        call testsuite%get_char_repr(repr)
+        call init_test_result(suiteresult, testsuite%name, repr, ctx)
+        call logger%short_log_result(testtypes%suitesetup, suiteresult)
         done(isuite) = .true.
 
       end associate
@@ -300,10 +302,11 @@ contains
   end subroutine initialize_suites_
 
 
-  subroutine finalize_suites_(testsuites, testinds, ctxfact, runner, driverresult)
+  subroutine finalize_suites_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     type(suite_base_cls), target, intent(inout) :: testsuites(:)
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
+    class(test_logger), intent(inout) :: logger
     class(test_runner), intent(in) :: runner
     type(driver_result), intent(inout) :: driverresult
 
@@ -324,18 +327,18 @@ contains
 
       associate (&
           & testsuite => testsuites(isuite)%instance,&
-          & suiteresult => driverresult%suiteresults(isuiteres))
-
-        ! Suite initialization failed, finalization should be skipped
-        if  (.not. suiteresult%success) then
-          done(isuite) = .true.
-          cycle
-        end if
+          & suiteresults => driverresult%suiteresults(:, isuiteres))
 
         call ctxfact%create_context(testsuite, null(), ctx)
-        ctxptr => ctx
-        call runner%tear_down_suite(testsuite, ctxptr)
-        call init_test_status(suiteresult, .not. ctx%failed(), testsuite%name, repr, ctx)
+        if  (suiteresults(1)%status == teststatus%ok) then
+          ctxptr => ctx
+          call runner%tear_down_suite(testsuite, ctxptr)
+        else
+          call ctx%skip()
+        end if
+        call testsuite%get_char_repr(repr)
+        call init_test_result(suiteresults(2), testsuite%name, repr, ctx)
+        call logger%short_log_result(testtypes%suiteteardown, suiteresults(2))
         done(isuite) = .true.
 
       end associate
@@ -356,7 +359,6 @@ contains
     class(context_base), pointer :: ctxptr
     character(:), allocatable :: testrepr
     integer :: itest, ntests, isuite, isuiteres, icase
-    logical :: success
 
     ntests = size(testinds, dim=2)
     do itest = 1, ntests
@@ -366,21 +368,19 @@ contains
       associate (&
           & testsuite => testsuites(isuite)%instance,&
           & testcase => testsuites(isuite)%instance%testcases(icase)%instance,&
-          & suiteresult => driverresult%suiteresults(isuiteres),&
+          & suiteresult => driverresult%suiteresults(1, isuiteres),&
           & caseresult => driverresult%caseresults(itest))
 
-        if (.not. suiteresult%success) then
-          ! We should signalize failure here instead of just cycling over it
-          cycle
-        end if
-
         call ctxfact%create_context(testsuite, testcase, ctx)
-        ctxptr => ctx
-        call runner%run_test(testcase, ctxptr)
+        if (suiteresult%status /= teststatus%ok) then
+          call ctx%skip()
+        else
+          ctxptr => ctx
+          call runner%run_test(testcase, ctxptr)
+        end if
         call testcase%get_char_repr(testrepr)
-        success = .not. ctx%failed()
-        call logger%short_log_result(testsuite%name, testcase%name, success)
-        call init_test_status(caseresult, success, testcase%name, testrepr, ctx)
+        call init_test_result(caseresult, testcase%name, testrepr, ctx)
+        call logger%short_log_result(testtypes%caserun, suiteresult, caseresult)
       end associate
     end do
 
@@ -449,7 +449,7 @@ contains
       end if
     end do
 
-    allocate(driverresult%suiteresults(nnewsuites))
+    allocate(driverresult%suiteresults(2, nnewsuites))
     allocate(driverresult%caseresults(ntests))
 
     allocate(driverresult%casetosuite(ntests))

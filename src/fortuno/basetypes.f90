@@ -4,9 +4,19 @@ module fortuno_basetypes
   implicit none
 
   private
+  public :: teststatus
   public :: test_base, test_base_cls
   public :: context_base
   public :: init_suite_base, suite_base, suite_base_cls
+
+
+  type :: test_status_enum_
+    integer :: ok = 0
+    integer :: failed = 1
+    integer :: skipped = 2
+  end type test_status_enum_
+
+  type(test_status_enum_), parameter :: teststatus = test_status_enum_()
 
 
   type, abstract :: test_base
@@ -29,6 +39,7 @@ module fortuno_basetypes
     procedure :: add_test_scalar => suite_base_add_test_scalar
     procedure :: add_test_array => suite_base_add_test_array
     generic :: add_test => add_test_scalar, add_test_array
+    procedure :: get_char_repr => suite_base_get_char_repr
   end type suite_base
 
 
@@ -40,7 +51,7 @@ module fortuno_basetypes
   type, abstract :: context_base
     class(test_base), pointer :: testcase => null()
     class(suite_base), pointer :: testsuite => null()
-    logical, private :: failure = .false.
+    integer, private :: status_ = teststatus%ok
     logical, private :: check_failure = .false.
     integer :: nchecks = 0
     class(failure_info), allocatable :: failureinfo
@@ -51,13 +62,15 @@ module fortuno_basetypes
     procedure :: register_check => context_base_register_check
     procedure :: failed => context_base_failed
     procedure :: check_failed => context_base_check_failed
+    procedure :: skip => context_base_skip
+    procedure :: status => context_base_status
   end type context_base
 
 contains
 
-  subroutine test_base_get_char_repr(this, state)
+  subroutine test_base_get_char_repr(this, repr)
     class(test_base), intent(in) :: this
-    character(:), allocatable, intent(out) :: state
+    character(:), allocatable, intent(out) :: repr
   end subroutine test_base_get_char_repr
 
 
@@ -71,7 +84,7 @@ contains
     type(failure_info), allocatable :: failureinfo
 
     call this%register_check(cond)
-    if (cond) return
+    if (cond .or. this%status_ == teststatus%skipped) return
     allocate(failureinfo)
     failureinfo%checknr = this%nchecks
     if (present(msg)) failureinfo%message = msg
@@ -103,7 +116,7 @@ contains
 
     this%nchecks = this%nchecks + 1
     this%check_failure = .not. succeeded
-    this%failure = this%failure .or. this%check_failure
+    if (this%status_ == teststatus%ok .and. .not. succeeded) this%status_ = teststatus%failed
 
   end subroutine context_base_register_check
 
@@ -112,18 +125,35 @@ contains
     class(context_base), intent(in) :: this
     logical :: failed
 
-    failed = this%failure
+    failed = this%status_ == teststatus%failed
 
   end function context_base_failed
 
 
-  function context_base_check_failed(this) result(failed)
+  function context_base_check_failed(this) result(checkfailed)
     class(context_base), intent(in) :: this
-    logical :: failed
+    logical :: checkfailed
 
-    failed = this%check_failure
+    checkfailed = this%check_failure
 
   end function context_base_check_failed
+
+
+  subroutine context_base_skip(this)
+    class(context_base), intent(inout) :: this
+
+    if (this%status_ == teststatus%ok) this%status_ = teststatus%skipped
+
+  end subroutine context_base_skip
+
+
+  function context_base_status(this) result(status)
+    class(context_base), intent(in) :: this
+    integer :: status
+
+    status = this%status_
+
+  end function context_base_status
 
 
   subroutine init_suite_base(this, name, testcases)
@@ -144,6 +174,7 @@ contains
     this%name = name
 
   end subroutine suite_base_set_name
+
 
   subroutine suite_base_add_test_scalar(this, testcase)
     class(suite_base), intent(inout) :: this
@@ -168,6 +199,12 @@ contains
     end do
 
   end subroutine suite_base_add_test_array
+
+
+  subroutine suite_base_get_char_repr(this, repr)
+    class(suite_base), intent(in) :: this
+    character(:), allocatable, intent(out) :: repr
+  end subroutine suite_base_get_char_repr
 
 
   subroutine add_slots_(testcases, newslots)

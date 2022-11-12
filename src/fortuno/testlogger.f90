@@ -1,13 +1,14 @@
 module fortuno_testlogger
-  use fortuno_basetypes, only : context_base
+  use fortuno_basetypes, only : context_base, teststatus
   use fortuno_failureinfo, only : failure_info
   implicit none
 
   private
+  public :: driver_result
   public :: test_logger
   public :: test_name_str
-  public :: test_status, init_test_status
-  public :: driver_result
+  public :: test_result, init_test_result
+  public :: testtypes
 
 
   type, abstract :: test_logger
@@ -19,25 +20,29 @@ module fortuno_testlogger
   end type test_logger
 
 
-  type :: test_status
-    logical :: success = .false.
+  type :: test_result
+    integer :: status = teststatus%failed
     character(:), allocatable :: name
     character(:), allocatable :: repr
     class(failure_info), allocatable :: failureinfo
-  end type test_status
+  end type test_result
 
 
   type :: driver_result
-    type(test_status), allocatable :: suiteresults(:)
-    type(test_status), allocatable :: caseresults(:)
+    type(test_result), allocatable :: suiteresults(:,:)
+    type(test_result), allocatable :: caseresults(:)
     integer, allocatable :: casetosuite(:)
     logical :: failed = .false.
   end type driver_result
 
 
-  interface test_status
-    module procedure new_test_status
-  end interface
+  type :: test_types_enum_
+    integer :: suitesetup = 1
+    integer :: suiteteardown = 2
+    integer :: caserun = 3
+  end type test_types_enum_
+
+  type(test_types_enum_), parameter :: testtypes = test_types_enum_()
 
 
   abstract interface
@@ -54,12 +59,13 @@ module fortuno_testlogger
       class(test_logger), intent(inout) :: this
     end subroutine end_short_log_i
 
-    subroutine short_log_result_i(this, suitename, casename, success)
-      import :: test_logger
+    subroutine short_log_result_i(this, testtype, suiteresult, caseresult)
+      import :: test_logger, test_result
       implicit none
       class(test_logger), intent(inout) :: this
-      character(*), intent(in) :: suitename, casename
-      logical, intent(in) :: success
+      integer, intent(in) :: testtype
+      type(test_result), intent(in) :: suiteresult
+      type(test_result), optional, intent(in) :: caseresult
     end subroutine short_log_result_i
 
     subroutine log_results_i(this, driverresult)
@@ -74,39 +80,52 @@ module fortuno_testlogger
 contains
 
 
-  function new_test_status(success, name, repr, ctx) result(this)
-    logical, intent(in) :: success
-    character(*), intent(in) :: name
-    character(:), allocatable, intent(in) :: repr
-    class(context_base), intent(inout) :: ctx
-    type(test_status) :: this
-
-    call init_test_status(this, success, name, repr, ctx)
-
-  end function new_test_status
-
-
-  subroutine init_test_status(this, success, name, repr, ctx)
-    type(test_status), intent(out) :: this
-    logical, intent(in) :: success
+  subroutine init_test_result(this, name, repr, ctx)
+    type(test_result), intent(out) :: this
     character(*), intent(in) :: name
     character(:), allocatable, intent(in) :: repr
     class(context_base), intent(inout) :: ctx
 
-    this%success = success
+    this%status = ctx%status()
     this%name = name
     if (allocated(repr)) this%repr = repr
     if (allocated(ctx%failureinfo)) call move_alloc(ctx%failureinfo, this%failureinfo)
 
-  end subroutine init_test_status
+  end subroutine init_test_result
 
 
-  function test_name_str(suitestatus, casestatus) result(testname)
-    type(test_status) :: suitestatus, casestatus
+  function test_name_str(testtype, suitestatus, casestatus) result(testname)
+    integer, intent(in) :: testtype
+    type(test_result), intent(in) :: suitestatus
+    type(test_result), optional, intent(in) :: casestatus
     character(:), allocatable :: testname
 
-    testname = suitestatus%name // "/" // casestatus%name
-    if (allocated(casestatus%repr)) testname = testname // "{" // casestatus%repr // "}"
+    character(:), allocatable :: prefix, suitename, casename
+
+    select case (testtype)
+    case (testtypes%suitesetup)
+      prefix = "+"
+    case (testtypes%suiteteardown)
+      prefix = "-"
+    case default
+      prefix = ""
+    end select
+
+    if (allocated(suitestatus%repr)) then
+      suitename = prefix // suitestatus%name // "{" // suitestatus%repr // "}"
+    else
+      suitename = prefix // suitestatus%name
+    end if
+    if (.not. present(casestatus)) then
+      testname = suitename
+      return
+    end if
+    if (allocated(casestatus%repr)) then
+      casename = casestatus%name // "{" // casestatus%repr // "}"
+    else
+      casename = casestatus%name
+    end if
+    testname = suitename // "/" // casename
 
   end function test_name_str
 
