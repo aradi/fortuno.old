@@ -1,4 +1,4 @@
-module testmod_multiple1
+module testmod_multiple_1
   use mylib, only : factorial
   use fortuno, only : context => serial_context, suite => serial_suite, test => serial_test
   implicit none
@@ -9,24 +9,24 @@ contains
   function test_suite() result(testsuite)
     type(suite) :: testsuite
 
-    testsuite = suite("multiple1", [&
-        & test("factorial_0", test_factorial0)&
+    testsuite = suite("multiple_1", [&
+        & test("factorial_0", test_factorial_0)&
         & ])
 
   end function test_suite
 
 
-  subroutine test_factorial0(ctx)
+  subroutine test_factorial_0(ctx)
     class(context), intent(inout) :: ctx
 
     call ctx%check(factorial(0) == 1)
 
-  end subroutine test_factorial0
+  end subroutine test_factorial_0
 
-end module testmod_multiple1
+end module testmod_multiple_1
 
 
-module testmod_multiple2
+module testmod_multiple_2
   use mylib, only : factorial
   use fortuno, only : context => serial_context, test => serial_test, suite => serial_suite
   implicit none
@@ -37,7 +37,7 @@ contains
   function test_suite() result(testsuite)
     type(suite) :: testsuite
 
-    testsuite = suite("multiple2", [&
+    testsuite = suite("multiple_2", [&
         & test("factorial_0_failing", test_factorial_0_failing),&
         & test("factorial_1to5_failing", test_factorial_1to5_failing)&
         & ])
@@ -64,13 +64,13 @@ contains
 
   end subroutine test_factorial_1to5_failing
 
-end module testmod_multiple2
+end module testmod_multiple_2
 
 
-program test_driver
+program testapp_multiple
   use fortuno, only : serial_app
-  use testmod_multiple1, only : test_suite_1 => test_suite
-  use testmod_multiple2, only : test_suite_2 => test_suite
+  use testmod_multiple_1, only : test_suite_1 => test_suite
+  use testmod_multiple_2, only : test_suite_2 => test_suite
   implicit none
 
   type(serial_app), allocatable :: app
@@ -78,4 +78,4 @@ program test_driver
   app = serial_app([test_suite_1(), test_suite_2()])
   call app%run()
 
-end program test_driver
+end program testapp_multiple

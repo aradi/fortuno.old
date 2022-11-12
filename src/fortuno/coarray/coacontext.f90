@@ -65,17 +65,15 @@ contains
   end subroutine coa_context_check_logical
 
 
-  subroutine coa_context_factory_create_context(this, testsuite, testcase, ctx)
+  subroutine coa_context_factory_create_context(this, testsuite, ctx)
     class(coa_context_factory), intent(in) :: this
     class(suite_base), pointer, intent(in) :: testsuite
-    class(test_base), pointer, intent(in) :: testcase
     class(context_base), allocatable, intent(out) :: ctx
 
     type(coa_context), allocatable :: coactx
 
     allocate(coactx)
-    coactx%testsuite => testsuite
-    coactx%testcase => testcase
+    coactx%suite=> testsuite
     call move_alloc(coactx, ctx)
 
   end subroutine coa_context_factory_create_context

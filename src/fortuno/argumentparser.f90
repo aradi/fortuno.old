@@ -91,11 +91,11 @@ contains
     seppos = index(arg, "/")
     if (seppos == 0) then
       testname%suitename = arg
-      testname%casename = ""
+      testname%testname = ""
       return
     end if
     testname%suitename = arg(1 : seppos - 1)
-    testname%casename = arg(seppos + 1 :)
+    testname%testname = arg(seppos + 1 :)
 
   end subroutine get_test_name_from_arg_
 

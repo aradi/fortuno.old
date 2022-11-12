@@ -10,7 +10,7 @@ module testmod_coa_simple
     procedure(test_divnfailure), nopass, pointer :: testproc
     integer :: divisor, remainder
   contains
-    procedure :: run => div_n_failure_run
+    procedure :: run
   end type
 
 contains
@@ -22,8 +22,8 @@ contains
     testsuite = suite("coa_simple", [&
         & test("broadcast", test_broadcast),&
         & test("allreduce", test_allreduce),&
-        & test("imgs-lt-4", test_imgs_lt_4),&
-        & test("imgs-ge-4", test_imgs_ge_4)&
+        & test("imgs_lt_4", test_imgs_lt_4),&
+        & test("imgs_ge_4", test_imgs_ge_4)&
         & ])
     call testsuite%add_test(&
         & div_n_failure("divnfailure(3, 0)", test_divnfailure, divisor=3, remainder=0))
@@ -104,27 +104,27 @@ contains
   end subroutine test_imgs_ge_4
 
 
-  subroutine test_divnfailure(ctx, mycase)
+  subroutine test_divnfailure(ctx, mytest)
     class(context), intent(inout) :: ctx
-    class(div_n_failure), intent(in) :: mycase
+    class(div_n_failure), intent(in) :: mytest
 
     character(100) :: msg
 
-    if (mod(this_image() - 1, mycase%divisor) == mycase%remainder) then
+    if (mod(this_image() - 1, mytest%divisor) == mytest%remainder) then
       write(msg, "(a, i0)") "This has failed on purpose on image ", this_image()
       call ctx%check(.false., msg=trim(msg))
     else
       call ctx%check(.true.)
     end if
 
-    if (mod(this_image() - 2, mycase%divisor) == mycase%remainder) then
+    if (mod(this_image() - 2, mytest%divisor) == mytest%remainder) then
       write(msg, "(a, i0)") "This has failed on purpose (the 2nd time) on image ", this_image()
       call ctx%check(is_equal(3, 2), msg=trim(msg))
     else
       call ctx%check(is_equal(2, 2))
     end if
 
-    if (mod(this_image() - 3, mycase%divisor) == mycase%remainder) then
+    if (mod(this_image() - 3, mytest%divisor) == mytest%remainder) then
       write(msg, "(a, i0)") "This has failed on purpose (the 3rd time) on image ", this_image()
       call ctx%check(is_equal(4, 3), msg=trim(msg))
     else
@@ -134,13 +134,13 @@ contains
   end subroutine test_divnfailure
 
 
-  subroutine div_n_failure_run(this, ctx)
+  subroutine run(this, ctx)
     class(div_n_failure), intent(inout) :: this
     class(context), intent(inout) :: ctx
 
     call this%testproc(ctx, this)
 
-  end subroutine div_n_failure_run
+  end subroutine run
 
 end module testmod_coa_simple
 

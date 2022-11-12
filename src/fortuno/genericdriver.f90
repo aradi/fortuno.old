@@ -37,11 +37,11 @@ module fortuno_genericdriver
     end subroutine tear_down_suite_i
 
 
-    subroutine run_test_i(this, testcase, ctx)
+    subroutine run_test_i(this, test, ctx)
       import :: test_runner, test_base, context_base
       implicit none
       class(test_runner), intent(in) :: this
-      class(test_base), pointer, intent(in) :: testcase
+      class(test_base), pointer, intent(in) :: test
       class(context_base), pointer, intent(in) :: ctx
     end subroutine run_test_i
 
@@ -50,7 +50,7 @@ module fortuno_genericdriver
 
   type :: test_name
     character(:), allocatable :: suitename
-    character(:), allocatable :: casename
+    character(:), allocatable :: testname
   end type test_name
 
 
@@ -175,66 +175,59 @@ contains
   end subroutine tear_down
 
 
-  subroutine get_test_indices_(testsuites, testinds, testnames)
+  subroutine get_test_indices_(testsuites, testindices, testnames)
     type(suite_base_cls), intent(in) :: testsuites(:)
-    integer, allocatable, intent(out) :: testinds(:,:)
+    integer, allocatable, intent(out) :: testindices(:,:)
     type(test_name), optional, intent(in) :: testnames(:)
 
     logical :: usetestnames
-    integer :: itest, isuite, icase, ntests
-    integer :: ii
+    integer :: itest, isuite, iglobaltest, nglobaltests
 
-    ntests = 0
+    nglobaltests = 0
     usetestnames = .false.
     if (present(testnames)) then
-      ntests = size(testnames)
-      usetestnames = ntests > 0
+      nglobaltests = size(testnames)
+      usetestnames = nglobaltests > 0
     end if
-    if (ntests == 0) then
+    if (nglobaltests == 0) then
       do isuite = 1, size(testsuites)
-        ntests = ntests + size(testsuites(isuite)%instance%testcases)
+        nglobaltests = nglobaltests + size(testsuites(isuite)%instance%tests)
       end do
     end if
 
-    allocate(testinds(2, ntests))
+    allocate(testindices(2, nglobaltests))
 
     if (usetestnames) then
-      do itest = 1, ntests
-        isuite = 0
-        do ii = 1, size(testsuites)
-          if (testsuites(ii)%instance%name == testnames(itest)%suitename) then
-            isuite = ii
-            exit
-          end if
+      do iglobaltest = 1, nglobaltests
+        do isuite = 1, size(testsuites)
+          if (testsuites(isuite)%instance%name == testnames(iglobaltest)%suitename) exit
         end do
-        if (isuite == 0) error stop "Test suite '" // testnames(itest)%suitename // "' not found"
+        if (isuite > size(testsuites)) then
+          error stop "Test suite '" // testnames(iglobaltest)%suitename // "' not found"
+        end if
 
-        icase = 0
-        do ii = 1, size(testsuites(isuite)%instance%testcases)
-          if (testsuites(isuite)%instance%testcases(ii)%instance%name&
-              & == testnames(itest)%casename) then
-            icase = ii
-            exit
-          end if
+        do itest = 1, size(testsuites(isuite)%instance%tests)
+          if (testsuites(isuite)%instance%tests(itest)%instance%name&
+              & == testnames(iglobaltest)%testname) exit
         end do
-        if (icase == 0) error stop "Test case '" // testnames(itest)%suitename // "/"&
-            & // testnames(itest)%casename // "' not found"
-
-        testinds(:, itest) = [isuite, icase]
+        if (itest > size(testsuites(isuite)%instance%tests)) then
+          error stop "Test '" // testnames(iglobaltest)%suitename // "/" &
+              & // testnames(iglobaltest)%testname // "' not found"
+        end if
+        testindices(:, iglobaltest) = [isuite, itest]
       end do
     else
-      itest = 0
+      iglobaltest = 0
       do isuite = 1, size(testsuites)
         associate(testsuite => testsuites(isuite)%instance)
-          do icase = 1, size(testsuite%testcases)
-            associate(testcase => testsuite%testcases(icase)%instance)
-              itest = itest + 1
-              testinds(:, itest) = [isuite, icase]
+          do itest = 1, size(testsuite%tests)
+            associate(test => testsuite%tests(itest)%instance)
+              iglobaltest = iglobaltest + 1
+              testindices(:, iglobaltest) = [isuite, itest]
             end associate
           end do
         end associate
       end do
-
     end if
 
   end subroutine get_test_indices_
@@ -256,7 +249,7 @@ contains
     call logger%end_short_log()
 
     driverresult%failed = any(driverresult%suiteresults(:,:)%status == teststatus%failed) &
-        & .or. any(driverresult%caseresults(:)%status == teststatus%failed)
+        & .or. any(driverresult%testresults(:)%status == teststatus%failed)
 
   end subroutine run_tests_
 
@@ -282,13 +275,13 @@ contains
     do itest = 1, ntests
       isuite = testinds(1, itest)
       if (done(isuite)) cycle
-      isuiteres = driverresult%casetosuite(itest)
+      isuiteres = driverresult%suiteindex(itest)
 
       associate (&
           & testsuite => testsuites(isuite)%instance,&
           & suiteresult => driverresult%suiteresults(1, isuiteres))
 
-        call ctxfact%create_context(testsuite, null(), ctx)
+        call ctxfact%create_context(testsuite, ctx)
         ctxptr => ctx
         call runner%set_up_suite(testsuite, ctxptr)
         call testsuite%get_char_repr(repr)
@@ -322,14 +315,14 @@ contains
     allocate(done(nsuites), source=.false.)
     do itest = 1, ntests
       isuite = testinds(1, itest)
-      isuiteres = driverresult%casetosuite(itest)
+      isuiteres = driverresult%suiteindex(itest)
       if (done(isuite)) cycle
 
       associate (&
           & testsuite => testsuites(isuite)%instance,&
           & suiteresults => driverresult%suiteresults(:, isuiteres))
 
-        call ctxfact%create_context(testsuite, null(), ctx)
+        call ctxfact%create_context(testsuite, ctx)
         if  (suiteresults(1)%status == teststatus%ok) then
           ctxptr => ctx
           call runner%tear_down_suite(testsuite, ctxptr)
@@ -358,29 +351,29 @@ contains
     class(context_base), allocatable, target :: ctx
     class(context_base), pointer :: ctxptr
     character(:), allocatable :: testrepr
-    integer :: itest, ntests, isuite, isuiteres, icase
+    integer :: iglobaltest, nglobaltests, isuite, isuiteres, itest
 
-    ntests = size(testinds, dim=2)
-    do itest = 1, ntests
-      isuite = testinds(1, itest)
-      icase = testinds(2, itest)
-      isuiteres = driverresult%casetosuite(itest)
+    nglobaltests = size(testinds, dim=2)
+    do iglobaltest = 1, nglobaltests
+      isuite = testinds(1, iglobaltest)
+      itest = testinds(2, iglobaltest)
+      isuiteres = driverresult%suiteindex(iglobaltest)
       associate (&
           & testsuite => testsuites(isuite)%instance,&
-          & testcase => testsuites(isuite)%instance%testcases(icase)%instance,&
+          & test => testsuites(isuite)%instance%tests(itest)%instance,&
           & suiteresult => driverresult%suiteresults(1, isuiteres),&
-          & caseresult => driverresult%caseresults(itest))
+          & testresult => driverresult%testresults(iglobaltest))
 
-        call ctxfact%create_context(testsuite, testcase, ctx)
+        call ctxfact%create_context(testsuite, ctx)
         if (suiteresult%status /= teststatus%ok) then
           call ctx%skip()
         else
           ctxptr => ctx
-          call runner%run_test(testcase, ctxptr)
+          call runner%run_test(test, ctxptr)
         end if
-        call testcase%get_char_repr(testrepr)
-        call init_test_result(caseresult, testcase%name, testrepr, ctx)
-        call logger%short_log_result(testtypes%caserun, suiteresult, caseresult)
+        call test%get_char_repr(testrepr)
+        call init_test_result(testresult, test%name, testrepr, ctx)
+        call logger%short_log_result(testtypes%testrun, suiteresult, testresult)
       end associate
     end do
 
@@ -416,7 +409,7 @@ contains
     ntests = 0
     do isuite = 1, size(testsuites)
       associate (testsuite => testsuites(isuite)%instance)
-        ntests = ntests + size(testsuite%testcases)
+        ntests = ntests + size(testsuite%tests)
       end associate
     end do
 
@@ -450,11 +443,11 @@ contains
     end do
 
     allocate(driverresult%suiteresults(2, nnewsuites))
-    allocate(driverresult%caseresults(ntests))
+    allocate(driverresult%testresults(ntests))
 
-    allocate(driverresult%casetosuite(ntests))
+    allocate(driverresult%suiteindex(ntests))
     do itest = 1, ntests
-      driverresult%casetosuite(itest) = suitemap(testinds(1, itest))
+      driverresult%suiteindex(itest) = suitemap(testinds(1, itest))
     end do
 
   end subroutine allocate_driver_result_

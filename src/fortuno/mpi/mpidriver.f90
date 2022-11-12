@@ -168,13 +168,13 @@ contains
   end subroutine tear_down_suite
 
 
-  subroutine run_test(this, testcase, ctx)
+  subroutine run_test(this, test, ctx)
     class(mpi_runner), intent(in) :: this
-    class(test_base), pointer, intent(in) :: testcase
+    class(test_base), pointer, intent(in) :: test
     class(context_base), pointer, intent(in) :: ctx
 
     class(mpi_context), pointer :: myctx
-    class(mpi_test_base), pointer :: mycase
+    class(mpi_test_base), pointer :: mytest
 
     select type(ctx)
     class is (mpi_context)
@@ -183,14 +183,14 @@ contains
       error stop "Internal error, expected serial_context, obtained something else"
     end select
 
-    select type(testcase)
+    select type(test)
     class is (mpi_test_base)
-      mycase => testcase
+      mytest => test
     class default
       error stop "Internal error, expected serial_context, obtained something else"
     end select
 
-    call mycase%run(myctx)
+    call mytest%run(myctx)
 
   end subroutine run_test
 

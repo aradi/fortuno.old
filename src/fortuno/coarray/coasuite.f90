@@ -40,12 +40,12 @@ module fortuno_coarray_coasuite
     end subroutine coa_suite_base_tear_down
 
 
-    function new_coa_suite(name, testcases) result(this)
+    function new_coa_suite(name, tests) result(this)
       character(*), intent(in) :: name
-      class(coa_test_base), optional, intent(in) :: testcases(:)
+      class(coa_test_base), optional, intent(in) :: tests(:)
       type(coa_suite) :: this
 
-      call init_suite_base(this, name, testcases)
+      call init_suite_base(this, name, tests)
 
     end function new_coa_suite
 

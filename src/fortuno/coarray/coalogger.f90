@@ -43,26 +43,26 @@ contains
   end subroutine end_short_log
 
 
-  subroutine short_log_result(this, testtype, suiteresult, caseresult)
+  subroutine short_log_result(this, testtype, suiteresult, testresult)
     class(coa_logger), intent(inout) :: this
     integer, intent(in) :: testtype
     type(test_result), intent(in) :: suiteresult
-    type(test_result), optional, intent(in) :: caseresult
+    type(test_result), optional, intent(in) :: testresult
 
     if (this_image() /= 1) return
-    call this%serial_logger%short_log_result(testtype, suiteresult, caseresult)
+    call this%serial_logger%short_log_result(testtype, suiteresult, testresult)
 
   end subroutine short_log_result
 
 
-  subroutine begin_test_base_failure_log(this, testtype, suiteresult, caseresult)
+  subroutine begin_test_base_failure_log(this, testtype, suiteresult, testresult)
     class(coa_logger), intent(inout) :: this
     integer, intent(in) :: testtype
     type(test_result), intent(in) :: suiteresult
-    type(test_result), optional, intent(in) :: caseresult
+    type(test_result), optional, intent(in) :: testresult
 
     if (this_image() /= 1) return
-    call this%serial_logger%begin_test_base_failure_log(testtype, suiteresult, caseresult)
+    call this%serial_logger%begin_test_base_failure_log(testtype, suiteresult, testresult)
 
   end subroutine begin_test_base_failure_log
 
@@ -102,12 +102,12 @@ contains
   end subroutine log_test_base_failure
 
 
-  subroutine log_summary(this, suitestats, casestats)
+  subroutine log_summary(this, suitestats, teststats)
     class(coa_logger), intent(inout) :: this
-    integer, intent(in) :: suitestats(:), casestats(:)
+    integer, intent(in) :: suitestats(:), teststats(:)
 
     if (this_image() /= 1) return
-    call this%serial_logger%log_summary(suitestats, casestats)
+    call this%serial_logger%log_summary(suitestats, teststats)
 
   end subroutine log_summary
 

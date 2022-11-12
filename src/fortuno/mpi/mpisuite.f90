@@ -40,12 +40,12 @@ contains
   end subroutine mpi_suite_base_tear_down
 
 
-  function new_mpi_suite(name, testcases) result(this)
+  function new_mpi_suite(name, tests) result(this)
     character(*), intent(in) :: name
-    class(mpi_test_base), optional, intent(in) :: testcases(:)
+    class(mpi_test_base), optional, intent(in) :: tests(:)
     type(mpi_suite) :: this
 
-    call init_suite_base(this, name, testcases)
+    call init_suite_base(this, name, tests)
 
   end function new_mpi_suite
 

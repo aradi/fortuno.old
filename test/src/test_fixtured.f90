@@ -31,20 +31,20 @@ contains
   end function test_suite
 
 
-  subroutine test_recursion_down(ctx, mycase)
+  subroutine test_recursion_down(ctx, mytest)
     class(context), intent(inout) :: ctx
-    class(random_test), intent(in) :: mycase
+    class(random_test), intent(in) :: mytest
 
-    call ctx%check(factorial(mycase%nn) == mycase%nn * factorial(mycase%nn - 1))
+    call ctx%check(factorial(mytest%nn) == mytest%nn * factorial(mytest%nn - 1))
 
   end subroutine test_recursion_down
 
 
-  subroutine test_recursion_up(ctx, mycase)
+  subroutine test_recursion_up(ctx, mytest)
     class(context), intent(inout) :: ctx
-    class(random_test), intent(in) :: mycase
+    class(random_test), intent(in) :: mytest
 
-    call ctx%check(factorial(mycase%nn + 2) == (mycase%nn + 1) * factorial(mycase%nn))
+    call ctx%check(factorial(mytest%nn + 1) == (mytest%nn + 1) * factorial(mytest%nn))
 
   end subroutine test_recursion_up
 

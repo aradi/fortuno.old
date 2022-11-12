@@ -20,7 +20,7 @@ module fortuno_serial_seriallogger
     procedure :: log_test_base_failure
     procedure :: end_test_base_failure_log
     procedure :: log_summary
-    procedure, private :: log_case_results_
+    procedure, private :: log_test_results_
     procedure, private :: log_suite_results_
   end type serial_logger
 
@@ -41,16 +41,16 @@ contains
   end subroutine end_short_log
 
 
-  subroutine short_log_result(this, testtype, suiteresult, caseresult)
+  subroutine short_log_result(this, testtype, suiteresult, testresult)
     class(serial_logger), intent(inout) :: this
     integer, intent(in) :: testtype
     type(test_result), intent(in) :: suiteresult
-    type(test_result), optional, intent(in) :: caseresult
+    type(test_result), optional, intent(in) :: testresult
 
     integer :: status
 
-    if (testtype == testtypes%caserun) then
-      status = caseresult%status
+    if (testtype == testtypes%testrun) then
+      status = testresult%status
     else
       status = suiteresult%status
     end if
@@ -66,7 +66,7 @@ contains
       write(stdout, "(a)", advance="no") "??????? | "
     end select
 
-    write(stdout, "(a)") test_name_str(testtype, suiteresult, caseresult)
+    write(stdout, "(a)") test_name_str(testtype, suiteresult, testresult)
 
   end subroutine short_log_result
 
@@ -75,22 +75,22 @@ contains
     class(serial_logger), intent(inout) :: this
     type(driver_result), intent(in) :: driverresult
 
-    integer :: suitestats(3), casestats(3)
+    integer :: suitestats(3), teststats(3)
 
     call this%log_suite_results_(driverresult, suitestats)
-    call this%log_case_results_(driverresult, casestats)
-    call this%log_summary(suitestats, casestats)
+    call this%log_test_results_(driverresult, teststats)
+    call this%log_summary(suitestats, teststats)
 
   end subroutine log_results
 
 
-  subroutine begin_test_base_failure_log(this, testtype, suiteresult, caseresult)
+  subroutine begin_test_base_failure_log(this, testtype, suiteresult, testresult)
     class(serial_logger), intent(inout) :: this
     integer, intent(in) :: testtype
     type(test_result), intent(in) :: suiteresult
-    type(test_result), optional, intent(in) :: caseresult
+    type(test_result), optional, intent(in) :: testresult
 
-    write(stdout, "(a, t12, a, /)") "# FAILED:", test_name_str(testtype, suiteresult, caseresult)
+    write(stdout, "(a, t12, a, /)") "# FAILED:", test_name_str(testtype, suiteresult, testresult)
 
   end subroutine begin_test_base_failure_log
 
@@ -116,9 +116,9 @@ contains
   end subroutine end_test_base_failure_log
 
 
-  subroutine log_summary(this, suitestats, casestats)
+  subroutine log_summary(this, suitestats, teststats)
     class(serial_logger), intent(inout) :: this
-    integer, intent(in) :: suitestats(:), casestats(:)
+    integer, intent(in) :: suitestats(:), teststats(:)
 
     character(100) :: formstr
     integer :: ntests, fieldwidth
@@ -136,48 +136,48 @@ contains
     write(stdout, formstr) suitestats(3), int(real(suitestats(3)) / real(ntests) * 100.0)
     write(stdout, "()")
 
-    ntests = sum(casestats)
+    ntests = sum(teststats)
     fieldwidth = nr_digits(ntests)
 
     write(formstr, "(a, i0, a)") "('Total test cases: ', i", fieldwidth, ")"
     write(stdout, formstr) ntests
     write(formstr, "(a, i0, a)") "('Skipped:     ', i", fieldwidth, ", '  (', I3, '%)')"
-    write(stdout, formstr) casestats(2), int(real(casestats(2)) / real(ntests) * 100.0)
+    write(stdout, formstr) teststats(2), int(real(teststats(2)) / real(ntests) * 100.0)
     write(formstr, "(a, i0, a)") "('Passed:      ', i", fieldwidth, ", '  (', I3, '%)')"
-    write(stdout, formstr) casestats(1), int(real(casestats(1)) / real(ntests) * 100.0)
+    write(stdout, formstr) teststats(1), int(real(teststats(1)) / real(ntests) * 100.0)
     write(formstr, "(a, i0, a)") "('Failed:      ', i", fieldwidth, ", '  (', I3, '%)')"
-    write(stdout, formstr) casestats(3), int(real(casestats(3)) / real(ntests) * 100.0)
+    write(stdout, formstr) teststats(3), int(real(teststats(3)) / real(ntests) * 100.0)
     write(stdout, "()")
 
   end subroutine log_summary
 
 
-  subroutine log_case_results_(this, driverresult, stats)
+  subroutine log_test_results_(this, driverresult, stats)
     class(serial_logger), intent(inout) :: this
     type(driver_result), intent(in) :: driverresult
     integer, intent(out) :: stats(:)
 
-    integer :: nsucceeded, nfailed, nskipped, icase
+    integer :: nsucceeded, nfailed, nskipped, itest
 
     nsucceeded = 0
     nfailed = 0
     nskipped = 0
 
-    do icase = 1, size(driverresult%caseresults)
+    do itest = 1, size(driverresult%testresults)
       associate (&
-          & suiteresults => driverresult%suiteresults(:, driverresult%casetosuite(icase)),&
-          & caseresult => driverresult%caseresults(icase)&
+          & suiteresults => driverresult%suiteresults(:, driverresult%suiteindex(itest)),&
+          & testresult => driverresult%testresults(itest)&
           &)
-        select case (caseresult%status)
+        select case (testresult%status)
         case (teststatus%ok)
           nsucceeded = nsucceeded + 1
         case (teststatus%skipped)
           nskipped = nskipped + 1
         case (teststatus%failed)
           nfailed = nfailed + 1
-          call this%begin_test_base_failure_log(testtypes%caserun, suiteresults(1), caseresult)
-          if (allocated(caseresult%failureinfo)) then
-            call this%log_test_base_failure(caseresult%failureinfo)
+          call this%begin_test_base_failure_log(testtypes%testrun, suiteresults(1), testresult)
+          if (allocated(testresult%failureinfo)) then
+            call this%log_test_base_failure(testresult%failureinfo)
           end if
           call this%end_test_base_failure_log()
         end select
@@ -186,7 +186,7 @@ contains
 
     stats = [nsucceeded, nskipped, nfailed]
 
-  end subroutine log_case_results_
+  end subroutine log_test_results_
 
 
   subroutine log_suite_results_(this, driverresult, stats)

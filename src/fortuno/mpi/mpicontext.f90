@@ -63,17 +63,15 @@ contains
   end subroutine mpi_context_check_logical
 
 
-  subroutine mpi_context_factory_create_context(this, testsuite, testcase, ctx)
+  subroutine mpi_context_factory_create_context(this, testsuite, ctx)
     class(mpi_context_factory), intent(in) :: this
     class(suite_base), pointer, intent(in) :: testsuite
-    class(test_base), pointer, intent(in) :: testcase
     class(context_base), allocatable, intent(out) :: ctx
 
     type(mpi_context), allocatable :: mpictx
 
     allocate(mpictx)
-    mpictx%testsuite => testsuite
-    mpictx%testcase => testcase
+    mpictx%suite=> testsuite
     mpictx%mpi = this%mpi
     call move_alloc(mpictx, ctx)
 

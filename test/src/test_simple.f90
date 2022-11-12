@@ -38,8 +38,11 @@ contains
   subroutine test_factorial_2_3(ctx)
     class(context), intent(inout) :: ctx
 
-    call ctx%skip()  ! Skip test (probably you should return from the test at this point)
-    call ctx%check(factorial(2) == 1) ! This won't fail as test was skipped
+    ! Skip test
+    call ctx%skip()
+    ! Probably you should return from the test at this point. No details about any checks beyond
+    ! this point will be recorded.
+    call ctx%check(factorial(2) == 1) ! Despite failing check, test will remain 'skipped'
     call ctx%check(factorial(3) == 6)
 
   end subroutine test_factorial_2_3

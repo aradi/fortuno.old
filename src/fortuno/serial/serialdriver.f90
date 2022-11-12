@@ -92,15 +92,13 @@ contains
   end subroutine create_test_runner
 
 
-  subroutine create_context(this, testsuite, testcase, ctx)
+  subroutine create_context(this, testsuite, ctx)
     class(serial_context_factory), intent(in) :: this
     class(suite_base), pointer, intent(in) :: testsuite
-    class(test_base), pointer, intent(in) :: testcase
     class(context_base), allocatable, intent(out) :: ctx
 
     allocate(serial_context :: ctx)
-    ctx%testsuite => testsuite
-    ctx%testcase => testcase
+    ctx%suite=> testsuite
 
   end subroutine create_context
 
@@ -159,13 +157,13 @@ contains
   end subroutine tear_down_suite
 
 
-  subroutine run_test(this, testcase, ctx)
+  subroutine run_test(this, test, ctx)
     class(serial_runner), intent(in) :: this
-    class(test_base), pointer, intent(in) :: testcase
+    class(test_base), pointer, intent(in) :: test
     class(context_base), pointer, intent(in) :: ctx
 
     class(serial_context), pointer :: myctx
-    class(serial_test_base), pointer :: mycase
+    class(serial_test_base), pointer :: mytest
 
     select type(ctx)
     class is (serial_context)
@@ -174,14 +172,14 @@ contains
       error stop "Internal error, expected serial_context, obtained something else"
     end select
 
-    select type(testcase)
+    select type(test)
     class is (serial_test_base)
-      mycase => testcase
+      mytest => test
     class default
       error stop "Internal error, expected serial_context, obtained something else"
     end select
 
-    call mycase%run(myctx)
+    call mytest%run(myctx)
 
   end subroutine run_test
 

@@ -30,8 +30,8 @@ module fortuno_testlogger
 
   type :: driver_result
     type(test_result), allocatable :: suiteresults(:,:)
-    type(test_result), allocatable :: caseresults(:)
-    integer, allocatable :: casetosuite(:)
+    type(test_result), allocatable :: testresults(:)
+    integer, allocatable :: suiteindex(:)
     logical :: failed = .false.
   end type driver_result
 
@@ -39,7 +39,7 @@ module fortuno_testlogger
   type :: test_types_enum_
     integer :: suitesetup = 1
     integer :: suiteteardown = 2
-    integer :: caserun = 3
+    integer :: testrun = 3
   end type test_types_enum_
 
   type(test_types_enum_), parameter :: testtypes = test_types_enum_()
@@ -59,13 +59,13 @@ module fortuno_testlogger
       class(test_logger), intent(inout) :: this
     end subroutine end_short_log_i
 
-    subroutine short_log_result_i(this, testtype, suiteresult, caseresult)
+    subroutine short_log_result_i(this, testtype, suiteresult, testresult)
       import :: test_logger, test_result
       implicit none
       class(test_logger), intent(inout) :: this
       integer, intent(in) :: testtype
       type(test_result), intent(in) :: suiteresult
-      type(test_result), optional, intent(in) :: caseresult
+      type(test_result), optional, intent(in) :: testresult
     end subroutine short_log_result_i
 
     subroutine log_results_i(this, driverresult)
@@ -94,13 +94,13 @@ contains
   end subroutine init_test_result
 
 
-  function test_name_str(testtype, suitestatus, casestatus) result(testname)
+  function test_name_str(testtype, suiteresult, testresult) result(testnamestr)
     integer, intent(in) :: testtype
-    type(test_result), intent(in) :: suitestatus
-    type(test_result), optional, intent(in) :: casestatus
-    character(:), allocatable :: testname
+    type(test_result), intent(in) :: suiteresult
+    type(test_result), optional, intent(in) :: testresult
+    character(:), allocatable :: testnamestr
 
-    character(:), allocatable :: prefix, suitename, casename
+    character(:), allocatable :: prefix, suitename, testname
 
     select case (testtype)
     case (testtypes%suitesetup)
@@ -111,21 +111,21 @@ contains
       prefix = ""
     end select
 
-    if (allocated(suitestatus%repr)) then
-      suitename = prefix // suitestatus%name // "{" // suitestatus%repr // "}"
+    if (allocated(suiteresult%repr)) then
+      suitename = prefix // suiteresult%name // "{" // suiteresult%repr // "}"
     else
-      suitename = prefix // suitestatus%name
+      suitename = prefix // suiteresult%name
     end if
-    if (.not. present(casestatus)) then
-      testname = suitename
+    if (.not. present(testresult)) then
+      testnamestr = suitename
       return
     end if
-    if (allocated(casestatus%repr)) then
-      casename = casestatus%name // "{" // casestatus%repr // "}"
+    if (allocated(testresult%repr)) then
+      testname = testresult%name // "{" // testresult%repr // "}"
     else
-      casename = casestatus%name
+      testname = testresult%name
     end if
-    testname = suitename // "/" // casename
+    testnamestr = suitename // "/" // testname
 
   end function test_name_str
 

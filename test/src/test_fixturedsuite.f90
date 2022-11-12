@@ -63,11 +63,11 @@ contains
     class(random_test), intent(inout) :: this
     class(context), intent(inout) :: ctx
 
-    type(random_suite), pointer :: mysuite => null()
+    type(random_suite), pointer :: mysuite
 
-    select type (testsuite => ctx%testsuite)
+    select type (suite => ctx%suite)
     type is (random_suite)
-      mysuite => testsuite
+      mysuite => suite
     class default
       error stop "Expected type random_suite, obtained something else"
     end select
@@ -106,7 +106,7 @@ module testmod_fixturedsuite_failing
   type, extends(serial_suite_base) :: failing_suite
     integer :: myval = -1
   contains
-    procedure :: set_up => failing_suite_set_up
+    procedure :: set_up
   end type failing_suite
 
 contains
@@ -117,27 +117,28 @@ contains
 
     call testsuite%set_name("fixtured_failing")
     call testsuite%add_test([&
-        & test("factorial_1", test_factorial1)&
+        & test("factorial_1", test_factorial_1)&
         & ])
 
   end function test_suite
 
 
-  subroutine failing_suite_set_up(this, ctx)
+  subroutine set_up(this, ctx)
     class(failing_suite), intent(inout) :: this
     class(context), intent(inout) :: ctx
 
     call ctx%check(this%myval == 42, msg="Failing on purpose")  ! this will fail
 
-  end subroutine failing_suite_set_up
+  end subroutine set_up
 
 
-  subroutine test_factorial1(ctx)
+  subroutine test_factorial_1(ctx)
     class(context), intent(inout) :: ctx
 
+    ! This will be never checked, as suite setup failed
     call ctx%check(factorial(1) == 1)
 
-  end subroutine test_factorial1
+  end subroutine test_factorial_1
 
 end module testmod_fixturedsuite_failing
 
@@ -152,7 +153,7 @@ module testmod_fixturedsuite_skipped
   type, extends(serial_suite_base) :: skipped_suite
     integer :: myval = -1
   contains
-    procedure :: set_up => skipped_suite_set_up
+    procedure :: set_up
   end type skipped_suite
 
 contains
@@ -163,28 +164,28 @@ contains
 
     call testsuite%set_name("fixtured_skipped")
     call testsuite%add_test([&
-        & test("factorial_1", test_factorial1)&
+        & test("factorial_1", test_factorial_1)&
         & ])
 
   end function test_suite
 
 
-  subroutine skipped_suite_set_up(this, ctx)
+  subroutine set_up(this, ctx)
     class(skipped_suite), intent(inout) :: this
     class(context), intent(inout) :: ctx
 
     call ctx%skip()
 
-  end subroutine skipped_suite_set_up
+  end subroutine set_up
 
 
-  subroutine test_factorial1(ctx)
+  subroutine test_factorial_1(ctx)
     class(context), intent(inout) :: ctx
 
-    ! Will be never executed, as suite set_up had been skipped explicitely.
+    ! Will be never executed, as suite set_up had been skipped
     call ctx%check(factorial(1) == 1)
 
-  end subroutine test_factorial1
+  end subroutine test_factorial_1
 
 end module testmod_fixturedsuite_skipped
 

@@ -9,7 +9,7 @@ module testmod_mpi_simple
     procedure(test_divnfailure), nopass, pointer :: testproc
     integer :: div, rem
   contains
-    procedure :: run => div_n_failure_run
+    procedure :: run
   end type
 
 contains
@@ -21,8 +21,8 @@ contains
     testsuite = suite("mpi_simple", [&
         & test("broadcast", test_broadcast),&
         & test("allreduce", test_allreduce),&
-        & test("procs-lt-4", test_procs_lt_4),&
-        & test("procs-ge-4", test_procs_ge_4)&
+        & test("procs_lt_4", test_procs_lt_4),&
+        & test("procs_ge_4", test_procs_ge_4)&
         & ])
     call testsuite%add_test(&
         & div_n_failure("divnfailure(3, 0)", test_divnfailure, div=3, rem=0))
@@ -55,7 +55,7 @@ contains
 
 
   subroutine test_allreduce(ctx)
-    class(context),intent(inout) :: ctx
+    class(context), intent(inout) :: ctx
 
     integer :: send, recv, expected
 
@@ -92,27 +92,27 @@ contains
   end subroutine test_procs_ge_4
 
 
-  subroutine test_divnfailure(ctx, mycase)
+  subroutine test_divnfailure(ctx, mytest)
     class(context), intent(inout) :: ctx
-    class(div_n_failure), intent(in) :: mycase
+    class(div_n_failure), intent(in) :: mytest
 
     character(100) :: msg
 
-    if (mod(ctx%mpi%rank, mycase%div) == mycase%rem) then
+    if (mod(ctx%mpi%rank, mytest%div) == mytest%rem) then
       write(msg, "(a, i0)") "This has failed on purpose on rank ", ctx%mpi%rank
       call ctx%check(.false., msg=trim(msg))
     else
       call ctx%check(.true.)
     end if
 
-    if (mod(ctx%mpi%rank - 1, mycase%div) == mycase%rem) then
+    if (mod(ctx%mpi%rank - 1, mytest%div) == mytest%rem) then
       write(msg, "(a, i0)") "This has failed on purpose (2nd time) on rank ", ctx%mpi%rank
       call ctx%check(.false., msg=trim(msg))
     else
       call ctx%check(.true.)
     end if
 
-    if (mod(ctx%mpi%rank - 2, mycase%div) == mycase%rem) then
+    if (mod(ctx%mpi%rank - 2, mytest%div) == mytest%rem) then
       write(msg, "(a, i0)") "This has failed on purpose (3rd time) on rank ", ctx%mpi%rank
       call ctx%check(.false., msg=trim(msg))
     else
@@ -122,13 +122,13 @@ contains
   end subroutine test_divnfailure
 
 
-  subroutine div_n_failure_run(this, ctx)
+  subroutine run(this, ctx)
     class(div_n_failure), intent(inout) :: this
     class(context), intent(inout) :: ctx
 
     call this%testproc(ctx, this)
 
-  end subroutine div_n_failure_run
+  end subroutine run
 
 end module testmod_mpi_simple
 

@@ -80,7 +80,7 @@ contains
     class(context), intent(inout) :: ctx
 
     call ctx%check(is_equal(size(drvres%suiteresults), 1))
-    call ctx%check(is_equal(size(drvres%caseresults), 4), file="test_simple.f90", line=102, &
+    call ctx%check(is_equal(size(drvres%testresults), 4), file="test_simple.f90", line=102, &
         & msg="This has intentionally so much info.")
 
   end subroutine test_nr_of_entries
@@ -89,8 +89,8 @@ contains
   subroutine test_results(ctx)
     class(context), intent(inout) :: ctx
 
-    !call ctx%check(all(drvres%caseresults(:)%success .eqv. [.true., .true., .true., .false.]))
-    call ctx%check(all(drvres%caseresults(:)%status == [teststatus%ok, teststatus%ok]))
+    ! Note: only 2 of the 4 tests are selected in set_up_module()
+    call ctx%check(all(drvres%testresults(:)%status == [teststatus%ok, teststatus%ok]))
 
   end subroutine test_results
 
