@@ -181,56 +181,97 @@ contains
     type(test_name), optional, intent(in) :: testnames(:)
 
     logical :: usetestnames
-    integer :: itest, isuite, iglobaltest, nglobaltests
 
-    nglobaltests = 0
     usetestnames = .false.
-    if (present(testnames)) then
-      nglobaltests = size(testnames)
-      usetestnames = nglobaltests > 0
-    end if
-    if (nglobaltests == 0) then
-      do isuite = 1, size(testsuites)
-        nglobaltests = nglobaltests + size(testsuites(isuite)%instance%tests)
-      end do
-    end if
-
-    allocate(testindices(2, nglobaltests))
+    if (present(testnames)) usetestnames = size(testnames) > 0
 
     if (usetestnames) then
-      do iglobaltest = 1, nglobaltests
-        do isuite = 1, size(testsuites)
-          if (testsuites(isuite)%instance%name == testnames(iglobaltest)%suitename) exit
-        end do
-        if (isuite > size(testsuites)) then
-          error stop "Test suite '" // testnames(iglobaltest)%suitename // "' not found"
-        end if
-
-        do itest = 1, size(testsuites(isuite)%instance%tests)
-          if (testsuites(isuite)%instance%tests(itest)%instance%name&
-              & == testnames(iglobaltest)%testname) exit
-        end do
-        if (itest > size(testsuites(isuite)%instance%tests)) then
-          error stop "Test '" // testnames(iglobaltest)%suitename // "/" &
-              & // testnames(iglobaltest)%testname // "' not found"
-        end if
-        testindices(:, iglobaltest) = [isuite, itest]
-      end do
+      call get_test_indices_by_name_(testsuites, testnames, testindices)
     else
-      iglobaltest = 0
-      do isuite = 1, size(testsuites)
-        associate(testsuite => testsuites(isuite)%instance)
-          do itest = 1, size(testsuite%tests)
-            associate(test => testsuite%tests(itest)%instance)
-              iglobaltest = iglobaltest + 1
-              testindices(:, iglobaltest) = [isuite, itest]
-            end associate
-          end do
-        end associate
-      end do
+      call get_all_test_indices_(testsuites, testindices)
     end if
 
   end subroutine get_test_indices_
+
+
+  subroutine get_test_indices_by_name_(testsuites, testnames, testindices)
+    type(suite_base_cls), intent(in) :: testsuites(:)
+    type(test_name), intent(in) :: testnames(:)
+    integer, allocatable, intent(out) :: testindices(:,:)
+
+    integer, allocatable :: testindbuffer(:,:)
+    logical, allocatable :: included(:,:)
+    integer :: testspersuite, maxtestspersuite, nglobaltests, maxglobaltests
+    integer :: isuite, itest, iname
+
+    maxtestspersuite = 0
+    maxglobaltests = 0
+    do isuite = 1, size(testsuites)
+      testspersuite = size(testsuites(isuite)%instance%tests)
+      maxglobaltests = maxglobaltests + testspersuite
+      maxtestspersuite = max(maxtestspersuite, testspersuite)
+    end do
+
+    allocate(included(maxtestspersuite, size(testsuites)), source=.false.)
+    allocate(testindbuffer(2, maxglobaltests))
+    nglobaltests = 0
+    do iname = 1, size(testnames)
+      associate (suitename => testnames(iname)%suitename, testname => testnames(iname)%testname)
+        do isuite = 1, size(testsuites)
+          if (testsuites(isuite)%instance%name == suitename) exit
+        end do
+        if (isuite > size(testsuites)) error stop "Test suite '" // suitename // "' not found"
+        if (len(testname) == 0) then
+          do itest = 1, size(testsuites(isuite)%instance%tests)
+            if (included(itest, isuite)) cycle
+            included(itest, isuite) = .true.
+            nglobaltests = nglobaltests + 1
+            testindbuffer(:, nglobaltests) = [isuite, itest]
+          end do
+        else
+          do itest = 1, size(testsuites(isuite)%instance%tests)
+            if (testsuites(isuite)%instance%tests(itest)%instance%name == testname) exit
+          end do
+          if (itest > size(testsuites(isuite)%instance%tests)) then
+            error stop "Test '" // suitename // "/" // testname // "' not found"
+          end if
+          if (included(itest, isuite)) cycle
+          included(itest, isuite) = .true.
+          testindbuffer(:, nglobaltests) = [isuite, itest]
+        end if
+      end associate
+    end do
+    testindices = testindbuffer(:, 1:nglobaltests)
+
+  end subroutine get_test_indices_by_name_
+
+
+  subroutine get_all_test_indices_(testsuites, testindices)
+    type(suite_base_cls), intent(in) :: testsuites(:)
+    integer, allocatable, intent(out) :: testindices(:,:)
+
+    integer :: nglobaltests, iglobaltest
+    integer :: isuite, itest
+
+    nglobaltests = 0
+    do isuite = 1, size(testsuites)
+      nglobaltests = nglobaltests + size(testsuites(isuite)%instance%tests)
+    end do
+
+    allocate(testindices(2, nglobaltests))
+    iglobaltest = 0
+    do isuite = 1, size(testsuites)
+      associate(testsuite => testsuites(isuite)%instance)
+        do itest = 1, size(testsuite%tests)
+          associate(test => testsuite%tests(itest)%instance)
+            iglobaltest = iglobaltest + 1
+            testindices(:, iglobaltest) = [isuite, itest]
+          end associate
+        end do
+      end associate
+    end do
+
+  end subroutine get_all_test_indices_
 
 
   subroutine run_tests_(testsuites, testinds, ctxfact, logger, runner, driverresult)
