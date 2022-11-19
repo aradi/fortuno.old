@@ -11,7 +11,7 @@ project(
 # Set up install directories
 include(GNUInstallDirs)
 set(INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/fortuno")
-set(INSTALL_MODULEDIR "${INSTALL_INCLUDEDIR}/fmod")
+set(INSTALL_MODULEDIR "${INSTALL_INCLUDEDIR}/fortran")
 
 # Include project specific CMake functions
 include(cmake/Fortuno.cmake)

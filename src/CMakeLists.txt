@@ -1,18 +1,11 @@
 # Source files of the serial part of the library
-set(
-    f90-sources
-    fortuno.f90
-)
+set(f90-sources)
 
 # Source files of the MPI-part of the library
-set(
-    mpi-f90-sources
-)
+set(mpi-f90-sources)
 
 # Source files of the coarray-part of the library
-set(
-    coa-f90-sources
-)
+set(coa-f90-sources)
 
 # Collect source files from subdirectories
 add_subdirectory(fortuno)
@@ -36,7 +29,7 @@ if(WITH_COARRAY)
 endif()
 
 # Store generated mod-files in a separate folder
-set(moddir "${CMAKE_CURRENT_BINARY_DIR}/fmod")
+set(moddir "${CMAKE_CURRENT_BINARY_DIR}/modfiles")
 set_target_properties(
     Fortuno
     PROPERTIES Fortran_MODULE_DIRECTORY "${moddir}"

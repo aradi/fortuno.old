@@ -1,42 +1,40 @@
 module testmod_fixturedsuite_random
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, suite => serial_suite, serial_suite_base,&
-      & serial_test_base
+  use fortuno_serial, only : check, fixtured_test, suite_base, test_suite, suite_ptr
   implicit none
 
 
-  type, extends(serial_suite_base) :: random_suite
+  type, extends(test_suite) :: random_suite
     integer :: nn = -1
   contains
-    procedure :: set_up
-    procedure :: get_char_repr
+    procedure :: set_up => random_suite_set_up
+    procedure :: get_char_repr => random_suite_get_char_repr
   end type random_suite
 
 
-  type, extends(serial_test_base) :: random_test
-    procedure(test_recursion_down), nopass, pointer :: testroutine
+  type, extends(fixtured_test) :: random_test
+    type(random_suite), pointer :: suite => null()
   contains
-    procedure :: run
+    procedure :: set_up => random_test_set_up
   end type random_test
 
 contains
 
 
-  function test_suite() result(testsuite)
-    type(random_suite) :: testsuite
+  function fixtured_random_suite() result(suite)
+    type(random_suite) :: suite
 
-    call testsuite%set_name("fixtured_random")
-    call testsuite%add_test([&
+    call suite%set_name("fixtured_random")
+    call suite%add_test([&
         & random_test("recursion_down", test_recursion_down),&
         & random_test("recursion_up", test_recursion_down)&
         & ])
 
-  end function test_suite
+  end function fixtured_random_suite
 
 
-  subroutine set_up(this, ctx)
+  subroutine random_suite_set_up(this)
     class(random_suite), intent(inout) :: this
-    class(context), intent(inout) :: ctx
 
     real :: rand
 
@@ -44,10 +42,10 @@ contains
     call random_number(rand)
     this%nn = int(20.0 * rand) + 1
 
-  end subroutine set_up
+  end subroutine random_suite_set_up
 
 
-  subroutine get_char_repr(this, repr)
+  subroutine random_suite_get_char_repr(this, repr)
     class(random_suite), intent(in) :: this
     character(:), allocatable, intent(out) :: repr
 
@@ -56,40 +54,37 @@ contains
     write(reprstr, "(i0)") this%nn
     repr = trim(reprstr)
 
-  end subroutine get_char_repr
+  end subroutine random_suite_get_char_repr
 
 
-  subroutine run(this, ctx)
+  subroutine random_test_set_up(this)
     class(random_test), intent(inout) :: this
-    class(context), intent(inout) :: ctx
 
-    type(random_suite), pointer :: mysuite
+    class(suite_base), pointer :: genericsuite
 
-    select type (suite => ctx%suite)
+    genericsuite => suite_ptr()
+    select type (genericsuite)
     type is (random_suite)
-      mysuite => suite
+      this%suite => genericsuite
     class default
-      error stop "Expected type random_suite, obtained something else"
+      error stop "Expected random_suite, obtained some other type"
     end select
-    call this%testroutine(ctx, mysuite)
 
-  end subroutine run
+  end subroutine random_test_set_up
 
 
-  subroutine test_recursion_down(ctx, mysuite)
-    class(context), intent(inout) :: ctx
-    class(random_suite), intent(in) :: mysuite
+  subroutine test_recursion_down(this)
+    class(random_test), intent(in) :: this
 
-    call ctx%check(factorial(mysuite%nn + 1) == mysuite%nn * factorial(mysuite%nn - 1))
+    call check(factorial(this%suite%nn + 1) == this%suite%nn * factorial(this%suite%nn - 1))
 
   end subroutine test_recursion_down
 
 
-  subroutine test_recursion_up(ctx, mysuite)
-    class(context), intent(inout) :: ctx
-    class(random_suite), intent(in) :: mysuite
+  subroutine test_recursion_up(this)
+    class(random_test), intent(in) :: this
 
-    call ctx%check(factorial(mysuite%nn + 1) == (mysuite%nn + 1) * factorial(mysuite%nn))
+    call check(factorial(this%suite%nn + 1) == (this%suite%nn + 1) * factorial(this%suite%nn))
 
   end subroutine test_recursion_up
 
@@ -98,12 +93,11 @@ end module testmod_fixturedsuite_random
 
 module testmod_fixturedsuite_failing
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, suite => serial_suite, serial_suite_base,&
-      & test => serial_test
+  use fortuno_serial, only : check, test_suite, test
   implicit none
 
 
-  type, extends(serial_suite_base) :: failing_suite
+  type, extends(test_suite) :: failing_suite
     integer :: myval = -1
   contains
     procedure :: set_up
@@ -112,31 +106,29 @@ module testmod_fixturedsuite_failing
 contains
 
 
-  function test_suite() result(testsuite)
-    type(failing_suite) :: testsuite
+  function fixtured_failing_suite() result(suite)
+    type(failing_suite) :: suite
 
-    call testsuite%set_name("fixtured_failing")
-    call testsuite%add_test([&
+    call suite%set_name("fixtured_failing")
+    call suite%add_test([&
         & test("factorial_1", test_factorial_1)&
         & ])
 
-  end function test_suite
+  end function fixtured_failing_suite
 
 
-  subroutine set_up(this, ctx)
+  subroutine set_up(this)
     class(failing_suite), intent(inout) :: this
-    class(context), intent(inout) :: ctx
 
-    call ctx%check(this%myval == 42, msg="Failing on purpose")  ! this will fail
+    call check(this%myval == 42, msg="Failing on purpose")  ! this will fail
 
   end subroutine set_up
 
 
-  subroutine test_factorial_1(ctx)
-    class(context), intent(inout) :: ctx
+  subroutine test_factorial_1()
 
     ! This will be never checked, as suite setup failed
-    call ctx%check(factorial(1) == 1)
+    call check(factorial(1) == 1)
 
   end subroutine test_factorial_1
 
@@ -145,12 +137,11 @@ end module testmod_fixturedsuite_failing
 
 module testmod_fixturedsuite_skipped
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, suite => serial_suite, serial_suite_base,&
-      & test => serial_test
+  use fortuno_serial, only : check, test_suite, test, skip
   implicit none
 
 
-  type, extends(serial_suite_base) :: skipped_suite
+  type, extends(test_suite) :: skipped_suite
     integer :: myval = -1
   contains
     procedure :: set_up
@@ -159,31 +150,29 @@ module testmod_fixturedsuite_skipped
 contains
 
 
-  function test_suite() result(testsuite)
-    type(skipped_suite) :: testsuite
+  function fixtured_skipped_suite() result(suite)
+    type(skipped_suite) :: suite
 
-    call testsuite%set_name("fixtured_skipped")
-    call testsuite%add_test([&
+    call suite%set_name("fixtured_skipped")
+    call suite%add_test([&
         & test("factorial_1", test_factorial_1)&
         & ])
 
-  end function test_suite
+  end function fixtured_skipped_suite
 
 
-  subroutine set_up(this, ctx)
+  subroutine set_up(this)
     class(skipped_suite), intent(inout) :: this
-    class(context), intent(inout) :: ctx
 
-    call ctx%skip()
+    call skip()
 
   end subroutine set_up
 
 
-  subroutine test_factorial_1(ctx)
-    class(context), intent(inout) :: ctx
+  subroutine test_factorial_1()
 
     ! Will be never executed, as suite set_up had been skipped
-    call ctx%check(factorial(1) == 1)
+    call check(factorial(1) == 1)
 
   end subroutine test_factorial_1
 
@@ -191,18 +180,18 @@ end module testmod_fixturedsuite_skipped
 
 
 program testapp_fixturedsuite
-  use fortuno, only : serial_app
-  use testmod_fixturedsuite_random, only : test_suite1 => test_suite
-  use testmod_fixturedsuite_failing, only : test_suite2 => test_suite
-  use testmod_fixturedsuite_skipped, only : test_suite3 => test_suite
+  use fortuno_serial, only : test_app
+  use testmod_fixturedsuite_random, only : fixtured_random_suite
+  use testmod_fixturedsuite_failing, only : fixtured_failing_suite
+  use testmod_fixturedsuite_skipped, only : fixtured_skipped_suite
   implicit none
 
-  type(serial_app), allocatable :: app
+  type(test_app), allocatable :: app
 
-  app = serial_app()
-  call app%add_suite(test_suite1())
-  call app%add_suite(test_suite2())
-  call app%add_suite(test_suite3())
+  app = test_app()
+  call app%add_suite(fixtured_random_suite())
+  call app%add_suite(fixtured_failing_suite())
+  call app%add_suite(fixtured_skipped_suite())
   call app%run()
 
 end program testapp_fixturedsuite

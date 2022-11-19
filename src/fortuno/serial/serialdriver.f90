@@ -3,6 +3,7 @@ module fortuno_serial_serialdriver
   use fortuno_basetypes, only : suite_base, context_base, test_base
   use fortuno_contextfactory, only : context_factory
   use fortuno_genericdriver, only : generic_driver, test_runner
+  use fortuno_serial_serialgctx, only : set_global_context, restore_global_context
   use fortuno_serial_serialcontext, only : serial_context
   use fortuno_serial_seriallogger, only : serial_logger
   use fortuno_serial_serialsuite, only : serial_suite_base
@@ -41,6 +42,7 @@ module fortuno_serial_serialdriver
   contains
     procedure :: create_context
   end type serial_context_factory
+
 
 contains
 
@@ -98,7 +100,7 @@ contains
     class(context_base), allocatable, intent(out) :: ctx
 
     allocate(serial_context :: ctx)
-    ctx%suite=> testsuite
+    ctx%suite => testsuite
 
   end subroutine create_context
 
@@ -108,7 +110,7 @@ contains
     class(suite_base), pointer, intent(in) :: testsuite
     class(context_base), pointer, intent(in) :: ctx
 
-    class(serial_context), pointer :: myctx
+    class(serial_context), pointer :: myctx, oldctx
     class(serial_suite_base), pointer :: mysuite
 
     select type(ctx)
@@ -125,7 +127,9 @@ contains
       error stop "Internal error, expected serial_context, obtained something else"
     end select
 
-    call mysuite%set_up(myctx)
+    call set_global_context(myctx, oldctx)
+    call mysuite%set_up()
+    call restore_global_context(oldctx)
 
   end subroutine set_up_suite
 
@@ -135,7 +139,7 @@ contains
     class(suite_base), pointer, intent(in) :: testsuite
     class(context_base), pointer, intent(in) :: ctx
 
-    class(serial_context), pointer :: myctx
+    class(serial_context), pointer :: myctx, oldctx
     class(serial_suite_base), pointer :: mysuite
 
     select type(ctx)
@@ -152,7 +156,9 @@ contains
       error stop "Internal error, expected serial_suite_base, obtained something else"
     end select
 
-    call mysuite%tear_down(myctx)
+    call set_global_context(myctx, oldctx)
+    call mysuite%tear_down()
+    call restore_global_context(oldctx)
 
   end subroutine tear_down_suite
 
@@ -162,7 +168,7 @@ contains
     class(test_base), pointer, intent(in) :: test
     class(context_base), pointer, intent(in) :: ctx
 
-    class(serial_context), pointer :: myctx
+    class(serial_context), pointer :: myctx, oldctx
     class(serial_test_base), pointer :: mytest
 
     select type(ctx)
@@ -176,10 +182,12 @@ contains
     class is (serial_test_base)
       mytest => test
     class default
-      error stop "Internal error, expected serial_context, obtained something else"
+      error stop "Internal error, expected serial_test_base, obtained something else"
     end select
 
-    call mytest%run(myctx)
+    call set_global_context(myctx, oldctx)
+    call mytest%run()
+    call restore_global_context(oldctx)
 
   end subroutine run_test
 

@@ -1,73 +1,62 @@
 module testmod_simple
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, suite => serial_suite, test => serial_test
+  use fortuno_serial, only : test_suite, test, check, check_failed, skip
   implicit none
 
 contains
 
 
-  function test_suite() result(testsuite)
-    type(suite) :: testsuite
+  function simple_suite() result(suite)
+    type(test_suite) :: suite
 
-    testsuite = suite("simple", [&
+    suite = test_suite("simple", [&
         & test("factorial_0", test_factorial_0),&
         & test("factorial_1", test_factorial_1),&
         & test("factorial_2_3", test_factorial_2_3),&
         & test("factorial_4_5", test_factorial_4_5)&
         & ])
 
-  end function test_suite
+  end function simple_suite
 
-
-  subroutine test_factorial_0(ctx)
-    class(context), intent(inout) :: ctx
-
-    call ctx%check(factorial(0) == 1)
-
+  ! Test: 0! = 1
+  subroutine test_factorial_0()
+    call check(factorial(0) == 1)
   end subroutine test_factorial_0
 
-
-  subroutine test_factorial_1(ctx)
-    class(context), intent(inout) :: ctx
-
-    call ctx%check(factorial(1) == 1)
-
+  ! Test: 1! = 1
+  subroutine test_factorial_1()
+    call check(factorial(1) == 1)
   end subroutine test_factorial_1
 
-
-  subroutine test_factorial_2_3(ctx)
-    class(context), intent(inout) :: ctx
-
-    ! Skip test
-    call ctx%skip()
-    ! Probably you should return from the test at this point. No details about any checks beyond
-    ! this point will be recorded.
-    call ctx%check(factorial(2) == 1) ! Despite failing check, test will remain 'skipped'
-    call ctx%check(factorial(3) == 6)
-
+  ! When: skip() is called as first context control command
+  ! Then: subsequent failing and succesful checks do not change skipped status
+  subroutine test_factorial_2_3()
+    call skip()
+    ! Probably you should return from the test at this point.
+    ! No details about any checks beyond this point will be recorded, test will remain 'skipped'
+    call check(factorial(2) == 1)
+    call check(factorial(3) == 6)
   end subroutine test_factorial_2_3
 
-
-  subroutine test_factorial_4_5(ctx)
-    class(context), intent(inout) :: ctx
-
-    call ctx%check(factorial(4) == 24)
-    if (ctx%check_failed()) return  ! Abort this test if last check failed
-    call ctx%check(factorial(5) == 120)
-
+  ! When: check_failed() is called after successful check
+  ! Then: it returns true
+  subroutine test_factorial_4_5()
+    call check(factorial(4) == 24)
+    if (check_failed()) return  ! Abort this test if last check failed
+    call check(factorial(5) == 120)
   end subroutine test_factorial_4_5
 
 end module testmod_simple
 
 
 program testapp_simple
-  use fortuno, only : serial_app
-  use testmod_simple, only : test_suite
+  use fortuno_serial, only : test_app
+  use testmod_simple, only : simple_suite
   implicit none
 
-  type(serial_app), allocatable :: app
+  type(test_app), allocatable :: app
 
-  app = serial_app([test_suite()])
+  app = test_app([simple_suite()])
   call app%run()
 
 end program testapp_simple

@@ -1,6 +1,5 @@
 module fortuno_serial_serialsuite
   use fortuno_basetypes, only : init_suite_base, suite_base
-  use fortuno_serial_serialcontext, only : serial_context
   use fortuno_serial_serialtest, only : serial_test_base
   implicit none
 
@@ -26,16 +25,14 @@ module fortuno_serial_serialsuite
 contains
 
 
-  subroutine serial_suite_base_set_up(this, ctx)
+  subroutine serial_suite_base_set_up(this)
     class(serial_suite_base), intent(inout) :: this
-    class(serial_context), intent(inout) :: ctx
 
   end subroutine serial_suite_base_set_up
 
 
-  subroutine serial_suite_base_tear_down(this, ctx)
+  subroutine serial_suite_base_tear_down(this)
     class(serial_suite_base), intent(inout) :: this
-    class(serial_context), intent(inout) :: ctx
 
   end subroutine serial_suite_base_tear_down
 

@@ -1,12 +1,8 @@
 module fortuno_coarray
-  use fortuno_coarray_coaapp, only : coa_app
-  use fortuno_coarray_coacontext, only : coa_context
-  use fortuno_coarray_coadriver, only : coa_driver
-  use fortuno_coarray_coasuite, only : coa_suite, coa_suite_base
-  use fortuno_coarray_coatest, only : coa_test, coa_test_base
+  use fortuno_common, only : context_base, test_base, suite_base, init_suite_base, teststatus,&
+      & is_equal, test_name, test_error, driver_result, get_version
+  use fortuno_coa_simplified, only : check, check_failed, failed, globalctx, skip, suite_ptr, test,&
+      & fixtured_test, test_suite, test_driver, test_app
   implicit none
-
-  private
-  public :: coa_app, coa_context, coa_driver, coa_suite, coa_suite_base, coa_test, coa_test_base
 
 end module fortuno_coarray

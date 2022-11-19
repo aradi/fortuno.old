@@ -1,12 +1,9 @@
 module fortuno_mpi
-  use fortuno_mpi_mpiapp, only : mpi_app
-  use fortuno_mpi_mpicontext, only : mpi_context
-  use fortuno_mpi_mpidriver, only : mpi_driver
-  use fortuno_mpi_mpisuite, only : mpi_suite, mpi_suite_base
-  use fortuno_mpi_mpitest, only : mpi_test, mpi_test_base
+  use fortuno_common, only : context_base, test_base, suite_base, init_suite_base, teststatus,&
+      & is_equal, test_name, test_error, driver_result, get_version
+  use fortuno_mpi_simplified, only : check, check_failed, comm_handle_f, comm_handle_f08, &
+      & comm_rank, comm_size, failed, globalctx, skip, suite_ptr, test, fixtured_test, test_suite,&
+      & test_driver, test_app
   implicit none
-
-  private
-  public :: mpi_app, mpi_context, mpi_driver, mpi_suite, mpi_suite_base, mpi_test, mpi_test_base
 
 end module fortuno_mpi

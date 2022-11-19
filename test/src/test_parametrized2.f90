@@ -1,6 +1,6 @@
 module testmod_parametrized2
   use mylib, only : factorial
-  use fortuno, only : context => serial_context, suite => serial_suite, serial_test_base
+  use fortuno_serial, only : check, test_suite, fixtured_test
   implicit none
 
 
@@ -13,59 +13,46 @@ module testmod_parametrized2
       & ]
 
 
-  type, extends(serial_test_base) :: factcalc_test
+  type, extends(fixtured_test) :: factcalc_test
     type(calc) :: factcalc
-  contains
-    procedure :: run
-    procedure :: test_fact_calc
   end type factcalc_test
 
 contains
 
 
-  function test_suite() result(testsuite)
-    type(suite) :: testsuite
+  function param2_suite() result(suite)
+    type(test_suite) :: suite
 
     integer :: icalc
     character(200) :: name
 
-    testsuite = suite("param2")
+    suite = test_suite("param2")
     do icalc = 1, size(factcalcs)
       write(name, "(a, i0)") "factorial_", factcalcs(icalc)%arg
-      call testsuite%add_test(factcalc_test(trim(name), factcalc=factcalcs(icalc)))
+      call suite%add_test(factcalc_test(trim(name), test_fact_calc, factcalcs(icalc)))
     end do
 
-  end function test_suite
+  end function param2_suite
 
 
-  subroutine test_fact_calc(this, ctx)
+  subroutine test_fact_calc(this)
     class(factcalc_test), intent(in) :: this
-    class(context), intent(inout) :: ctx
 
-    call ctx%check(factorial(this%factcalc%arg) == this%factcalc%res)
+    call check(factorial(this%factcalc%arg) == this%factcalc%res)
 
   end subroutine test_fact_calc
-
-
-  subroutine run(this, ctx)
-    class(factcalc_test), intent(inout) :: this
-    class(context), intent(inout) :: ctx
-
-    call this%test_fact_calc(ctx)
-
-  end subroutine run
 
 end module testmod_parametrized2
 
 
 program testapp_parametrized2
-  use fortuno, only : serial_app
-  use testmod_parametrized2, only : test_suite
+  use fortuno_serial, only : test_app
+  use testmod_parametrized2, only : param2_suite
   implicit none
 
-  type(serial_app), allocatable :: app
+  type(test_app), allocatable :: app
 
-  app = serial_app([test_suite()])
+  app = test_app([param2_suite()])
   call app%run()
 
 end program testapp_parametrized2

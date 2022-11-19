@@ -1,10 +1,9 @@
 module fortuno_serial_serialtest
   use fortuno_basetypes, only : test_base
-  use fortuno_serial_serialcontext, only : serial_context
   implicit none
 
   private
-  public :: serial_test_base, serial_test
+  public :: serial_test_base, serial_test, serial_fixtured_test
 
 
   type, extends(test_base), abstract :: serial_test_base
@@ -14,10 +13,10 @@ module fortuno_serial_serialtest
 
 
   abstract interface
-    subroutine serial_test_base_run_i(this, ctx)
-      import :: serial_test_base, serial_context
+    subroutine serial_test_base_run_i(this)
+      import :: serial_test_base
+      implicit none
       class(serial_test_base), intent(inout) :: this
-      class(serial_context), intent(inout) :: ctx
     end subroutine serial_test_base_run_i
   end interface
 
@@ -25,26 +24,64 @@ module fortuno_serial_serialtest
   type, extends(serial_test_base) :: serial_test
     procedure(serial_test_testroutine_i), nopass, pointer :: testroutine
   contains
-    procedure :: run
+    procedure :: run => serial_test_run
   end type serial_test
 
 
   abstract interface
-    subroutine serial_test_testroutine_i(ctx)
-      import :: serial_context
-      class(serial_context), intent(inout) :: ctx
+    subroutine serial_test_testroutine_i()
     end subroutine serial_test_testroutine_i
   end interface
+
+
+  type, extends(serial_test_base) :: serial_fixtured_test
+    procedure(serial_fixtured_test_testroutine_i), pointer :: testroutine
+  contains
+    procedure :: run => serial_fixtured_test_run
+    procedure :: set_up => serial_fixtured_test_set_up
+    procedure :: tear_down => serial_fixtured_test_tear_down
+  end type serial_fixtured_test
+
+
+  abstract interface
+    subroutine serial_fixtured_test_testroutine_i(this)
+      import :: serial_fixtured_test
+      implicit none
+      class(serial_fixtured_test), intent(in) :: this
+    end subroutine serial_fixtured_test_testroutine_i
+  end interface
+
 
 contains
 
 
-  subroutine run(this, ctx)
+  subroutine serial_test_run(this)
     class(serial_test), intent(inout) :: this
-    class(serial_context), intent(inout) :: ctx
 
-    call this%testroutine(ctx)
+    call this%testroutine()
 
-  end subroutine run
+  end subroutine serial_test_run
+
+
+  subroutine serial_fixtured_test_run(this)
+    class(serial_fixtured_test), intent(inout) :: this
+
+    call this%set_up()
+    call this%testroutine()
+    call this%tear_down()
+
+  end subroutine serial_fixtured_test_run
+
+
+  subroutine serial_fixtured_test_set_up(this)
+    class(serial_fixtured_test), intent(inout) :: this
+
+  end subroutine serial_fixtured_test_set_up
+
+
+  subroutine serial_fixtured_test_tear_down(this)
+    class(serial_fixtured_test), intent(inout) :: this
+
+  end subroutine serial_fixtured_test_tear_down
 
 end module fortuno_serial_serialtest

@@ -1,6 +1,5 @@
 module fortuno_coarray_coasuite
     use fortuno_basetypes, only : suite_base, init_suite_base
-    use fortuno_coarray_coacontext, only : coa_context
     use fortuno_coarray_coatest, only : coa_test_base
     implicit none
 
@@ -26,17 +25,13 @@ module fortuno_coarray_coasuite
   contains
 
 
-    subroutine coa_suite_base_set_up(this, ctx)
+    subroutine coa_suite_base_set_up(this)
       class(coa_suite_base), intent(inout) :: this
-      class(coa_context), intent(inout) :: ctx
-
     end subroutine coa_suite_base_set_up
 
 
-    subroutine coa_suite_base_tear_down(this, ctx)
+    subroutine coa_suite_base_tear_down(this)
       class(coa_suite_base), intent(inout) :: this
-      class(coa_context), intent(inout) :: ctx
-
     end subroutine coa_suite_base_tear_down
 
 

@@ -1,78 +1,75 @@
 module testmod_mpi_simple
   use mpi_f08, only : MPI_Allreduce, MPI_Bcast, MPI_INTEGER, MPI_SUM
-  use fortuno_mpi, only : context => mpi_context, suite => mpi_suite, test => mpi_test,&
-      & mpi_test_base
+  use fortuno_mpi, only : comm_handle_f08, comm_rank, comm_size, check, fixtured_test, skip, test,&
+      & test_suite
   implicit none
 
 
-  type, extends(mpi_test_base) :: div_n_failure
-    procedure(test_divnfailure), nopass, pointer :: testproc
+  type, extends(fixtured_test) :: div_n_failure
     integer :: div, rem
-  contains
-    procedure :: run
   end type
 
 contains
 
 
-  function test_suite() result(testsuite)
-    type(suite) :: testsuite
+  function mpi_simple_suite() result(suite)
+    type(test_suite) :: suite
 
-    testsuite = suite("mpi_simple", [&
+    suite = test_suite("mpi_simple", [&
         & test("broadcast", test_broadcast),&
         & test("allreduce", test_allreduce),&
         & test("procs_lt_4", test_procs_lt_4),&
         & test("procs_ge_4", test_procs_ge_4)&
         & ])
-    call testsuite%add_test(&
-        & div_n_failure("divnfailure(3, 0)", test_divnfailure, div=3, rem=0))
+    call suite%add_test(&
+        & div_n_failure("divnfailure_3_0", test_divnfailure, div=3, rem=0))
 
-  end function test_suite
+  end function mpi_simple_suite
 
 
-  subroutine test_broadcast(ctx)
-    class(context), intent(inout) :: ctx
+  ! Given: rank 0 contains a different integer value as all other ranks
+  ! When: rank 0 broadcasts its value
+  ! Then: all ranks contain rank 0's value
+  subroutine test_broadcast()
 
+    integer, parameter :: value_rank0 = 1, value_otherranks = -1
     integer :: buffer
 
-    if (ctx%mpi%rank == 0) then
-      buffer = 42
+    if (comm_rank() == 0) then
+      buffer = value_rank0
     else
-      buffer = -1
+      buffer = value_otherranks
     end if
 
-    if (ctx%mpi%rank == 0) then
-      call ctx%check(buffer == 42)
-    else
-      call ctx%check(buffer == -1)
-    end if
-    if (ctx%failed()) return
+    call MPI_Bcast(buffer, 1, MPI_INTEGER, 0, comm_handle_f08())
 
-    call MPI_Bcast(buffer, 1, MPI_INTEGER, 0, ctx%mpi%comm)
-    call ctx%check(buffer == 42)
+    call check(buffer == value_rank0)
 
   end subroutine test_broadcast
 
 
-  subroutine test_allreduce(ctx)
-    class(context), intent(inout) :: ctx
+  ! Given: all ranks contain an integer with value (rank + 1)
+  ! When: allreduce() is invoked with summation
+  ! Then: all ranks contain the sum N * (N + 1) / 2, where N = nr. of processes.
+  subroutine test_allreduce()
 
     integer :: send, recv, expected
 
-    send = ctx%mpi%rank + 1
-    call MPI_Allreduce(send, recv, 1, MPI_INTEGER, MPI_SUM, ctx%mpi%comm)
-    call ctx%check(send == ctx%mpi%rank + 1)
-    expected = ctx%mpi%commsize * (ctx%mpi%commsize + 1) / 2
-    call ctx%check(recv == expected)
+    send = comm_rank() + 1
+
+    call MPI_Allreduce(send, recv, 1, MPI_INTEGER, MPI_SUM, comm_handle_f08())
+
+    expected = comm_size() * (comm_size() + 1) / 2
+    call check(recv == expected)
 
   end subroutine test_allreduce
 
 
-  subroutine test_procs_lt_4(ctx)
-    class(context), intent(inout) :: ctx
+  ! Empty test executed only when nr. of processes < 4.
+  subroutine test_procs_lt_4()
 
-    if (ctx%mpi%commsize >= 4) then
-      call ctx%skip()
+    if (comm_size() >= 4) then
+      call skip()
       return
     end if
     ! Here you can put tests, which work only up to 3 processes
@@ -80,11 +77,11 @@ contains
   end subroutine test_procs_lt_4
 
 
-  subroutine test_procs_ge_4(ctx)
-    class(context), intent(inout) :: ctx
+  ! Empty test executed only when nr. of processes >= 4.
+  subroutine test_procs_ge_4()
 
-    if (ctx%mpi%commsize < 4) then
-      call ctx%skip()
+    if (comm_size() < 4) then
+      call skip()
       return
     end if
     ! Here you can put tests, which work only for 4 processes or more
@@ -92,55 +89,47 @@ contains
   end subroutine test_procs_ge_4
 
 
-  subroutine test_divnfailure(ctx, mytest)
-    class(context), intent(inout) :: ctx
-    class(div_n_failure), intent(in) :: mytest
+  ! When: rank, rank -1 or rank - 2 divided by `div` have a remainder of `rem`
+  ! Then: fail with customized error message
+  subroutine test_divnfailure(this)
+    class(div_n_failure), intent(in) :: this
 
     character(100) :: msg
 
-    if (mod(ctx%mpi%rank, mytest%div) == mytest%rem) then
-      write(msg, "(a, i0)") "This has failed on purpose on rank ", ctx%mpi%rank
-      call ctx%check(.false., msg=trim(msg))
+    if (mod(comm_rank(), this%div) == this%rem) then
+      write(msg, "(a, i0)") "This has failed on purpose on rank ", comm_rank()
+      call check(.false., msg=trim(msg))
     else
-      call ctx%check(.true.)
+      call check(.true.)
     end if
 
-    if (mod(ctx%mpi%rank - 1, mytest%div) == mytest%rem) then
-      write(msg, "(a, i0)") "This has failed on purpose (2nd time) on rank ", ctx%mpi%rank
-      call ctx%check(.false., msg=trim(msg))
+    if (mod(comm_rank() - 1, this%div) == this%rem) then
+      write(msg, "(a, i0)") "This has failed on purpose (2nd time) on rank ", comm_rank()
+      call check(.false., msg=trim(msg))
     else
-      call ctx%check(.true.)
+      call check(.true.)
     end if
 
-    if (mod(ctx%mpi%rank - 2, mytest%div) == mytest%rem) then
-      write(msg, "(a, i0)") "This has failed on purpose (3rd time) on rank ", ctx%mpi%rank
-      call ctx%check(.false., msg=trim(msg))
+    if (mod(comm_rank() - 2, this%div) == this%rem) then
+      write(msg, "(a, i0)") "This has failed on purpose (3rd time) on rank ", comm_rank()
+      call check(.false., msg=trim(msg))
     else
-      call ctx%check(.true.)
+      call check(.true.)
     end if
 
   end subroutine test_divnfailure
-
-
-  subroutine run(this, ctx)
-    class(div_n_failure), intent(inout) :: this
-    class(context), intent(inout) :: ctx
-
-    call this%testproc(ctx, this)
-
-  end subroutine run
 
 end module testmod_mpi_simple
 
 
 program testapp_mpi_simple
-  use fortuno_mpi, only : mpi_app
-  use testmod_mpi_simple, only : test_suite
+  use fortuno_mpi, only : test_app
+  use testmod_mpi_simple, only : mpi_simple_suite
   implicit none
 
-  type(mpi_app), allocatable :: app
+  type(test_app), allocatable :: app
 
-  app = mpi_app([test_suite()])
+  app = test_app([mpi_simple_suite()])
   call app%run()
 
 end program testapp_mpi_simple

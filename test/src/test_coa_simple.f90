@@ -1,90 +1,76 @@
 module testmod_coa_simple
   use mylib, only : factorial
-  use fortuno, only : is_equal, suite_base
-  use fortuno_coarray, only : context => coa_context, suite => coa_suite, test => coa_test,&
-      & coa_test_base
+  use fortuno_coarray, only : check, fixtured_test, is_equal, skip, test, test_suite
   implicit none
 
 
-  type, extends(coa_test_base) :: div_n_failure
-    procedure(test_divnfailure), nopass, pointer :: testproc
+  type, extends(fixtured_test) :: div_n_failure
     integer :: divisor, remainder
-  contains
-    procedure :: run
   end type
 
 contains
 
 
-  function test_suite() result(testsuite)
-    type(suite) :: testsuite
+  function coa_simple_suite() result(suite)
+    type(test_suite) :: suite
 
-    testsuite = suite("coa_simple", [&
+    suite = test_suite("coa_simple", [&
         & test("broadcast", test_broadcast),&
         & test("allreduce", test_allreduce),&
         & test("imgs_lt_4", test_imgs_lt_4),&
         & test("imgs_ge_4", test_imgs_ge_4)&
         & ])
-    call testsuite%add_test(&
-        & div_n_failure("divnfailure(3, 0)", test_divnfailure, divisor=3, remainder=0))
+    call suite%add_test(&
+        & div_n_failure("divnfailure_3_0", test_divnfailure, divisor=3, remainder=0))
 
-  end function test_suite
+  end function coa_simple_suite
 
 
-  subroutine test_broadcast(ctx)
-    class(context), intent(inout) :: ctx
+  ! Given: image 1 contains a different integer value as all other images
+  ! When: image 1 broadcasts its value
+  ! Then: all images contain image 1's value
+  subroutine test_broadcast()
 
+    integer, parameter :: value_img1 = 1, value_otherimgs = -1
     integer, allocatable :: buffer[:]
 
     allocate(buffer[*])
     if (this_image() == 1) then
-      buffer = 42
+      buffer = value_img1
     else
-      buffer = -1
+      buffer = value_otherimgs
     end if
-
-    if (this_image() == 1) then
-      call ctx%check(buffer == 42)
-    else
-      call ctx%check(buffer == -1)
-    end if
-    if (ctx%failed()) return
 
     buffer = buffer[1]
-    call ctx%check(buffer == 42)
+
+    call check(buffer == value_img1)
 
   end subroutine test_broadcast
 
 
-  subroutine test_allreduce(ctx)
-    class(context), intent(inout) :: ctx
+  ! Given: all images contain an integer with their image number as value
+  ! When: all reduction is invoked with summation (hand coded here)
+  ! Then: all images contain the sum N * (N + 1) / 2, where N = nr. of images
+  subroutine test_allreduce()
 
     integer, allocatable :: buffer[:]
-    integer :: iimg, expected
+    integer :: expected
 
-    allocate(buffer[*])
-    buffer = this_image()
-    sync all
+    allocate(buffer[*], source=this_image())
 
-    if (this_image() == 1) then
-      do iimg = 2, num_images()
-        buffer= buffer + buffer[iimg]
-      end do
-    end if
-    sync all
+    call coa_all_reduce(buffer)
 
-    buffer = buffer[1]
     expected = num_images() * (num_images() + 1) / 2
-    call ctx%check(buffer == expected)
+    call check(buffer == expected)
 
   end subroutine test_allreduce
 
 
-  subroutine test_imgs_lt_4(ctx)
-    class(context), intent(inout) :: ctx
+  ! Empty test executed only when nr. of images < 4.
+  subroutine test_imgs_lt_4()
 
     if (num_images() >= 4) then
-      call ctx%skip()
+      call skip()
       return
     end if
     ! Here you can put tests, which work only up to 3 images
@@ -92,11 +78,10 @@ contains
   end subroutine test_imgs_lt_4
 
 
-  subroutine test_imgs_ge_4(ctx)
-    class(context), intent(inout) :: ctx
+  subroutine test_imgs_ge_4()
 
     if (num_images() < 4) then
-      call ctx%skip()
+      call skip()
       return
     end if
     ! Here you can put tests, which work only for 4 images or more
@@ -104,55 +89,63 @@ contains
   end subroutine test_imgs_ge_4
 
 
-  subroutine test_divnfailure(ctx, mytest)
-    class(context), intent(inout) :: ctx
-    class(div_n_failure), intent(in) :: mytest
+  subroutine test_divnfailure(this)
+    class(div_n_failure), intent(in) :: this
 
     character(100) :: msg
 
-    if (mod(this_image() - 1, mytest%divisor) == mytest%remainder) then
+    if (mod(this_image() - 1, this%divisor) == this%remainder) then
       write(msg, "(a, i0)") "This has failed on purpose on image ", this_image()
-      call ctx%check(.false., msg=trim(msg))
+      call check(.false., msg=trim(msg))
     else
-      call ctx%check(.true.)
+      call check(.true.)
     end if
 
-    if (mod(this_image() - 2, mytest%divisor) == mytest%remainder) then
+    if (mod(this_image() - 2, this%divisor) == this%remainder) then
       write(msg, "(a, i0)") "This has failed on purpose (the 2nd time) on image ", this_image()
-      call ctx%check(is_equal(3, 2), msg=trim(msg))
+      call check(is_equal(3, 2), msg=trim(msg))
     else
-      call ctx%check(is_equal(2, 2))
+      call check(is_equal(2, 2))
     end if
 
-    if (mod(this_image() - 3, mytest%divisor) == mytest%remainder) then
+    if (mod(this_image() - 3, this%divisor) == this%remainder) then
       write(msg, "(a, i0)") "This has failed on purpose (the 3rd time) on image ", this_image()
-      call ctx%check(is_equal(4, 3), msg=trim(msg))
+      call check(is_equal(4, 3), msg=trim(msg))
     else
-      call ctx%check(is_equal(3, 3))
+      call check(is_equal(3, 3))
     end if
 
   end subroutine test_divnfailure
 
 
-  subroutine run(this, ctx)
-    class(div_n_failure), intent(inout) :: this
-    class(context), intent(inout) :: ctx
+  ! Hand coded all reduction with summation (modern compiler might use co_sum() instead)
+  subroutine coa_all_reduce(buffer)
+    integer, intent(inout) :: buffer[*]
 
-    call this%testproc(ctx, this)
+    integer :: iimg
 
-  end subroutine run
+    sync all
+    if (this_image() == 1) then
+      do iimg = 2, num_images()
+        buffer = buffer + buffer[iimg]
+      end do
+    end if
+    sync all
+    buffer = buffer[1]
+
+  end subroutine coa_all_reduce
 
 end module testmod_coa_simple
 
 
 program testapp_coa_simple
-  use fortuno_coarray, only : coa_app
-  use testmod_coa_simple, only : test_suite
+  use fortuno_coarray, only : test_app
+  use testmod_coa_simple, only : coa_simple_suite
   implicit none
 
-  type(coa_app), allocatable :: app
+  type(test_app), allocatable :: app
 
-  app = coa_app([test_suite()])
+  app = test_app([coa_simple_suite()])
   call app%run()
 
 end program testapp_coa_simple

@@ -5,6 +5,7 @@ module fortuno_mpi_mpidriver
   use fortuno_contextfactory, only : context_factory
   use fortuno_genericdriver, only : generic_driver, test_runner
   use fortuno_mpi_mpicontext, only : mpi_context, mpi_context_factory, mpi_env
+  use fortuno_mpi_mpigctx, only : restore_global_context, set_global_context
   use fortuno_mpi_mpilogger, only : mpi_logger
   use fortuno_mpi_mpisuite, only : mpi_suite_base
   use fortuno_mpi_mpitest, only : mpi_test_base
@@ -119,7 +120,7 @@ contains
     class(suite_base), pointer, intent(in) :: testsuite
     class(context_base), pointer, intent(in) :: ctx
 
-    class(mpi_context), pointer :: myctx
+    class(mpi_context), pointer :: myctx, oldctx
     class(mpi_suite_base), pointer :: mysuite
 
     select type(ctx)
@@ -136,7 +137,9 @@ contains
       error stop "Internal error, expected mpi_context, obtained something else"
     end select
 
-    call mysuite%set_up(myctx)
+    call set_global_context(myctx, oldctx)
+    call mysuite%set_up()
+    call restore_global_context(oldctx)
 
   end subroutine set_up_suite
 
@@ -146,7 +149,7 @@ contains
     class(suite_base), pointer, intent(in) :: testsuite
     class(context_base), pointer, intent(in) :: ctx
 
-    class(mpi_context), pointer :: myctx
+    class(mpi_context), pointer :: myctx, oldctx
     class(mpi_suite_base), pointer :: mysuite
 
     select type(ctx)
@@ -163,7 +166,9 @@ contains
       error stop "Internal error, expected mpi_suite_base, obtained something else"
     end select
 
-    call mysuite%tear_down(myctx)
+    call set_global_context(myctx, oldctx)
+    call mysuite%tear_down()
+    call restore_global_context(oldctx)
 
   end subroutine tear_down_suite
 
@@ -173,24 +178,26 @@ contains
     class(test_base), pointer, intent(in) :: test
     class(context_base), pointer, intent(in) :: ctx
 
-    class(mpi_context), pointer :: myctx
+    class(mpi_context), pointer :: myctx, oldctx
     class(mpi_test_base), pointer :: mytest
 
     select type(ctx)
     class is (mpi_context)
       myctx => ctx
     class default
-      error stop "Internal error, expected serial_context, obtained something else"
+      error stop "Internal error, expected mpi_context, obtained something else"
     end select
 
     select type(test)
     class is (mpi_test_base)
       mytest => test
     class default
-      error stop "Internal error, expected serial_context, obtained something else"
+      error stop "Internal error, expected mpi_test_base, obtained something else"
     end select
 
-    call mytest%run(myctx)
+    call set_global_context(myctx, oldctx)
+    call mytest%run()
+    call restore_global_context(oldctx)
 
   end subroutine run_test
 

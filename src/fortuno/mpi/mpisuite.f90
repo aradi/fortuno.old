@@ -26,16 +26,14 @@ module fortuno_mpi_mpisuite
 contains
 
 
-  subroutine mpi_suite_base_set_up(this, ctx)
+  subroutine mpi_suite_base_set_up(this)
     class(mpi_suite_base), intent(inout) :: this
-    class(mpi_context), intent(inout) :: ctx
 
   end subroutine mpi_suite_base_set_up
 
 
-  subroutine mpi_suite_base_tear_down(this, ctx)
+  subroutine mpi_suite_base_tear_down(this)
     class(mpi_suite_base), intent(inout) :: this
-    class(mpi_context), intent(inout) :: ctx
 
   end subroutine mpi_suite_base_tear_down
 

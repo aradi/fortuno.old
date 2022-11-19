@@ -3,6 +3,7 @@ module fortuno_coarray_coadriver
   use fortuno_basetypes, only : test_base, context_base, suite_base
   use fortuno_contextfactory, only : context_factory
   use fortuno_coarray_coacontext, only : coa_context, coa_context_factory
+  use fortuno_coarray_coagctx, only : set_global_context, restore_global_context
   use fortuno_coarray_coalogger, only : coa_logger
   use fortuno_coarray_coasuite, only : coa_suite_base
   use fortuno_coarray_coatest, only : coa_test_base
@@ -91,7 +92,7 @@ contains
     class(suite_base), pointer, intent(in) :: testsuite
     class(context_base), pointer, intent(in) :: ctx
 
-    class(coa_context), pointer :: myctx
+    class(coa_context), pointer :: myctx, oldctx
     class(coa_suite_base), pointer :: mysuite
 
     select type(ctx)
@@ -108,7 +109,9 @@ contains
       error stop "Internal error, expected coa_context, obtained something else"
     end select
 
-    call mysuite%set_up(myctx)
+    call set_global_context(myctx, oldctx)
+    call mysuite%set_up()
+    call restore_global_context(oldctx)
 
   end subroutine set_up_suite
 
@@ -118,7 +121,7 @@ contains
     class(suite_base), pointer, intent(in) :: testsuite
     class(context_base), pointer, intent(in) :: ctx
 
-    class(coa_context), pointer :: myctx
+    class(coa_context), pointer :: myctx, oldctx
     class(coa_suite_base), pointer :: mysuite
 
     select type(ctx)
@@ -135,7 +138,9 @@ contains
       error stop "Internal error, expected coa_suite_base, obtained something else"
     end select
 
-    call mysuite%tear_down(myctx)
+    call set_global_context(myctx, oldctx)
+    call mysuite%tear_down()
+    call restore_global_context(oldctx)
 
   end subroutine tear_down_suite
 
@@ -145,7 +150,7 @@ contains
     class(test_base), pointer, intent(in) :: test
     class(context_base), pointer, intent(in) :: ctx
 
-    class(coa_context), pointer :: myctx
+    class(coa_context), pointer :: myctx, oldctx
     class(coa_test_base), pointer :: mytest
 
     select type(ctx)
@@ -162,7 +167,9 @@ contains
       error stop "Internal error, expected serial_context, obtained something else"
     end select
 
-    call mytest%run(myctx)
+    call set_global_context(myctx, oldctx)
+    call mytest%run()
+    call restore_global_context(oldctx)
 
   end subroutine run_test
 

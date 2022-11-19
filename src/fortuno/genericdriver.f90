@@ -237,6 +237,7 @@ contains
           end if
           if (included(itest, isuite)) cycle
           included(itest, isuite) = .true.
+          nglobaltests = nglobaltests + 1
           testindbuffer(:, nglobaltests) = [isuite, itest]
         end if
       end associate
