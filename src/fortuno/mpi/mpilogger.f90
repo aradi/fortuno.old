@@ -5,7 +5,6 @@ module fortuno_mpi_mpilogger
   use fortuno_serial_seriallogger, only : serial_logger
   use fortuno_mpi_mpifailureinfo, only : mpi_failure_info
   use fortuno_testlogger, only : test_result
-  use fortuno_utils, only : findloc_logical
   implicit none
 
   private
@@ -95,7 +94,7 @@ contains
     call MPI_Barrier(this%mpicomm)
     select type (failureinfo)
     class is (mpi_failure_info)
-      firstfailing = findloc_logical(failureinfo%failedranks, .true.) - 1
+      firstfailing = findloc(failureinfo%failedranks, .true., dim=1) - 1
       if (firstfailing == this%myrank) then
         if (writesepline) write(stdout, "()")
         call failureinfo%write_formatted(stdout)

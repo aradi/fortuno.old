@@ -4,7 +4,6 @@ module fortuno_coarray_coalogger
   use fortuno_failureinfo, only : failure_info
   use fortuno_serial_seriallogger, only : serial_logger
   use fortuno_testlogger, only : test_result
-  use fortuno_utils, only : findloc_logical
   implicit none
 
   private
@@ -92,7 +91,7 @@ contains
     sync all
     select type (failureinfo)
     class is (coa_failure_info)
-      firstfailing = findloc_logical(failureinfo%failedimages, .true.)
+      firstfailing = findloc(failureinfo%failedimages, .true., dim=1)
       if (firstfailing == this_image()) then
         if (writesepline) write(stdout, "()")
         call failureinfo%write_formatted(stdout)

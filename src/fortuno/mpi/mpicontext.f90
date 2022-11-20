@@ -1,5 +1,5 @@
 module fortuno_mpi_mpicontext
-  use mpi_f08, only : mpi_comm, mpi_allreduce, MPI_IN_PLACE, MPI_LOGICAL, MPI_LAND
+  use mpi_f08, only : mpi_comm, mpi_allreduce, MPI_IN_PLACE, MPI_INTEGER, MPI_PROD
   use fortuno_basetypes, only : test_base, context_base, suite_base
   use fortuno_contextfactory, only : context_factory
   use fortuno_mpi_mpifailureinfo, only : mpi_failure_info
@@ -44,11 +44,20 @@ contains
 
     type(mpi_failure_info), allocatable :: failureinfo
     logical :: globalcond(this%mpi%commsize)
+    integer :: globalcondint(this%mpi%commsize)
 
     globalcond(:) = .true.
     globalcond(this%mpi%rank + 1) = cond
-    call mpi_allreduce(MPI_IN_PLACE, globalcond, this%mpi%commsize, MPI_LOGICAL, MPI_LAND,&
+
+    ! workaround: ifort and intelmpi
+    ! allreduce() with MPI_LOGICALS and MPI_LAND seems to result in some broken logical
+    ! representation resulting in incorrect findloc(..., dim=1) results. Therefore, map logicals
+    ! to integers before reduction and map them back afterwards again.
+    globalcondint(:) = merge(1, 0, globalcond)
+    call mpi_allreduce(MPI_IN_PLACE, globalcondint, this%mpi%commsize, MPI_INTEGER, MPI_PROD,&
         & this%mpi%comm)
+    globalcond(:) = globalcondint == 1
+
     call this%register_check(all(globalcond))
     if (.not. this%check_failed()) return
     allocate(failureinfo)

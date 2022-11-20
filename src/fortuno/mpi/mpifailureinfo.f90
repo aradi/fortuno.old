@@ -1,6 +1,5 @@
 module fortuno_mpi_mpifailureinfo
   use fortuno_failureinfo, only : failure_info
-  use fortuno_utils, only : findloc_logical
   implicit none
 
   private
@@ -23,7 +22,7 @@ contains
     integer :: firstfailed, totalfailed
 
     if (allocated(this%failedranks)) then
-      firstfailed = findloc_logical(this%failedranks, .true.) - 1
+      firstfailed = findloc(this%failedranks, .true., dim=1) - 1
       totalfailed = count(this%failedranks, dim=1)
       if (totalfailed > 1) then
         write(unit, "(a, t12, i0, a, i0, a)") "Rank:", firstfailed, "  (+ ", totalfailed - 1,&
