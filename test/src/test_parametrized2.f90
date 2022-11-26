@@ -29,7 +29,7 @@ contains
     suite = test_suite("param2")
     do icalc = 1, size(factcalcs)
       write(name, "(a, i0)") "factorial_", factcalcs(icalc)%arg
-      call suite%add_test(factcalc_test(trim(name), test_fact_calc, factcalcs(icalc)))
+      call suite%add_test(factcalc_test(trim(name), test_fact_calc, factcalc=factcalcs(icalc)))
     end do
 
   end function param2_suite

@@ -3,6 +3,7 @@ module fortuno_utils
 
   private
   public :: dyn_char
+  public :: keyword_arg_enforcer_
   public :: nr_digits, string
 
 
@@ -23,6 +24,13 @@ module fortuno_utils
     procedure :: has_content => dyn_char_has_content
     procedure :: starts_with => dyn_char_starts_with
   end type dyn_char
+
+
+  ! Dummy type used to enforce explicit keyword arguments in type initializations
+  ! Should only be used internally in fortuno and not exported to consumers!
+  type :: keyword_arg_enforcer_
+  end type keyword_arg_enforcer_
+
 
 contains
 

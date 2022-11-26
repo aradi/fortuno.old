@@ -1,5 +1,6 @@
 module fortuno_serial_serialtest
   use fortuno_basetypes, only : test_base
+  use fortuno_utils, only : keyword_arg_enforcer_
   implicit none
 
   private
@@ -23,6 +24,7 @@ module fortuno_serial_serialtest
 
   type, extends(serial_test_base) :: serial_test
     procedure(serial_test_testroutine_i), nopass, pointer :: testroutine
+    type(keyword_arg_enforcer_) :: kwargsonly = keyword_arg_enforcer_()
   contains
     procedure :: run => serial_test_run
   end type serial_test
@@ -36,6 +38,7 @@ module fortuno_serial_serialtest
 
   type, extends(serial_test_base) :: serial_fixtured_test
     procedure(serial_fixtured_test_testroutine_i), pointer :: testroutine
+    type(keyword_arg_enforcer_) :: kwargsonly = keyword_arg_enforcer_()
   contains
     procedure :: run => serial_fixtured_test_run
     procedure :: set_up => serial_fixtured_test_set_up
