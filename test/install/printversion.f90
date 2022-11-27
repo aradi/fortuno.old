@@ -1,6 +1,6 @@
 program test_build
   use iso_fortran_env, only : stdout => output_unit
-  use fortuno, only : get_version
+  use fortuno_serial, only : get_version
   implicit none
 
   integer :: major, minor, patch

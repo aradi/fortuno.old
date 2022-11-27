@@ -7,5 +7,5 @@ project(TestBuild LANGUAGES Fortran)
 
 find_package(Fortuno REQUIRED)
 
-add_executable(test_build test_build.f90)
-target_link_libraries(test_build Fortuno::Fortuno)
+add_executable(printversion printversion.f90)
+target_link_libraries(printversion Fortuno::Fortuno)

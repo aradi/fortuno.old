@@ -1,0 +1,7 @@
+add_subdirectory(serial)
+if(WITH_MPI)
+    add_subdirectory(mpi)
+endif()
+if(WITH_COARRAY)
+    add_subdirectory(coarray)
+endif()

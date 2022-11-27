@@ -38,8 +38,8 @@ add_subdirectory(src)
 
 # Build tests
 if(WITH_TESTS)
-  enable_testing()
-  add_subdirectory(test)
+    enable_testing()
+    add_subdirectory(test)
 endif()
 
 

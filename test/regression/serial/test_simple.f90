@@ -47,16 +47,3 @@ contains
   end subroutine test_factorial_4_5
 
 end module testmod_simple
-
-
-program testapp_simple
-  use fortuno_serial, only : test_app
-  use testmod_simple, only : simple_suite
-  implicit none
-
-  type(test_app), allocatable :: app
-
-  app = test_app([simple_suite()])
-  call app%run()
-
-end program testapp_simple

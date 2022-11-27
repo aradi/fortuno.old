@@ -11,10 +11,10 @@ module testmod_parametrized
 contains
 
 
-  function param_suite() result(suite)
+  function parametrized_suite() result(suite)
     type(test_suite) :: suite
 
-    suite = test_suite("param", [&
+    suite = test_suite("parametrized", [&
         & factcalc_test("factorial_0", test_factorial, arg=0, res=1),&
         & factcalc_test("factorial_1", test_factorial, arg=1, res=1),&
         & factcalc_test("factorial_2", test_factorial, arg=2, res=2),&
@@ -22,7 +22,7 @@ contains
         & factcalc_test("factorial_4", test_factorial, arg=4, res=24)&
         & ])
 
-  end function param_suite
+  end function parametrized_suite
 
 
   subroutine test_factorial(this)
@@ -33,16 +33,3 @@ contains
   end subroutine test_factorial
 
 end module testmod_parametrized
-
-
-program testapp_parameterized
-  use fortuno_serial, only : test_app
-  use testmod_parametrized, only : param_suite
-  implicit none
-
-  type(test_app), allocatable :: app
-
-  app = test_app([param_suite()])
-  call app%run()
-
-end program testapp_parameterized

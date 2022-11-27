@@ -20,19 +20,19 @@ module testmod_parametrized2
 contains
 
 
-  function param2_suite() result(suite)
+  function parametrized2_suite() result(suite)
     type(test_suite) :: suite
 
     integer :: icalc
     character(200) :: name
 
-    suite = test_suite("param2")
+    suite = test_suite("parametrized2")
     do icalc = 1, size(factcalcs)
       write(name, "(a, i0)") "factorial_", factcalcs(icalc)%arg
       call suite%add_test(factcalc_test(trim(name), test_fact_calc, factcalc=factcalcs(icalc)))
     end do
 
-  end function param2_suite
+  end function parametrized2_suite
 
 
   subroutine test_fact_calc(this)
@@ -43,16 +43,3 @@ contains
   end subroutine test_fact_calc
 
 end module testmod_parametrized2
-
-
-program testapp_parametrized2
-  use fortuno_serial, only : test_app
-  use testmod_parametrized2, only : param2_suite
-  implicit none
-
-  type(test_app), allocatable :: app
-
-  app = test_app([param2_suite()])
-  call app%run()
-
-end program testapp_parametrized2

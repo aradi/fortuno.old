@@ -1,22 +1,22 @@
 #
-# User adjustable config options
+# Global config options
 #
 
-# Turn this on for MPI support
-option(WITH_MPI "Whether MPI support should be enabled")
+# MPI support
+option(WITH_MPI "Whether MPI support should be enabled" FALSE)
 
-# Turn this on for coarray support
-option(WITH_COARRAY "Whether coarray support should be enabled")
+# Coarray support
+option(WITH_COARRAY "Whether coarray support should be enabled" FALSE)
 
-# Turn this on, if the libraries should be built as shared libraries
-option(BUILD_SHARED_LIBS "Whether the libraries built should be shared" FALSE)
+# Type of the built libraries
+option(BUILD_SHARED_LIBS "Whether libraries built should be shared" FALSE)
 
-# Turn this off, if you don't want to build the tests
+# Building tests
 option(WITH_TESTS "Whether tests should be built" FALSE)
 
 
 #
-# Fortran compiler dependent config options
+# Compiler dependent config options
 #
 
 if("GNU" STREQUAL "${CMAKE_Fortran_COMPILER_ID}")

@@ -68,16 +68,3 @@ contains
   end subroutine get_char_repr
 
 end module testmod_fixtured
-
-
-program testapp_fixtured
-  use fortuno_serial, only : test_app
-  use testmod_fixtured, only : fixtured_suite
-  implicit none
-
-  type(test_app), allocatable :: app
-
-  app = test_app([fixtured_suite()])
-  call app%run()
-
-end program testapp_fixtured

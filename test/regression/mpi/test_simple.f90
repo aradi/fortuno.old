@@ -1,5 +1,5 @@
-module testmod_mpi_simple
-  use mpi_f08, only : MPI_Allreduce, MPI_Bcast, MPI_INTEGER, MPI_SUM
+module testmod_simple
+  use mylib, only : allreduce_sum, broadcast
   use fortuno_mpi, only : comm_handle_f08, comm_rank, comm_size, check, fixtured_test, skip, test,&
       & test_suite
   implicit none
@@ -12,10 +12,10 @@ module testmod_mpi_simple
 contains
 
 
-  function mpi_simple_suite() result(suite)
+  function simple_suite() result(suite)
     type(test_suite) :: suite
 
-    suite = test_suite("mpi_simple", [&
+    suite = test_suite("simple", [&
         & test("broadcast", test_broadcast),&
         & test("allreduce", test_allreduce),&
         & test("procs_lt_4", test_procs_lt_4),&
@@ -24,43 +24,44 @@ contains
     call suite%add_test(&
         & div_n_failure("divnfailure_3_0", test_divnfailure, div=3, rem=0))
 
-  end function mpi_simple_suite
+  end function simple_suite
 
 
-  ! Given: rank 0 contains a different integer value as all other ranks
-  ! When: rank 0 broadcasts its value
-  ! Then: all ranks contain rank 0's value
+  ! Given: source rank contains a different integer value as all other ranks
+  ! When: source rank broadcasts its value
+  ! Then: all ranks contain source rank's value
   subroutine test_broadcast()
 
-    integer, parameter :: value_rank0 = 1, value_otherranks = -1
+    integer, parameter :: source_rank = 0, source_rank_value = 1, other_rank_value = -1
     integer :: buffer
 
-    if (comm_rank() == 0) then
-      buffer = value_rank0
+    ! buffer = (comm_rank() == 0 ? value_rank0 : value_otherranks)
+    if (comm_rank() == source_rank) then
+      buffer = source_rank_value
     else
-      buffer = value_otherranks
+      buffer = other_rank_value
     end if
 
-    call MPI_Bcast(buffer, 1, MPI_INTEGER, 0, comm_handle_f08())
+    call broadcast(buffer, source_rank, comm_handle_f08())
 
-    call check(buffer == value_rank0)
+    call check(buffer == source_rank_value)
 
   end subroutine test_broadcast
 
 
-  ! Given: all ranks contain an integer with value (rank + 1)
-  ! When: allreduce() is invoked with summation
-  ! Then: all ranks contain the sum N * (N + 1) / 2, where N = nr. of processes.
+  ! Given: all ranks contain integer with value (rank + 1)
+  ! When: allreduce_sum() is invoked
+  ! Then: all ranks contain the sum N * (N + 1) / 2, where N = nr. of ranks
   subroutine test_allreduce()
 
-    integer :: send, recv, expected
+    integer :: val, expected
 
-    send = comm_rank() + 1
+    val = comm_rank() + 1
 
-    call MPI_Allreduce(send, recv, 1, MPI_INTEGER, MPI_SUM, comm_handle_f08())
+    call allreduce_sum(val, comm_handle_f08())
 
     expected = comm_size() * (comm_size() + 1) / 2
-    call check(recv == expected)
+    call check(val == expected)
 
   end subroutine test_allreduce
 
@@ -119,17 +120,4 @@ contains
 
   end subroutine test_divnfailure
 
-end module testmod_mpi_simple
-
-
-program testapp_mpi_simple
-  use fortuno_mpi, only : test_app
-  use testmod_mpi_simple, only : mpi_simple_suite
-  implicit none
-
-  type(test_app), allocatable :: app
-
-  app = test_app([mpi_simple_suite()])
-  call app%run()
-
-end program testapp_mpi_simple
+end module testmod_simple

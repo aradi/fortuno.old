@@ -1,5 +1,5 @@
-module testmod_coa_simple
-  use mylib, only : factorial
+module testmod_simple
+  use mylib, only : allreduce_sum, broadcast
   use fortuno_coarray, only : check, fixtured_test, is_equal, skip, test, test_suite
   implicit none
 
@@ -11,10 +11,10 @@ module testmod_coa_simple
 contains
 
 
-  function coa_simple_suite() result(suite)
+  function simple_suite() result(suite)
     type(test_suite) :: suite
 
-    suite = test_suite("coa_simple", [&
+    suite = test_suite("simple", [&
         & test("broadcast", test_broadcast),&
         & test("allreduce", test_allreduce),&
         & test("imgs_lt_4", test_imgs_lt_4),&
@@ -23,33 +23,33 @@ contains
     call suite%add_test(&
         & div_n_failure("divnfailure_3_0", test_divnfailure, divisor=3, remainder=0))
 
-  end function coa_simple_suite
+  end function simple_suite
 
 
-  ! Given: image 1 contains a different integer value as all other images
-  ! When: image 1 broadcasts its value
-  ! Then: all images contain image 1's value
+  ! Given: source image contains a different integer value as all other images
+  ! When: source image broadcasts its value
+  ! Then: all images contain source image's value
   subroutine test_broadcast()
 
-    integer, parameter :: value_img1 = 1, value_otherimgs = -1
+    integer, parameter :: source_img = 1, source_img_value = 1, other_img_value = -1
     integer, allocatable :: buffer[:]
 
     allocate(buffer[*])
-    if (this_image() == 1) then
-      buffer = value_img1
+    if (this_image() == source_img) then
+      buffer = source_img_value
     else
-      buffer = value_otherimgs
+      buffer = other_img_value
     end if
 
-    buffer = buffer[1]
+    call broadcast(buffer, source_img)
 
-    call check(buffer == value_img1)
+    call check(buffer == source_img_value)
 
   end subroutine test_broadcast
 
 
   ! Given: all images contain an integer with their image number as value
-  ! When: all reduction is invoked with summation (hand coded here)
+  ! When: all reduction is invoked with summation
   ! Then: all images contain the sum N * (N + 1) / 2, where N = nr. of images
   subroutine test_allreduce()
 
@@ -58,7 +58,7 @@ contains
 
     allocate(buffer[*], source=this_image())
 
-    call coa_all_reduce(buffer)
+    call allreduce_sum(buffer)
 
     expected = num_images() * (num_images() + 1) / 2
     call check(buffer == expected)
@@ -117,35 +117,4 @@ contains
 
   end subroutine test_divnfailure
 
-
-  ! Hand coded all reduction with summation (modern compiler might use co_sum() instead)
-  subroutine coa_all_reduce(buffer)
-    integer, intent(inout) :: buffer[*]
-
-    integer :: iimg
-
-    sync all
-    if (this_image() == 1) then
-      do iimg = 2, num_images()
-        buffer = buffer + buffer[iimg]
-      end do
-    end if
-    sync all
-    buffer = buffer[1]
-
-  end subroutine coa_all_reduce
-
-end module testmod_coa_simple
-
-
-program testapp_coa_simple
-  use fortuno_coarray, only : test_app
-  use testmod_coa_simple, only : coa_simple_suite
-  implicit none
-
-  type(test_app), allocatable :: app
-
-  app = test_app([coa_simple_suite()])
-  call app%run()
-
-end program testapp_coa_simple
+end module testmod_simple

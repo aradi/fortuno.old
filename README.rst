@@ -31,7 +31,7 @@ directly used in Fortran projects without a need for a special pre-processor.
 
 Detailed documentation will be soon found on the `Fortuno documentation page
 <https://fortuno.readthedocs.io>`_ on Read the Docs. Currently, have a look
-at some of the example files in the `test folder <test/src/>`_.
+at some of the example files in the `test folder <test/regression/>`_.
 
 The development can be followed on the `Fortuno project page
 <https://github.com/aradi/fortuno>`_  on GitHub.
