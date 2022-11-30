@@ -12,7 +12,7 @@ option(WITH_COARRAY "Whether coarray support should be enabled" FALSE)
 option(BUILD_SHARED_LIBS "Whether libraries built should be shared" FALSE)
 
 # Building tests
-option(WITH_TESTS "Whether tests should be built" FALSE)
+option(WITH_TESTS "Whether tests should be built" TRUE)
 
 
 #
