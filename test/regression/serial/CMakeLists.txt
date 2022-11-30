@@ -10,10 +10,11 @@ add_subdirectory(src)
 # Set up all test suites to consider (contained in files named test_${suite})
 set(
     suites
-    simple
     fixtured
+    # fixturedsuite
     parametrized
     parametrized2
+    simple
 )
 
 # Create a library out of all test suites
