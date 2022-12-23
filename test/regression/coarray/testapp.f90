@@ -1,11 +1,11 @@
 program testapp_mpi
-  use fortuno_coarray, only : test_app
+  use fortuno_coarray, only : cmd_app
   use testmod_simple, only : simple_suite
   implicit none
 
-  type(test_app), allocatable :: app
+  type(cmd_app), allocatable :: app
 
-  app = test_app([&
+  app = cmd_app([&
       & simple_suite()&
       & ])
   call app%run()

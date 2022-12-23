@@ -1,14 +1,14 @@
-module fortuno_coarray_coaapp
+module fortuno_coarray_coacmdapp
   use fortuno_argumentparser, only : argument_parser
   use fortuno_coarray_coadriver, only : coa_driver
   use fortuno_coarray_coasuite, only : coa_suite_base
   implicit none
 
   private
-  public :: coa_app
+  public :: coa_cmd_app
 
 
-  type :: coa_app
+  type :: coa_cmd_app
   private
     type(coa_driver) :: driver
   contains
@@ -16,27 +16,27 @@ module fortuno_coarray_coaapp
     procedure :: add_suite_scalar
     procedure :: add_suite_array
     generic :: add_suite => add_suite_scalar, add_suite_array
-  end type coa_app
+  end type coa_cmd_app
 
 
-  interface coa_app
-    module procedure new_coa_app
-  end interface coa_app
+  interface coa_cmd_app
+    module procedure new_coa_cmd_app
+  end interface coa_cmd_app
 
 contains
 
 
-  function new_coa_app(testsuites) result(this)
+  function new_coa_cmd_app(testsuites) result(this)
     class(coa_suite_base), optional, intent(in) :: testsuites(:)
-    type(coa_app) :: this
+    type(coa_cmd_app) :: this
 
     this%driver = coa_driver(testsuites)
 
-  end function new_coa_app
+  end function new_coa_cmd_app
 
 
   subroutine run(this)
-    class(coa_app), intent(inout) :: this
+    class(coa_cmd_app), intent(inout) :: this
 
     type(argument_parser), allocatable :: argparser
 
@@ -47,7 +47,7 @@ contains
 
 
   subroutine add_suite_scalar(this, testsuite)
-    class(coa_app), intent(inout) :: this
+    class(coa_cmd_app), intent(inout) :: this
     class(coa_suite_base), intent(in) :: testsuite
 
     call this%driver%add_suite_base(testsuite)
@@ -56,11 +56,11 @@ contains
 
 
   subroutine add_suite_array(this, testsuites)
-    class(coa_app), intent(inout) :: this
+    class(coa_cmd_app), intent(inout) :: this
     class(coa_suite_base), intent(in) :: testsuites(:)
 
     call this%driver%add_suite_base(testsuites)
 
   end subroutine add_suite_array
 
-end module fortuno_coarray_coaapp
+end module fortuno_coarray_coacmdapp

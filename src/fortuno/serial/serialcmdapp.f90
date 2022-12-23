@@ -1,14 +1,14 @@
-module fortuno_serial_serialapp
+module fortuno_serial_serialcmdapp
   use fortuno_argumentparser, only : argument_parser
   use fortuno_serial_serialdriver, only : serial_driver
   use fortuno_serial_serialsuite, only : serial_suite_base
   implicit none
 
   private
-  public :: serial_app
+  public :: serial_cmd_app
 
 
-  type :: serial_app
+  type :: serial_cmd_app
   private
     type(serial_driver) :: driver
   contains
@@ -16,27 +16,27 @@ module fortuno_serial_serialapp
     procedure :: add_suite_scalar
     procedure :: add_suite_array
     generic :: add_suite => add_suite_scalar, add_suite_array
-  end type serial_app
+  end type serial_cmd_app
 
 
-  interface serial_app
-    module procedure new_serial_app
-  end interface serial_app
+  interface serial_cmd_app
+    module procedure new_serial_cmd_app
+  end interface serial_cmd_app
 
 contains
 
 
-  function new_serial_app(testsuites) result(this)
+  function new_serial_cmd_app(testsuites) result(this)
     class(serial_suite_base), optional, intent(in) :: testsuites(:)
-    type(serial_app) :: this
+    type(serial_cmd_app) :: this
 
     this%driver = serial_driver(testsuites)
 
-  end function new_serial_app
+  end function new_serial_cmd_app
 
 
   subroutine run(this)
-    class(serial_app), intent(inout) :: this
+    class(serial_cmd_app), intent(inout) :: this
 
     type(argument_parser), allocatable :: argparser
 
@@ -47,7 +47,7 @@ contains
 
 
   subroutine add_suite_scalar(this, testsuite)
-    class(serial_app), intent(inout) :: this
+    class(serial_cmd_app), intent(inout) :: this
     class(serial_suite_base), intent(in) :: testsuite
 
     call this%driver%add_suite_base(testsuite)
@@ -56,11 +56,11 @@ contains
 
 
   subroutine add_suite_array(this, testsuites)
-    class(serial_app), intent(inout) :: this
+    class(serial_cmd_app), intent(inout) :: this
     class(serial_suite_base), intent(in) :: testsuites(:)
 
     call this%driver%add_suite_base(testsuites)
 
   end subroutine add_suite_array
 
-end module fortuno_serial_serialapp
+end module fortuno_serial_serialcmdapp

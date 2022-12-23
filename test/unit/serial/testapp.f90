@@ -1,11 +1,11 @@
 program testapp
-  use fortuno_serial, only : test_app
+  use fortuno_serial, only : cmd_app
   use testmod_selftest, only : selftest_suite
   implicit none
 
-  type(test_app), allocatable :: app
+  type(cmd_app), allocatable :: app
 
-  app = test_app([selftest_suite()])
+  app = cmd_app([selftest_suite()])
   call app%run()
 
 end program testapp
