@@ -59,7 +59,9 @@ module fortuno_genericdriver
   contains
     procedure :: add_suite_base_scalar
     procedure :: add_suite_base_array
-    generic :: add_suite_base => add_suite_base_scalar, add_suite_base_array
+    procedure :: add_suite_base_cls_array
+    generic :: add_suite_base => add_suite_base_scalar, add_suite_base_array,&
+        & add_suite_base_cls_array
     procedure :: run
     procedure :: set_up
     procedure :: tear_down
@@ -127,6 +129,21 @@ contains
     end do
 
   end subroutine add_suite_base_array
+
+
+  subroutine add_suite_base_cls_array(this, testsuites)
+    class(generic_driver), intent(inout) :: this
+    class(suite_base_cls), intent(inout) :: testsuites(:)
+
+    integer :: isuite, istart
+
+    call add_slots_(this%testsuites, size(testsuites))
+    istart = size(this%testsuites) - size(testsuites)
+    do isuite = 1, size(testsuites)
+      call move_alloc(testsuites(isuite)%instance, this%testsuites(isuite)%instance)
+    end do
+
+  end subroutine add_suite_base_cls_array
 
 
   subroutine run(this, testnames, error, driverresult)

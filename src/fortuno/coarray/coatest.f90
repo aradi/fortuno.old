@@ -4,7 +4,7 @@ module fortuno_coarray_coatest
   implicit none
 
   private
-  public :: coa_fixtured_test, coa_test, coa_test_base
+  public :: coa_fixtured_test, coa_test, coa_test_base, coa_test_base_cls
 
 
   type, extends(test_base), abstract :: coa_test_base
@@ -19,6 +19,11 @@ module fortuno_coarray_coatest
       class(coa_test_base), intent(inout) :: this
     end subroutine coa_test_base_run_i
   end interface
+
+
+  type :: coa_test_base_cls
+    class(coa_test_base), allocatable :: instance
+  end type coa_test_base_cls
 
 
   type, extends(coa_test_base) :: coa_test

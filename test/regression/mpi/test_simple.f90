@@ -1,7 +1,7 @@
 module testmod_simple
   use mylib, only : allreduce_sum, broadcast
   use fortuno_mpi, only : comm_handle_f08, comm_rank, comm_size, check, fixtured_test, skip, test,&
-      & test_suite
+      & test_suite, tbc => test_base_cls
   implicit none
 
 
@@ -16,13 +16,12 @@ contains
     type(test_suite) :: suite
 
     suite = test_suite("simple", [&
-        & test("broadcast", test_broadcast),&
-        & test("allreduce", test_allreduce),&
-        & test("procs_lt_4", test_procs_lt_4),&
-        & test("procs_ge_4", test_procs_ge_4)&
+        & tbc(test("broadcast", test_broadcast)),&
+        & tbc(test("allreduce", test_allreduce)),&
+        & tbc(test("procs_lt_4", test_procs_lt_4)),&
+        & tbc(test("procs_ge_4", test_procs_ge_4)),&
+        & tbc(div_n_failure("divnfailure_3_0", test_divnfailure, div=3, rem=0))&
         & ])
-    call suite%add_test(&
-        & div_n_failure("divnfailure_3_0", test_divnfailure, div=3, rem=0))
 
   end function simple_suite
 

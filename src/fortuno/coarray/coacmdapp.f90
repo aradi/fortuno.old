@@ -1,7 +1,7 @@
 module fortuno_coarray_coacmdapp
   use fortuno_argumentparser, only : argument_parser
   use fortuno_coarray_coadriver, only : coa_driver
-  use fortuno_coarray_coasuite, only : coa_suite_base
+  use fortuno_coarray_coasuite, only : coa_suite_base, coa_suite_base_cls
   implicit none
 
   private
@@ -20,19 +20,28 @@ module fortuno_coarray_coacmdapp
 
 
   interface coa_cmd_app
-    module procedure new_coa_cmd_app
+    module procedure new_coa_cmd_app_suite, new_coa_cmd_app_suite_cls
   end interface coa_cmd_app
 
 contains
 
 
-  function new_coa_cmd_app(testsuites) result(this)
+  function new_coa_cmd_app_suite(testsuites) result(this)
     class(coa_suite_base), optional, intent(in) :: testsuites(:)
     type(coa_cmd_app) :: this
 
     this%driver = coa_driver(testsuites)
 
-  end function new_coa_cmd_app
+  end function new_coa_cmd_app_suite
+
+
+  function new_coa_cmd_app_suite_cls(testsuites) result(this)
+    type(coa_suite_base_cls), intent(in) :: testsuites(:)
+    type(coa_cmd_app) :: this
+
+    this%driver = coa_driver(testsuites)
+
+  end function new_coa_cmd_app_suite_cls
 
 
   subroutine run(this)

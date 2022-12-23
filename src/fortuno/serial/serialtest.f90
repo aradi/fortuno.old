@@ -4,13 +4,18 @@ module fortuno_serial_serialtest
   implicit none
 
   private
-  public :: serial_test_base, serial_test, serial_fixtured_test
+  public :: serial_test_base, serial_test_base_cls, serial_test, serial_fixtured_test
 
 
   type, extends(test_base), abstract :: serial_test_base
   contains
     procedure(serial_test_base_run_i), deferred :: run
   end type serial_test_base
+
+
+  type :: serial_test_base_cls
+    class(serial_test_base), allocatable :: instance
+  end type serial_test_base_cls
 
 
   abstract interface

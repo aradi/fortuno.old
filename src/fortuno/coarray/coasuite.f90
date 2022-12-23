@@ -4,7 +4,7 @@ module fortuno_coarray_coasuite
     implicit none
 
     private
-    public :: coa_suite, coa_suite_base
+    public :: coa_suite, coa_suite_base, coa_suite_base_cls
 
 
     type, extends(suite_base) :: coa_suite_base
@@ -12,6 +12,11 @@ module fortuno_coarray_coasuite
       procedure :: set_up => coa_suite_base_set_up
       procedure :: tear_down => coa_suite_base_tear_down
     end type coa_suite_base
+
+
+    type :: coa_suite_base_cls
+      class(coa_suite_base), allocatable :: instance
+    end type coa_suite_base_cls
 
 
     type, extends(coa_suite_base) :: coa_suite

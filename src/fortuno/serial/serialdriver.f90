@@ -1,12 +1,12 @@
 module fortuno_serial_serialdriver
   use iso_fortran_env, only : stderr => error_unit
-  use fortuno_basetypes, only : suite_base, context_base, test_base
+  use fortuno_basetypes, only : suite_base, suite_base_cls, context_base, test_base
   use fortuno_contextfactory, only : context_factory
   use fortuno_genericdriver, only : generic_driver, test_runner
   use fortuno_serial_serialgctx, only : set_global_context, restore_global_context
   use fortuno_serial_serialcontext, only : serial_context
   use fortuno_serial_seriallogger, only : serial_logger
-  use fortuno_serial_serialsuite, only : serial_suite_base
+  use fortuno_serial_serialsuite, only : serial_suite_base, serial_suite_base_cls
   use fortuno_serial_serialtest, only : serial_test_base
   use fortuno_testlogger, only : test_logger
   use fortuno_testerror, only : test_error
@@ -26,7 +26,7 @@ module fortuno_serial_serialdriver
 
 
   interface serial_driver
-    module procedure new_serial_driver
+    module procedure new_serial_driver_suite, new_serial_driver_suite_cls
   end interface
 
 
@@ -47,13 +47,29 @@ module fortuno_serial_serialdriver
 contains
 
 
-  function new_serial_driver(testsuites) result(this)
+  function new_serial_driver_suite(testsuites) result(this)
     class(suite_base), optional, intent(in) :: testsuites(:)
     type(serial_driver) :: this
 
     if (present(testsuites)) call this%add_suite_base(testsuites)
 
-  end function new_serial_driver
+  end function new_serial_driver_suite
+
+
+  function new_serial_driver_suite_cls(testsuites) result(this)
+    type(serial_suite_base_cls), intent(in) :: testsuites(:)
+    type(serial_driver) :: this
+
+    type(suite_base_cls), allocatable :: sbc(:)
+    integer :: isuite
+
+    allocate(sbc(size(testsuites)))
+    do isuite = 1, size(testsuites)
+      sbc(isuite)%instance = testsuites(isuite)%instance
+    end do
+    call this%add_suite_base(sbc)
+
+  end function new_serial_driver_suite_cls
 
 
   subroutine stop_on_error(this, error)

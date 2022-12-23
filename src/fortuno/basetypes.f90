@@ -38,7 +38,8 @@ module fortuno_basetypes
     procedure :: set_name => suite_base_set_name
     procedure, private :: add_test_scalar => suite_base_add_test_scalar
     procedure, private :: add_test_array => suite_base_add_test_array
-    generic :: add_test => add_test_scalar, add_test_array
+    procedure, private :: add_test_cls_array => suite_base_add_test_cls_array
+    generic :: add_test => add_test_scalar, add_test_array, add_test_cls_array
     procedure :: get_char_repr => suite_base_get_char_repr
   end type suite_base
 
@@ -198,6 +199,21 @@ contains
     end do
 
   end subroutine suite_base_add_test_array
+
+
+  subroutine suite_base_add_test_cls_array(this, tests)
+    class(suite_base), intent(inout) :: this
+    type(test_base_cls), intent(inout) :: tests(:)
+
+    integer :: istart, itest
+
+    call add_slots_(this%tests, size(tests))
+    istart = size(this%tests) - size(tests)
+    do itest = 1, size(tests)
+      call move_alloc(tests(itest)%instance, this%tests(istart + itest)%instance)
+    end do
+
+  end subroutine suite_base_add_test_cls_array
 
 
   subroutine suite_base_get_char_repr(this, repr)

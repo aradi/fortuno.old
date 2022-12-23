@@ -4,7 +4,7 @@ module fortuno_mpi_mpitest
   implicit none
 
   private
-  public :: mpi_fixtured_test, mpi_test, mpi_test_base
+  public :: mpi_fixtured_test, mpi_test, mpi_test_base, mpi_test_base_cls
 
 
   type, extends(test_base), abstract :: mpi_test_base
@@ -20,6 +20,11 @@ module fortuno_mpi_mpitest
       class(mpi_test_base), intent(inout) :: this
     end subroutine mpi_test_base_run_i
   end interface
+
+
+  type :: mpi_test_base_cls
+    class(mpi_test_base), allocatable :: instance
+  end type mpi_test_base_cls
 
 
   type, extends(mpi_test_base) :: mpi_test

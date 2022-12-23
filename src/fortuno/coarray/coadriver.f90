@@ -1,11 +1,11 @@
 module fortuno_coarray_coadriver
   use iso_fortran_env, only : stderr => error_unit
-  use fortuno_basetypes, only : test_base, context_base, suite_base
+  use fortuno_basetypes, only : test_base, context_base, suite_base, suite_base_cls
   use fortuno_contextfactory, only : context_factory
   use fortuno_coarray_coacontext, only : coa_context, coa_context_factory
   use fortuno_coarray_coagctx, only : set_global_context, restore_global_context
   use fortuno_coarray_coalogger, only : coa_logger
-  use fortuno_coarray_coasuite, only : coa_suite_base
+  use fortuno_coarray_coasuite, only : coa_suite_base, coa_suite_base_cls
   use fortuno_coarray_coatest, only : coa_test_base
   use fortuno_genericdriver, only : generic_driver, test_runner
   use fortuno_testerror, only : test_error
@@ -34,19 +34,36 @@ module fortuno_coarray_coadriver
 
 
   interface coa_driver
-    module procedure new_coa_driver
+    module procedure new_coa_driver_suite, new_coa_driver_suite_cls
   end interface
 
 contains
 
 
-  function new_coa_driver(testsuites) result(this)
+  function new_coa_driver_suite(testsuites) result(this)
     class(suite_base), optional, intent(in) :: testsuites(:)
     type(coa_driver) :: this
 
     if (present(testsuites)) call this%add_suite_base(testsuites)
 
-  end function new_coa_driver
+  end function new_coa_driver_suite
+
+
+  function new_coa_driver_suite_cls(testsuites) result(this)
+    type(coa_suite_base_cls), intent(in) :: testsuites(:)
+    type(coa_driver) :: this
+
+    type(suite_base_cls), allocatable :: sbc(:)
+    integer :: isuite
+
+    allocate(sbc(size(testsuites)))
+    do isuite = 1, size(testsuites)
+      sbc(isuite)%instance = testsuites(isuite)%instance
+    end do
+    call this%add_suite_base(sbc)
+
+  end function new_coa_driver_suite_cls
+
 
 
   subroutine create_context_factory(this, ctxfact)

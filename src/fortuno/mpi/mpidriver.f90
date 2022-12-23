@@ -7,7 +7,7 @@ module fortuno_mpi_mpidriver
   use fortuno_mpi_mpicontext, only : mpi_context, mpi_context_factory, mpi_env
   use fortuno_mpi_mpigctx, only : restore_global_context, set_global_context
   use fortuno_mpi_mpilogger, only : mpi_logger
-  use fortuno_mpi_mpisuite, only : mpi_suite_base
+  use fortuno_mpi_mpisuite, only : mpi_suite_base, mpi_suite_base_cls
   use fortuno_mpi_mpitest, only : mpi_test_base
   use fortuno_testerror, only : test_error
   use fortuno_testlogger, only : test_logger
@@ -41,19 +41,35 @@ module fortuno_mpi_mpidriver
 
 
   interface mpi_driver
-    module procedure new_mpi_driver
+    module procedure new_mpi_driver_suite, new_mpi_driver_suite_cls
   end interface
 
 contains
 
 
-  function new_mpi_driver(testsuites) result(this)
+  function new_mpi_driver_suite(testsuites) result(this)
     class(suite_base), optional, intent(in) :: testsuites(:)
     type(mpi_driver) :: this
 
     if (present(testsuites)) call this%add_suite_base(testsuites)
 
-  end function new_mpi_driver
+  end function new_mpi_driver_suite
+
+
+  function new_mpi_driver_suite_cls(testsuites) result(this)
+    type(mpi_suite_base_cls), intent(in) :: testsuites(:)
+    type(mpi_driver) :: this
+
+    type(suite_base_cls), allocatable :: sbc(:)
+    integer :: isuite
+
+    allocate(sbc(size(testsuites)))
+    do isuite = 1, size(testsuites)
+      sbc(isuite)%instance = testsuites(isuite)%instance
+    end do
+    call this%add_suite_base(sbc)
+
+  end function new_mpi_driver_suite_cls
 
 
   subroutine set_up(this)

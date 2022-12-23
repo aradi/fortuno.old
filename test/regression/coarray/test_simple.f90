@@ -1,6 +1,7 @@
 module testmod_simple
   use mylib, only : allreduce_sum, broadcast
-  use fortuno_coarray, only : check, fixtured_test, is_equal, skip, test, test_suite
+  use fortuno_coarray, only : check, fixtured_test, is_equal, skip, test, test_suite,&
+      & tbc => test_base_cls
   implicit none
 
 
@@ -15,13 +16,12 @@ contains
     type(test_suite) :: suite
 
     suite = test_suite("simple", [&
-        & test("broadcast", test_broadcast),&
-        & test("allreduce", test_allreduce),&
-        & test("imgs_lt_4", test_imgs_lt_4),&
-        & test("imgs_ge_4", test_imgs_ge_4)&
+        & tbc(test("broadcast", test_broadcast)),&
+        & tbc(test("allreduce", test_allreduce)),&
+        & tbc(test("imgs_lt_4", test_imgs_lt_4)),&
+        & tbc(test("imgs_ge_4", test_imgs_ge_4)),&
+        & tbc(div_n_failure("divnfailure_3_0", test_divnfailure, divisor=3, remainder=0))&
         & ])
-    call suite%add_test(&
-        & div_n_failure("divnfailure_3_0", test_divnfailure, divisor=3, remainder=0))
 
   end function simple_suite
 
