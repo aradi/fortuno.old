@@ -1,6 +1,6 @@
 module fortuno_mpi_mpitest
-  use fortuno_basetypes, only : test_base
   use fortuno_mpi_mpicontext, only : mpi_context
+  use fortuno_testbase, only : test_base
   implicit none
 
   private

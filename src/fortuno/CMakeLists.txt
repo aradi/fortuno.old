@@ -3,17 +3,20 @@ set(curdir "${CMAKE_CURRENT_SOURCE_DIR}")
 list(
     APPEND f90-sources
     "${curdir}/argumentparser.f90"
-    "${curdir}/basetypes.f90"
     "${curdir}/checkers.f90"
     "${curdir}/checkresult.f90"
     "${curdir}/common.f90"
+    "${curdir}/contextbase.f90"
     "${curdir}/contextfactory.f90"
     "${curdir}/failuredetails.f90"
     "${curdir}/failureinfo.f90"
     "${curdir}/genericdriver.f90"
     "${curdir}/serial.f90"
+    "${curdir}/suitebase.f90"
+    "${curdir}/testbase.f90"
     "${curdir}/testerror.f90"
     "${curdir}/testlogger.f90"
+    "${curdir}/teststatus.f90"
     "${curdir}/utils.f90"
     "${curdir}/version.f90"
 )

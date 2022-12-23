@@ -1,7 +1,7 @@
 module fortuno_serial_serialgctx
-  use fortuno_basetypes, only : suite_base
   use fortuno_checkresult, only : check_result
   use fortuno_serial_serialcontext, only : serial_context
+  use fortuno_suitebase, only : suite_base
 
   private
   public :: serialgctx

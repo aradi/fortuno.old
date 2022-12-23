@@ -1,6 +1,7 @@
 module fortuno_serial_serialsuite
-  use fortuno_basetypes, only : init_suite_base, suite_base, test_base_cls
   use fortuno_serial_serialtest, only : serial_test_base, serial_test_base_cls
+  use fortuno_suitebase, only : init_suite_base, suite_base
+  use fortuno_testbase, only : test_base_cls
   implicit none
 
   private

@@ -1,5 +1,5 @@
 module fortuno_serial_serialtest
-  use fortuno_basetypes, only : test_base
+  use fortuno_testbase, only : test_base
   use fortuno_utils, only : keyword_arg_enforcer_
   implicit none
 

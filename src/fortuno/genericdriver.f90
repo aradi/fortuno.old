@@ -1,8 +1,11 @@
 module fortuno_genericdriver
-  use fortuno_basetypes, only : suite_base, suite_base_cls, context_base, test_base, teststatus
+  use fortuno_contextbase, only : context_base
   use fortuno_contextfactory, only : context_factory
+  use fortuno_suitebase, only : suite_base, suite_base_cls
+  use fortuno_testbase, only : test_base
   use fortuno_testlogger, only : driver_result, test_logger, init_test_result, testtypes
   use fortuno_testerror, only : test_error
+  use fortuno_teststatus, only : teststatus
   implicit none
 
   private

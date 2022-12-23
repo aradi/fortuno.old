@@ -1,8 +1,11 @@
 module fortuno_mpi_mpicontext
   use mpi_f08, only : mpi_comm, mpi_allreduce, MPI_IN_PLACE, MPI_INTEGER, MPI_PROD
-  use fortuno_basetypes, only : test_base, context_base, suite_base
+  use fortuno_contextbase, only : context_base
   use fortuno_contextfactory, only : context_factory
   use fortuno_mpi_mpifailureinfo, only : mpi_failure_info
+  use fortuno_suitebase, only : suite_base
+  use fortuno_testbase, only : test_base
+
   implicit none
 
   private

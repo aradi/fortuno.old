@@ -1,6 +1,7 @@
 module fortuno_testlogger
-  use fortuno_basetypes, only : context_base, teststatus
+  use fortuno_contextbase, only : context_base
   use fortuno_failureinfo, only : failure_info
+  use fortuno_teststatus, only : teststatus
   implicit none
 
   private

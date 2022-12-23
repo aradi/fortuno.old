@@ -1,8 +1,8 @@
 module fortuno_mpi_mpigctx
   use mpi_f08, only : MPI_Comm
-  use fortuno_basetypes, only : suite_base
   use fortuno_checkresult, only : check_result
   use fortuno_mpi_mpicontext, only : mpi_context
+  use fortuno_suitebase, only : suite_base
   implicit none
 
   private

@@ -1,6 +1,6 @@
 module fortuno_coarray_coadriver
   use iso_fortran_env, only : stderr => error_unit
-  use fortuno_basetypes, only : test_base, context_base, suite_base, suite_base_cls
+  use fortuno_contextbase, only : context_base
   use fortuno_contextfactory, only : context_factory
   use fortuno_coarray_coacontext, only : coa_context, coa_context_factory
   use fortuno_coarray_coagctx, only : set_global_context, restore_global_context
@@ -8,6 +8,8 @@ module fortuno_coarray_coadriver
   use fortuno_coarray_coasuite, only : coa_suite_base, coa_suite_base_cls
   use fortuno_coarray_coatest, only : coa_test_base
   use fortuno_genericdriver, only : generic_driver, test_runner
+  use fortuno_suitebase, only : suite_base, suite_base_cls
+  use fortuno_testbase, only : test_base
   use fortuno_testerror, only : test_error
   use fortuno_testlogger, only : test_logger
   implicit none

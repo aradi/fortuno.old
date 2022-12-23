@@ -1,5 +1,5 @@
 module fortuno_serial_serialcontext
-  use fortuno_basetypes, only : context_base
+  use fortuno_contextbase, only : context_base
   implicit none
 
   private

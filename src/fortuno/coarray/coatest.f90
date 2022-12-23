@@ -1,6 +1,6 @@
 module fortuno_coarray_coatest
-  use fortuno_basetypes, only : test_base
   use fortuno_coarray_coacontext, only : coa_context
+  use fortuno_testbase, only : test_base
   implicit none
 
   private

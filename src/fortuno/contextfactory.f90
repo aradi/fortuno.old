@@ -1,5 +1,7 @@
 module fortuno_contextfactory
-  use fortuno_basetypes, only : context_base, suite_base, test_base
+  use fortuno_contextbase, only : context_base
+  use fortuno_suitebase, only : suite_base
+  use fortuno_testbase, only : test_base
   implicit none
 
   private

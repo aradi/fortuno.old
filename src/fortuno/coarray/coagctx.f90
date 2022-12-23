@@ -1,7 +1,7 @@
 module fortuno_coarray_coagctx
-  use fortuno_basetypes, only : suite_base
   use fortuno_checkresult, only : check_result
   use fortuno_coarray_coacontext, only : coa_context
+  use fortuno_suitebase, only : suite_base
   implicit none
 
   private

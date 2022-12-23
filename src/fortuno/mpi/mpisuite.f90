@@ -1,7 +1,8 @@
 module fortuno_mpi_mpisuite
-  use fortuno_basetypes, only : init_suite_base, suite_base, test_base_cls
   use fortuno_mpi_mpicontext, only : mpi_context
   use fortuno_mpi_mpitest, only : mpi_test_base, mpi_test_base_cls
+  use fortuno_suitebase, only : init_suite_base, suite_base
+  use fortuno_testbase, only : test_base_cls
   implicit none
 
   private

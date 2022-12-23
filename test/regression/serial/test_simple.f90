@@ -9,12 +9,17 @@ contains
   function simple_suite() result(suite)
     type(test_suite) :: suite
 
+    integer :: ii
+
     suite = test_suite("simple", [&
         & test("factorial_0", test_factorial_0),&
         & test("factorial_1", test_factorial_1),&
         & test("factorial_2_3", test_factorial_2_3),&
         & test("factorial_4_5", test_factorial_4_5)&
         & ])
+    do ii = 1, 10000
+      call suite%add_test(test("factorial_4_5", test_factorial_4_5))
+    end do
 
   end function simple_suite
 

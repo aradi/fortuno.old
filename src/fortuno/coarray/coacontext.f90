@@ -1,7 +1,10 @@
 module fortuno_coarray_coacontext
-  use fortuno_basetypes, only : test_base, context_base, suite_base
+  use fortuno_basetypes, only :
+  use fortuno_contextbase, only : context_base
   use fortuno_contextfactory, only : context_factory
   use fortuno_coarray_coafailureinfo, only : coa_failure_info
+  use fortuno_suitebase, only : suite_base
+  use fortuno_testbase, only : test_base
   implicit none
 
   private

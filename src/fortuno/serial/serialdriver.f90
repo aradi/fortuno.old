@@ -1,6 +1,6 @@
 module fortuno_serial_serialdriver
   use iso_fortran_env, only : stderr => error_unit
-  use fortuno_basetypes, only : suite_base, suite_base_cls, context_base, test_base
+  use fortuno_contextbase, only: context_base
   use fortuno_contextfactory, only : context_factory
   use fortuno_genericdriver, only : generic_driver, test_runner
   use fortuno_serial_serialgctx, only : set_global_context, restore_global_context
@@ -8,6 +8,8 @@ module fortuno_serial_serialdriver
   use fortuno_serial_seriallogger, only : serial_logger
   use fortuno_serial_serialsuite, only : serial_suite_base, serial_suite_base_cls
   use fortuno_serial_serialtest, only : serial_test_base
+  use fortuno_suitebase, only : suite_base, suite_base_cls
+  use fortuno_testbase, only : test_base
   use fortuno_testlogger, only : test_logger
   use fortuno_testerror, only : test_error
   implicit none

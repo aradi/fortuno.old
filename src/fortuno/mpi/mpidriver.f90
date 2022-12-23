@@ -1,7 +1,7 @@
 module fortuno_mpi_mpidriver
   use iso_fortran_env, only : stderr => error_unit
   use mpi_f08, only : MPI_Comm, MPI_Comm_rank, MPI_Comm_size, MPI_COMM_WORLD, MPI_Finalize, MPI_Init
-  use fortuno_basetypes, only : test_base, context_base, suite_base, suite_base_cls
+  use fortuno_contextbase, only : context_base
   use fortuno_contextfactory, only : context_factory
   use fortuno_genericdriver, only : generic_driver, test_runner
   use fortuno_mpi_mpicontext, only : mpi_context, mpi_context_factory, mpi_env
@@ -9,6 +9,8 @@ module fortuno_mpi_mpidriver
   use fortuno_mpi_mpilogger, only : mpi_logger
   use fortuno_mpi_mpisuite, only : mpi_suite_base, mpi_suite_base_cls
   use fortuno_mpi_mpitest, only : mpi_test_base
+  use fortuno_suitebase, only : suite_base, suite_base_cls
+  use fortuno_testbase, only : test_base
   use fortuno_testerror, only : test_error
   use fortuno_testlogger, only : test_logger
   use fortuno_utils, only : string
