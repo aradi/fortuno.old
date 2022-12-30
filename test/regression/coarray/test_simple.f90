@@ -1,7 +1,7 @@
 module testmod_simple
   use mylib, only : allreduce_sum, broadcast
-  use fortuno_coarray, only : check, fixtured_test, is_equal, skip, test, test_suite,&
-      & tbc => test_base_cls
+  use fortuno_coarray, only : check, fixtured_test, is_equal, skip, suite_base_cls, test,&
+      & test_suite, tbc => test_base_cls
   implicit none
 
 
@@ -13,9 +13,13 @@ contains
 
 
   function simple_suite() result(suite)
-    type(test_suite) :: suite
+    type(suite_base_cls) :: suite
 
-    suite = test_suite("simple", [&
+    ! Since the tests in the suite initializer have different types, they must be wrapped with
+    ! test_base_class (Fortran does not permit arrays with elements of differing types).
+    ! Alternatively you could use subsequent %add_test() calls to tests of different types.
+    suite%instance =&
+        & test_suite("simple", [&
         & tbc(test("broadcast", test_broadcast)),&
         & tbc(test("allreduce", test_allreduce)),&
         & tbc(test("imgs_lt_4", test_imgs_lt_4)),&

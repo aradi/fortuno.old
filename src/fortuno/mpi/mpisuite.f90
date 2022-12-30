@@ -71,5 +71,4 @@ contains
 
   end function new_mpi_suite_test_cls
 
-
 end module fortuno_mpi_mpisuite

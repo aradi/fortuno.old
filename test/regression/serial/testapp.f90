@@ -1,5 +1,5 @@
 program testapp
-  use fortuno_serial, only : cmd_app, sbc => suite_base_cls
+  use fortuno_serial, only : cmd_app
   use testmod_simple, only : simple_suite
   use testmod_fixtured, only : fixtured_suite
   use testmod_parametrized, only : parametrized_suite
@@ -9,10 +9,10 @@ program testapp
   type(cmd_app), allocatable :: app
 
   app = cmd_app([&
-      & sbc(simple_suite()),&
-      & sbc(fixtured_suite()),&
-      & sbc(parametrized_suite()),&
-      & sbc(parametrized2_suite())&
+      & simple_suite(),&
+      & fixtured_suite(),&
+      & parametrized_suite(),&
+      & parametrized2_suite()&
       & ])
   call app%run()
 

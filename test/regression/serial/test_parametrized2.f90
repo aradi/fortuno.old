@@ -1,6 +1,6 @@
 module testmod_parametrized2
   use mylib, only : factorial
-  use fortuno_serial, only : check, test_suite, fixtured_test
+  use fortuno_serial, only : check, suite_base_cls, test_suite, fixtured_test
   implicit none
 
 
@@ -21,15 +21,16 @@ contains
 
 
   function parametrized2_suite() result(suite)
-    type(test_suite) :: suite
+    type(suite_base_cls) :: suite
 
     integer :: icalc
     character(200) :: name
 
-    suite = test_suite("parametrized2")
+    suite%instance = test_suite("parametrized2")
     do icalc = 1, size(factcalcs)
       write(name, "(a, i0)") "factorial_", factcalcs(icalc)%arg
-      call suite%add_test(factcalc_test(trim(name), test_fact_calc, factcalc=factcalcs(icalc)))
+      call suite%instance%add_test(&
+          & factcalc_test(trim(name), test_fact_calc, factcalc=factcalcs(icalc)))
     end do
 
   end function parametrized2_suite

@@ -1,25 +1,21 @@
 module testmod_simple
   use mylib, only : factorial
-  use fortuno_serial, only : test_suite, test, check, check_failed, skip
+  use fortuno_serial, only : suite_base_cls, test_suite, test, check, check_failed, skip
   implicit none
 
 contains
 
 
   function simple_suite() result(suite)
-    type(test_suite) :: suite
+    type(suite_base_cls) :: suite
 
-    integer :: ii
-
-    suite = test_suite("simple", [&
+    suite%instance =&
+        & test_suite("simple", [&
         & test("factorial_0", test_factorial_0),&
         & test("factorial_1", test_factorial_1),&
         & test("factorial_2_3", test_factorial_2_3),&
         & test("factorial_4_5", test_factorial_4_5)&
         & ])
-    do ii = 1, 10000
-      call suite%add_test(test("factorial_4_5", test_factorial_4_5))
-    end do
 
   end function simple_suite
 

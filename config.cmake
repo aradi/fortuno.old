@@ -19,7 +19,7 @@ option(WITH_TESTS "Whether tests should be built" TRUE)
 # Compiler dependent config options
 #
 
-if("GNU" STREQUAL "${CMAKE_Fortran_COMPILER_ID}")
+if("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU")
 
     # Specific settings for the GNU compiler
 
@@ -34,7 +34,7 @@ if("GNU" STREQUAL "${CMAKE_Fortran_COMPILER_ID}")
 
     set(Fortran_COARRAY_FLAG "-fcoarray=lib" CACHE STRING "Coarray flag of the Fortran compiler")
 
-elseif("Intel" STREQUAL "${CMAKE_Fortran_COMPILER_ID}")
+elseif("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel|IntelLLVM")
 
     # Specific settings for the Intel compiler
 
@@ -49,7 +49,7 @@ elseif("Intel" STREQUAL "${CMAKE_Fortran_COMPILER_ID}")
 
     set(Fortran_COARRAY_FLAG "-coarray" CACHE STRING "Coarray flag of the Fortran compiler")
 
-elseif("NAG" STREQUAL "${CMAKE_Fortran_COMPILER_ID}")
+elseif("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "NAG")
 
     # Specific settings for the NAG compiler
 

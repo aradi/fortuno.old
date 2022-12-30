@@ -1,6 +1,6 @@
 module testmod_fixtured
   use mylib, only : factorial
-  use fortuno_serial, only : check, test_suite, fixtured_test
+  use fortuno_serial, only : check, fixtured_test, suite_base_cls, test_suite
   implicit none
 
 
@@ -15,13 +15,14 @@ contains
 
 
   function fixtured_suite() result(suite)
-    type(test_suite) :: suite
+    type(suite_base_cls) :: suite
 
     integer :: ii
 
     call random_seed()
 
-    suite = test_suite("fixtured", [&
+    suite%instance =&
+        & test_suite("fixtured", [&
         & [(random_test("recursion_down", test_recursion_down), ii = 1, 10)],&
         & [(random_test("recursion_up", test_recursion_up), ii = 1, 10)]&
         & ])

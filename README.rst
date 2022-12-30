@@ -4,12 +4,6 @@
 Fortuno – Fortran Unit Testing Objects
 **************************************
 
-**NOTE:** Fortuno is currently still under heavy development, the API might
-change without further notice. Nevetheless, it is fully functional, so you might
-give it a try already at this early stage (any feedback is welcome!). From
-release 0.1 (expected at the end of 2022), we will try to keep the API (at least
-at the user side) stable.
-
 The **Fortuno** project offers an object oriented unit testing framework for the
 Fortran language. It aims to combine the simplicity of `test-drive
 <https://github.com/fortran-lang/test-drive>`_ with the broad range of features

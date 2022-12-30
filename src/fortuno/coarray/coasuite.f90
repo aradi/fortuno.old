@@ -1,6 +1,7 @@
 module fortuno_coarray_coasuite
-  use fortuno_coarray_coatest, only : coa_test_base
+  use fortuno_coarray_coatest, only : coa_test_base, coa_test_base_cls
   use fortuno_suitebase, only : suite_base, init_suite_base
+  use fortuno_testbase, only : test_base_cls
   implicit none
 
   private
@@ -24,7 +25,7 @@ module fortuno_coarray_coasuite
 
 
   interface coa_suite
-    module procedure new_coa_suite
+    module procedure new_coa_suite_test, new_coa_suite_test_cls
   end interface coa_suite
 
 contains
@@ -40,13 +41,31 @@ contains
   end subroutine coa_suite_base_tear_down
 
 
-  function new_coa_suite(name, tests) result(this)
+  function new_coa_suite_test(name, tests) result(this)
     character(*), intent(in) :: name
     class(coa_test_base), optional, intent(in) :: tests(:)
     type(coa_suite) :: this
 
     call init_suite_base(this, name, tests)
 
-  end function new_coa_suite
+  end function new_coa_suite_test
+
+
+  function new_coa_suite_test_cls(name, tests) result(this)
+    character(*), intent(in) :: name
+    type(coa_test_base_cls), intent(in) :: tests(:)
+    type(coa_suite) :: this
+
+    type(test_base_cls), allocatable :: stbc(:)
+    integer :: itest
+
+    call init_suite_base(this, name)
+    allocate(stbc(size(tests)))
+    do itest = 1, size(tests)
+      stbc(itest)%instance = tests(itest)%instance
+    end do
+    call this%add_test(stbc)
+
+  end function new_coa_suite_test_cls
 
 end module fortuno_coarray_coasuite
