@@ -6,18 +6,18 @@ module testmod_simple
 contains
 
 
-  function simple_suite() result(suite)
+  function new_suite() result(suite)
     type(suite_base_cls) :: suite
 
     suite%instance =&
         & test_suite("simple", [&
-        & test("factorial_0", test_factorial_0),&
-        & test("factorial_1", test_factorial_1),&
-        & test("factorial_2_3", test_factorial_2_3),&
-        & test("factorial_4_5", test_factorial_4_5)&
+        & test("factorial_0", proc=test_factorial_0),&
+        & test("factorial_1", proc=test_factorial_1),&
+        & test("factorial_2_3", proc=test_factorial_2_3),&
+        & test("factorial_4_5", proc=test_factorial_4_5)&
         & ])
 
-  end function simple_suite
+  end function new_suite
 
   ! Test: 0! = 1
   subroutine test_factorial_0()

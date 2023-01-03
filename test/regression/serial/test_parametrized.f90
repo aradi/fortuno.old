@@ -1,36 +1,38 @@
 module testmod_parametrized
   use mylib, only : factorial
-  use fortuno_serial, only : check, suite_base_cls, test_suite, fixtured_test
+  use fortuno_serial, only : check, suite_base_cls, test_suite, serial_test_base
   implicit none
 
 
-  type, extends(fixtured_test) :: factcalc_test
+  type, extends(serial_test_base) :: factcalc_test
     integer :: arg, res
+  contains
+    procedure :: run => test_factcalc
   end type
 
 contains
 
 
-  function parametrized_suite() result(suite)
+  function new_suite() result(suite)
     type(suite_base_cls) :: suite
 
     suite%instance =&
         & test_suite("parametrized", [&
-        & factcalc_test("factorial_0", test_factorial, arg=0, res=1),&
-        & factcalc_test("factorial_1", test_factorial, arg=1, res=1),&
-        & factcalc_test("factorial_2", test_factorial, arg=2, res=2),&
-        & factcalc_test("factorial_3", test_factorial, arg=3, res=6),&
-        & factcalc_test("factorial_4", test_factorial, arg=4, res=24)&
+        & factcalc_test("factorial_0", arg=0, res=1),&
+        & factcalc_test("factorial_1", arg=1, res=1),&
+        & factcalc_test("factorial_2", arg=2, res=2),&
+        & factcalc_test("factorial_3", arg=3, res=6),&
+        & factcalc_test("factorial_4", arg=4, res=24)&
         & ])
 
-  end function parametrized_suite
+  end function new_suite
 
 
-  subroutine test_factorial(this)
-    class(factcalc_test), intent(in) :: this
+  subroutine test_factcalc(this)
+    class(factcalc_test), intent(inout) :: this
 
     call check(factorial(this%arg) == this%res)
 
-  end subroutine test_factorial
+  end subroutine test_factcalc
 
 end module testmod_parametrized

@@ -1,6 +1,6 @@
 module testmod_parametrized2
   use mylib, only : factorial
-  use fortuno_serial, only : check, suite_base_cls, test_suite, fixtured_test
+  use fortuno_serial, only : check, suite_base_cls, test_suite, serial_test_base
   implicit none
 
 
@@ -13,14 +13,16 @@ module testmod_parametrized2
       & ]
 
 
-  type, extends(fixtured_test) :: factcalc_test
-    type(calc) :: factcalc
+  type, extends(serial_test_base) :: factcalc_test
+    type(calc) :: data
+  contains
+    procedure :: run
   end type factcalc_test
 
 contains
 
 
-  function parametrized2_suite() result(suite)
+  function new_suite() result(suite)
     type(suite_base_cls) :: suite
 
     integer :: icalc
@@ -30,17 +32,17 @@ contains
     do icalc = 1, size(factcalcs)
       write(name, "(a, i0)") "factorial_", factcalcs(icalc)%arg
       call suite%instance%add_test(&
-          & factcalc_test(trim(name), test_fact_calc, factcalc=factcalcs(icalc)))
+          & factcalc_test(trim(name), data=factcalcs(icalc)))
     end do
 
-  end function parametrized2_suite
+  end function new_suite
 
 
-  subroutine test_fact_calc(this)
-    class(factcalc_test), intent(in) :: this
+  subroutine run(this)
+    class(factcalc_test), intent(inout) :: this
 
-    call check(factorial(this%factcalc%arg) == this%factcalc%res)
+    call check(factorial(this%data%arg) == this%data%res)
 
-  end subroutine test_fact_calc
+  end subroutine run
 
 end module testmod_parametrized2

@@ -1,20 +1,21 @@
 module testmod_fixtured
   use mylib, only : factorial
-  use fortuno_serial, only : check, fixtured_test, suite_base_cls, test_suite
+  use fortuno_serial, only : check, suite_base_cls, serial_test_base, test_suite
   implicit none
 
 
-  type, extends(fixtured_test) :: random_test
+  type, extends(serial_test_base) :: random_test
+    procedure(test_recursion_down), pointer :: proc
     integer :: nn = -1
   contains
-    procedure:: set_up
+    procedure :: run
     procedure :: get_char_repr
   end type
 
 contains
 
 
-  function fixtured_suite() result(suite)
+  function new_suite() result(suite)
     type(suite_base_cls) :: suite
 
     integer :: ii
@@ -23,11 +24,11 @@ contains
 
     suite%instance =&
         & test_suite("fixtured", [&
-        & [(random_test("recursion_down", test_recursion_down), ii = 1, 10)],&
-        & [(random_test("recursion_up", test_recursion_up), ii = 1, 10)]&
+        & [(random_test("recursion_down", proc=test_recursion_down), ii = 1, 10)],&
+        & [(random_test("recursion_up", proc=test_recursion_up), ii = 1, 10)]&
         & ])
 
-  end function fixtured_suite
+  end function new_suite
 
 
   subroutine test_recursion_down(this)
@@ -46,15 +47,16 @@ contains
   end subroutine test_recursion_up
 
 
-  subroutine set_up(this)
+  subroutine run(this)
     class(random_test), intent(inout) :: this
 
     real :: rand
 
     call random_number(rand)
     this%nn = int(20.0 * rand) + 1
+    call this%proc()
 
-  end subroutine set_up
+  end subroutine run
 
 
   subroutine get_char_repr(this, repr)

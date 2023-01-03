@@ -12,10 +12,10 @@ contains
     type(test_suite) :: suite
 
     suite = test_suite("selftest_fixture", [&
-        & test("check_t", test_check_t),&
-        & test("check_f", test_check_f),&
-        & test("check_tf", test_check_tf),&
-        & test("check_tft", test_check_tft)&
+        & test("check_t", proc=test_check_t),&
+        & test("check_f", proc=test_check_f),&
+        & test("check_tf", proc=test_check_tf),&
+        & test("check_tft", proc=test_check_tft)&
         & ])
 
   end function selftest_fixture_suite
@@ -63,8 +63,8 @@ contains
 
     call set_up_global_fixture()
     suite = test_suite("selftest", [&
-        & test("nr_of_entries", test_nr_of_entries),&
-        & test("results", test_results)&
+        & test("nr_of_entries", proc=test_nr_of_entries),&
+        & test("results", proc=test_results)&
         & ])
 
   end function selftest_suite

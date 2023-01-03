@@ -4,7 +4,7 @@ module fortuno_coarray_coatest
   implicit none
 
   private
-  public :: coa_fixtured_test, coa_test, coa_test_base, coa_test_base_cls
+  public :: coa_test, coa_test_base, coa_test_base_cls
 
 
   type, extends(test_base), abstract :: coa_test_base
@@ -27,33 +27,15 @@ module fortuno_coarray_coatest
 
 
   type, extends(coa_test_base) :: coa_test
-    procedure(coa_test_testroutine_i), nopass, pointer :: testroutine
+    procedure(coa_test_proc_i), nopass, pointer :: proc
   contains
     procedure :: run => coa_test_run
   end type coa_test
 
 
   abstract interface
-    subroutine coa_test_testroutine_i()
-    end subroutine coa_test_testroutine_i
-  end interface
-
-
-  type, extends(coa_test_base) :: coa_fixtured_test
-    procedure(coa_fixtured_test_testroutine_i), pointer :: testroutine
-  contains
-    procedure :: run => coa_fixtured_test_run
-    procedure :: set_up => coa_fixtured_test_set_up
-    procedure :: tear_down => coa_fixtured_test_tear_down
-  end type coa_fixtured_test
-
-
-  abstract interface
-    subroutine coa_fixtured_test_testroutine_i(this)
-      import :: coa_fixtured_test
-      implicit none
-      class(coa_fixtured_test), intent(in) :: this
-    end subroutine coa_fixtured_test_testroutine_i
+    subroutine coa_test_proc_i()
+    end subroutine coa_test_proc_i
   end interface
 
 contains
@@ -62,30 +44,8 @@ contains
   subroutine coa_test_run(this)
     class(coa_test), intent(inout) :: this
 
-    call this%testroutine()
+    call this%proc()
 
   end subroutine coa_test_run
-
-
-  subroutine coa_fixtured_test_run(this)
-    class(coa_fixtured_test), intent(inout) :: this
-
-    call this%set_up()
-    call this%testroutine()
-    call this%tear_down()
-
-  end subroutine coa_fixtured_test_run
-
-
-  subroutine coa_fixtured_test_set_up(this)
-    class(coa_fixtured_test), intent(inout) :: this
-
-  end subroutine coa_fixtured_test_set_up
-
-
-  subroutine coa_fixtured_test_tear_down(this)
-    class(coa_fixtured_test), intent(inout) :: this
-
-  end subroutine coa_fixtured_test_tear_down
 
 end module fortuno_coarray_coatest

@@ -1,4 +1,5 @@
 module fortuno_testbase
+  use fortuno_utils, only : keyword_arg_enforcer_
   implicit none
 
   private
@@ -7,6 +8,7 @@ module fortuno_testbase
 
   type, abstract :: test_base
     character(:), allocatable :: name
+    type(keyword_arg_enforcer_), private :: kwargsonly_ = keyword_arg_enforcer_()
   contains
     procedure :: get_char_repr
   end type test_base

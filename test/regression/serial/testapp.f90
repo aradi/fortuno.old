@@ -1,9 +1,9 @@
 program testapp
   use fortuno_serial, only : cmd_app
-  use testmod_simple, only : simple_suite
-  use testmod_fixtured, only : fixtured_suite
-  use testmod_parametrized, only : parametrized_suite
-  use testmod_parametrized2, only : parametrized2_suite
+  use testmod_simple, only : simple_suite => new_suite
+  use testmod_fixtured, only : fixtured_suite => new_suite
+  use testmod_parametrized, only : parametrized_suite => new_suite
+  use testmod_parametrized2, only : parametrized2_suite => new_suite
   implicit none
 
   type(cmd_app), allocatable :: app

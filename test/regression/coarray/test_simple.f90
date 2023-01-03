@@ -1,18 +1,20 @@
 module testmod_simple
   use mylib, only : allreduce_sum, broadcast
-  use fortuno_coarray, only : check, fixtured_test, is_equal, skip, suite_base_cls, test,&
-      & test_suite, tbc => test_base_cls
+  use fortuno_coarray, only : check, is_equal, skip, suite_base_cls, test,&
+      & test_suite, tbc => test_base_cls, coa_test_base
   implicit none
 
 
-  type, extends(fixtured_test) :: div_n_failure
+  type, extends(coa_test_base) :: div_n_failure
     integer :: divisor, remainder
+  contains
+    procedure :: run => test_divnfailure
   end type
 
 contains
 
 
-  function simple_suite() result(suite)
+  function new_suite() result(suite)
     type(suite_base_cls) :: suite
 
     ! Since the tests in the suite initializer have different types, they must be wrapped with
@@ -20,14 +22,14 @@ contains
     ! Alternatively you could use subsequent %add_test() calls to tests of different types.
     suite%instance =&
         & test_suite("simple", [&
-        & tbc(test("broadcast", test_broadcast)),&
-        & tbc(test("allreduce", test_allreduce)),&
-        & tbc(test("imgs_lt_4", test_imgs_lt_4)),&
-        & tbc(test("imgs_ge_4", test_imgs_ge_4)),&
-        & tbc(div_n_failure("divnfailure_3_0", test_divnfailure, divisor=3, remainder=0))&
+        & tbc(test("broadcast", proc=test_broadcast)),&
+        & tbc(test("allreduce", proc=test_allreduce)),&
+        & tbc(test("imgs_lt_4", proc=test_imgs_lt_4)),&
+        & tbc(test("imgs_ge_4", proc=test_imgs_ge_4)),&
+        & tbc(div_n_failure("divnfailure_3_0", divisor=3, remainder=0))&
         & ])
 
-  end function simple_suite
+  end function new_suite
 
 
   ! Given: source image contains a different integer value as all other images
@@ -94,7 +96,7 @@ contains
 
 
   subroutine test_divnfailure(this)
-    class(div_n_failure), intent(in) :: this
+    class(div_n_failure), intent(inout) :: this
 
     character(100) :: msg
 
