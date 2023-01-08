@@ -1,7 +1,7 @@
 module fortuno_serial_serialgctx
   use fortuno_checkresult, only : check_result
   use fortuno_serial_serialcontext, only : serial_context
-  use fortuno_suitebase, only : suite_base
+  use fortuno_genericsuite, only : generic_suite
 
   private
   public :: serialgctx
@@ -39,7 +39,7 @@ contains
 
 
   function suite_ptr() result(suiteptr)
-    class(suite_base), pointer :: suiteptr
+    class(generic_suite), pointer :: suiteptr
 
     suiteptr => serialgctx%suite
 

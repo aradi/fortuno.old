@@ -1,16 +1,16 @@
-module fortuno_contextbase
+module fortuno_genericcontext
   use fortuno_checkresult, only : check_result
   use fortuno_failureinfo, only : failure_info
-  use fortuno_suitebase, only : suite_base
+  use fortuno_genericsuite, only : generic_suite
   use fortuno_teststatus, only : teststatus
   implicit none
 
   private
-  public :: context_base
+  public :: generic_context
 
 
-  type, abstract :: context_base
-    class(suite_base), pointer :: suite => null()
+  type, abstract :: generic_context
+    class(generic_suite), pointer :: suite => null()
     integer, private :: status_ = teststatus%ok
     logical, private :: check_failure = .false.
     integer :: nchecks = 0
@@ -24,13 +24,13 @@ module fortuno_contextbase
     procedure :: check_failed
     procedure :: skip
     procedure :: status
-  end type context_base
+  end type generic_context
 
 contains
 
 
   subroutine check_logical(this, cond, msg, file, line)
-    class(context_base), intent(inout) :: this
+    class(generic_context), intent(inout) :: this
     logical, intent(in) :: cond
     character(*), optional, intent(in) :: msg
     character(*), optional, intent(in) :: file
@@ -52,7 +52,7 @@ contains
 
 
   subroutine check_detailed(this, checkresult, msg, file, line)
-    class(context_base), intent(inout) :: this
+    class(generic_context), intent(inout) :: this
     type(check_result), intent(in) :: checkresult
     character(*), optional, intent(in) :: msg
     character(*), optional, intent(in) :: file
@@ -66,7 +66,7 @@ contains
 
 
   subroutine register_check(this, succeeded)
-    class(context_base), intent(inout) :: this
+    class(generic_context), intent(inout) :: this
     logical, intent(in) :: succeeded
 
     this%nchecks = this%nchecks + 1
@@ -77,7 +77,7 @@ contains
 
 
   function failed(this)
-    class(context_base), intent(in) :: this
+    class(generic_context), intent(in) :: this
     logical :: failed
 
     failed = this%status_ == teststatus%failed
@@ -86,7 +86,7 @@ contains
 
 
   function check_failed(this) result(checkfailed)
-    class(context_base), intent(in) :: this
+    class(generic_context), intent(in) :: this
     logical :: checkfailed
 
     checkfailed = this%check_failure
@@ -95,7 +95,7 @@ contains
 
 
   subroutine skip(this)
-    class(context_base), intent(inout) :: this
+    class(generic_context), intent(inout) :: this
 
     if (this%status_ == teststatus%ok) this%status_ = teststatus%skipped
 
@@ -103,11 +103,11 @@ contains
 
 
   function status(this)
-    class(context_base), intent(in) :: this
+    class(generic_context), intent(in) :: this
     integer :: status
 
     status = this%status_
 
   end function status
 
-end module fortuno_contextbase
+end module fortuno_genericcontext

@@ -2,7 +2,7 @@ module fortuno_mpi_mpigctx
   use mpi_f08, only : MPI_Comm
   use fortuno_checkresult, only : check_result
   use fortuno_mpi_mpicontext, only : mpi_context
-  use fortuno_suitebase, only : suite_base
+  use fortuno_genericsuite, only : generic_suite
   implicit none
 
   private
@@ -42,7 +42,7 @@ contains
 
 
   function suite_ptr() result(suiteptr)
-    class(suite_base), pointer :: suiteptr
+    class(generic_suite), pointer :: suiteptr
 
     suiteptr => mpigctx%suite
 

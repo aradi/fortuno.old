@@ -1,7 +1,7 @@
 module fortuno_contextfactory
-  use fortuno_contextbase, only : context_base
-  use fortuno_suitebase, only : suite_base
-  use fortuno_testbase, only : test_base
+  use fortuno_genericcontext, only : generic_context
+  use fortuno_genericsuite, only : generic_suite
+  use fortuno_generictest, only : generic_test
   implicit none
 
   private
@@ -17,11 +17,11 @@ module fortuno_contextfactory
   abstract interface
 
     subroutine create_context_i(this, testsuite, ctx)
-      import :: context_factory, test_base, context_base, suite_base
+      import :: context_factory, generic_test, generic_context, generic_suite
       implicit none
       class(context_factory), intent(in) :: this
-      class(suite_base), pointer, intent(in) :: testsuite
-      class(context_base), allocatable, intent(out) :: ctx
+      class(generic_suite), pointer, intent(in) :: testsuite
+      class(generic_context), allocatable, intent(out) :: ctx
     end subroutine create_context_i
 
   end interface

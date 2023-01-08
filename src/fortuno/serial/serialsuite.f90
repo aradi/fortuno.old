@@ -1,14 +1,14 @@
 module fortuno_serial_serialsuite
   use fortuno_serial_serialtest, only : serial_test_base, serial_test_base_cls
-  use fortuno_suitebase, only : init_suite_base, suite_base
-  use fortuno_testbase, only : test_base_cls
+  use fortuno_genericsuite, only : init_generic_suite, generic_suite
+  use fortuno_generictest, only : generic_test_cls
   implicit none
 
   private
   public :: serial_suite, serial_suite_base, serial_suite_base_cls
 
 
-  type, extends(suite_base) :: serial_suite_base
+  type, extends(generic_suite) :: serial_suite_base
   contains
     procedure :: set_up => serial_suite_base_set_up
     procedure :: tear_down => serial_suite_base_tear_down
@@ -48,7 +48,7 @@ contains
     class(serial_test_base), optional, intent(in) :: tests(:)
     type(serial_suite) :: this
 
-    call init_suite_base(this, name, tests)
+    call init_generic_suite(this, name, tests)
 
   end function new_serial_suite_test
 
@@ -58,10 +58,10 @@ contains
     type(serial_test_base_cls), intent(in) :: tests(:)
     type(serial_suite) :: this
 
-    type(test_base_cls), allocatable :: stbc(:)
+    type(generic_test_cls), allocatable :: stbc(:)
     integer :: itest
 
-    call init_suite_base(this, name)
+    call init_generic_suite(this, name)
     allocate(stbc(size(tests)))
     do itest = 1, size(tests)
       stbc(itest)%instance = tests(itest)%instance

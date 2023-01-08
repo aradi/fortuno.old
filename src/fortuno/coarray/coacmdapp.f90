@@ -59,7 +59,7 @@ contains
     class(coa_cmd_app), intent(inout) :: this
     class(coa_suite_base), intent(in) :: testsuite
 
-    call this%driver%add_suite_base(testsuite)
+    call this%driver%add_generic_suite(testsuite)
 
   end subroutine add_suite_scalar
 
@@ -68,7 +68,7 @@ contains
     class(coa_cmd_app), intent(inout) :: this
     class(coa_suite_base), intent(in) :: testsuites(:)
 
-    call this%driver%add_suite_base(testsuites)
+    call this%driver%add_generic_suite(testsuites)
 
   end subroutine add_suite_array
 

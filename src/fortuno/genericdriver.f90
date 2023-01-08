@@ -1,8 +1,8 @@
 module fortuno_genericdriver
-  use fortuno_contextbase, only : context_base
+  use fortuno_genericcontext, only : generic_context
   use fortuno_contextfactory, only : context_factory
-  use fortuno_suitebase, only : suite_base, suite_base_cls
-  use fortuno_testbase, only : test_base
+  use fortuno_genericsuite, only : generic_suite, generic_suite_cls
+  use fortuno_generictest, only : generic_test
   use fortuno_testlogger, only : driver_result, test_logger, init_test_result, testtypes
   use fortuno_testerror, only : test_error
   use fortuno_teststatus, only : teststatus
@@ -23,29 +23,29 @@ module fortuno_genericdriver
   abstract interface
 
     subroutine set_up_suite_i(this, testsuite, ctx)
-      import :: test_runner, suite_base, context_base
+      import :: test_runner, generic_suite, generic_context
       implicit none
       class(test_runner), intent(in) :: this
-      class(suite_base), pointer, intent(in) :: testsuite
-      class(context_base), pointer, intent(in) :: ctx
+      class(generic_suite), pointer, intent(in) :: testsuite
+      class(generic_context), pointer, intent(in) :: ctx
     end subroutine set_up_suite_i
 
 
     subroutine tear_down_suite_i(this, testsuite, ctx)
-      import :: test_runner, suite_base, context_base
+      import :: test_runner, generic_suite, generic_context
       implicit none
       class(test_runner), intent(in) :: this
-      class(suite_base), pointer, intent(in) :: testsuite
-      class(context_base), pointer, intent(in) :: ctx
+      class(generic_suite), pointer, intent(in) :: testsuite
+      class(generic_context), pointer, intent(in) :: ctx
     end subroutine tear_down_suite_i
 
 
     subroutine run_test_i(this, test, ctx)
-      import :: test_runner, test_base, context_base
+      import :: test_runner, generic_test, generic_context
       implicit none
       class(test_runner), intent(in) :: this
-      class(test_base), pointer, intent(in) :: test
-      class(context_base), pointer, intent(in) :: ctx
+      class(generic_test), pointer, intent(in) :: test
+      class(generic_context), pointer, intent(in) :: ctx
     end subroutine run_test_i
 
   end interface
@@ -58,13 +58,13 @@ module fortuno_genericdriver
 
 
   type, abstract :: generic_driver
-    type(suite_base_cls), allocatable :: testsuites(:)
+    type(generic_suite_cls), allocatable :: testsuites(:)
   contains
-    procedure :: add_suite_base_scalar
-    procedure :: add_suite_base_array
-    procedure :: add_suite_base_cls_array
-    generic :: add_suite_base => add_suite_base_scalar, add_suite_base_array,&
-        & add_suite_base_cls_array
+    procedure :: add_generic_suite_scalar
+    procedure :: add_generic_suite_array
+    procedure :: add_generic_suite_cls_array
+    generic :: add_generic_suite => add_generic_suite_scalar, add_generic_suite_array,&
+        & add_generic_suite_cls_array
     procedure :: run
     procedure :: set_up
     procedure :: tear_down
@@ -109,19 +109,19 @@ module fortuno_genericdriver
 contains
 
 
-  subroutine add_suite_base_scalar(this, testsuite)
+  subroutine add_generic_suite_scalar(this, testsuite)
     class(generic_driver), intent(inout) :: this
-    class(suite_base), intent(in) :: testsuite
+    class(generic_suite), intent(in) :: testsuite
 
     call add_slots_(this%testsuites, 1)
     this%testsuites(size(this%testsuites))%instance = testsuite
 
-  end subroutine add_suite_base_scalar
+  end subroutine add_generic_suite_scalar
 
 
-  subroutine add_suite_base_array(this, testsuites)
+  subroutine add_generic_suite_array(this, testsuites)
     class(generic_driver), intent(inout) :: this
-    class(suite_base), intent(in) :: testsuites(:)
+    class(generic_suite), intent(in) :: testsuites(:)
 
     integer :: ii, istart
 
@@ -131,12 +131,12 @@ contains
       this%testsuites(istart + ii)%instance = testsuites(ii)
     end do
 
-  end subroutine add_suite_base_array
+  end subroutine add_generic_suite_array
 
 
-  subroutine add_suite_base_cls_array(this, testsuites)
+  subroutine add_generic_suite_cls_array(this, testsuites)
     class(generic_driver), intent(inout) :: this
-    class(suite_base_cls), intent(inout) :: testsuites(:)
+    class(generic_suite_cls), intent(inout) :: testsuites(:)
 
     integer :: isuite, istart
 
@@ -146,7 +146,7 @@ contains
       call move_alloc(testsuites(isuite)%instance, this%testsuites(isuite)%instance)
     end do
 
-  end subroutine add_suite_base_cls_array
+  end subroutine add_generic_suite_cls_array
 
 
   subroutine run(this, testnames, error, driverresult)
@@ -196,7 +196,7 @@ contains
 
 
   subroutine get_test_indices_(testsuites, testindices, testnames)
-    type(suite_base_cls), intent(in) :: testsuites(:)
+    type(generic_suite_cls), intent(in) :: testsuites(:)
     integer, allocatable, intent(out) :: testindices(:,:)
     type(test_name), optional, intent(in) :: testnames(:)
 
@@ -215,7 +215,7 @@ contains
 
 
   subroutine get_test_indices_by_name_(testsuites, testnames, testindices)
-    type(suite_base_cls), intent(in) :: testsuites(:)
+    type(generic_suite_cls), intent(in) :: testsuites(:)
     type(test_name), intent(in) :: testnames(:)
     integer, allocatable, intent(out) :: testindices(:,:)
 
@@ -268,7 +268,7 @@ contains
 
 
   subroutine get_all_test_indices_(testsuites, testindices)
-    type(suite_base_cls), intent(in) :: testsuites(:)
+    type(generic_suite_cls), intent(in) :: testsuites(:)
     integer, allocatable, intent(out) :: testindices(:,:)
 
     integer :: nglobaltests, iglobaltest
@@ -296,7 +296,7 @@ contains
 
 
   subroutine run_tests_(testsuites, testinds, ctxfact, logger, runner, driverresult)
-    type(suite_base_cls), target, intent(inout) :: testsuites(:)
+    type(generic_suite_cls), target, intent(inout) :: testsuites(:)
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
@@ -317,15 +317,15 @@ contains
 
 
   subroutine initialize_suites_(testsuites, testinds, ctxfact, logger, runner, driverresult)
-    type(suite_base_cls), target, intent(inout) :: testsuites(:)
+    type(generic_suite_cls), target, intent(inout) :: testsuites(:)
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
     class(test_runner), intent(in) :: runner
     type(driver_result), intent(inout) :: driverresult
 
-    class(context_base), allocatable, target :: ctx
-    class(context_base), pointer :: ctxptr
+    class(generic_context), allocatable, target :: ctx
+    class(generic_context), pointer :: ctxptr
     character(:), allocatable :: repr
     logical, allocatable :: done(:)
     integer :: nsuites, ntests, itest, isuite, isuiteres
@@ -358,15 +358,15 @@ contains
 
 
   subroutine finalize_suites_(testsuites, testinds, ctxfact, logger, runner, driverresult)
-    type(suite_base_cls), target, intent(inout) :: testsuites(:)
+    type(generic_suite_cls), target, intent(inout) :: testsuites(:)
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
     class(test_runner), intent(in) :: runner
     type(driver_result), intent(inout) :: driverresult
 
-    class(context_base), allocatable, target :: ctx
-    class(context_base), pointer :: ctxptr
+    class(generic_context), allocatable, target :: ctx
+    class(generic_context), pointer :: ctxptr
     character(:), allocatable :: repr
     logical, allocatable :: done(:)
     integer :: nsuites, ntests, itest, isuite, isuiteres
@@ -403,15 +403,15 @@ contains
 
 
   subroutine execute_tests_(testsuites, testinds, ctxfact, logger, runner, driverresult)
-    type(suite_base_cls), target, intent(inout) :: testsuites(:)
+    type(generic_suite_cls), target, intent(inout) :: testsuites(:)
     integer, intent(in) :: testinds(:,:)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
     class(test_runner), intent(in) :: runner
     type(driver_result), intent(inout) :: driverresult
 
-    class(context_base), allocatable, target :: ctx
-    class(context_base), pointer :: ctxptr
+    class(generic_context), allocatable, target :: ctx
+    class(generic_context), pointer :: ctxptr
     character(:), allocatable :: testrepr
     integer :: iglobaltest, nglobaltests, isuite, isuiteres, itest
 
@@ -443,10 +443,10 @@ contains
 
 
   subroutine add_slots_(testsuites, newslots)
-    type(suite_base_cls), allocatable, intent(inout) :: testsuites(:)
+    type(generic_suite_cls), allocatable, intent(inout) :: testsuites(:)
     integer, intent(in) :: newslots
 
-    type(suite_base_cls), allocatable :: buffer(:)
+    type(generic_suite_cls), allocatable :: buffer(:)
     integer :: ii
 
     if (.not. allocated(testsuites)) then
@@ -463,7 +463,7 @@ contains
 
 
   function nr_tests_(testsuites) result(ntests)
-    type(suite_base_cls), allocatable, intent(in) :: testsuites(:)
+    type(generic_suite_cls), allocatable, intent(in) :: testsuites(:)
     integer :: ntests
 
     integer :: isuite
@@ -479,7 +479,7 @@ contains
 
 
   subroutine allocate_driver_result_(testsuites, testinds, driverresult)
-    type(suite_base_cls), intent(in) :: testsuites(:)
+    type(generic_suite_cls), intent(in) :: testsuites(:)
     integer, intent(in) :: testinds(:,:)
     type(driver_result), allocatable, intent(out) :: driverresult
 

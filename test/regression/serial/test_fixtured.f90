@@ -1,10 +1,10 @@
 module testmod_fixtured
   use mylib, only : factorial
-  use fortuno_serial, only : check, suite_base_cls, serial_test_base, test_suite
+  use fortuno_serial, only : check, test_base, test_suite, test_suite_base_cls
   implicit none
 
 
-  type, extends(serial_test_base) :: random_test
+  type, extends(test_base) :: random_test
     procedure(test_recursion_down), pointer :: proc
     integer :: nn = -1
   contains
@@ -16,7 +16,7 @@ contains
 
 
   function new_suite() result(suite)
-    type(suite_base_cls) :: suite
+    type(test_suite_base_cls) :: suite
 
     integer :: ii
 

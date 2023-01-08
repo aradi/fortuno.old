@@ -1,13 +1,13 @@
 module testmod_simple
   use mylib, only : factorial
-  use fortuno_serial, only : suite_base_cls, test_suite, test, check, check_failed, skip
+  use fortuno_serial, only : test_suite, test_suite_base_cls, test, check, check_failed, skip
   implicit none
 
 contains
 
 
   function new_suite() result(suite)
-    type(suite_base_cls) :: suite
+    type(test_suite_base_cls) :: suite
 
     suite%instance =&
         & test_suite("simple", [&

@@ -1,9 +1,9 @@
 module fortuno_coarray_coacontext
-  use fortuno_contextbase, only : context_base
+  use fortuno_genericcontext, only : generic_context
   use fortuno_contextfactory, only : context_factory
   use fortuno_coarray_coafailureinfo, only : coa_failure_info
-  use fortuno_suitebase, only : suite_base
-  use fortuno_testbase, only : test_base
+  use fortuno_genericsuite, only : generic_suite
+  use fortuno_generictest, only : generic_test
   implicit none
 
   private
@@ -11,7 +11,7 @@ module fortuno_coarray_coacontext
   public :: coa_context_factory
 
 
-  type, extends(context_base) :: coa_context
+  type, extends(generic_context) :: coa_context
     logical, allocatable :: failedimages(:)
   contains
     procedure :: check_logical => coa_context_check_logical
@@ -69,8 +69,8 @@ contains
 
   subroutine coa_context_factory_create_context(this, testsuite, ctx)
     class(coa_context_factory), intent(in) :: this
-    class(suite_base), pointer, intent(in) :: testsuite
-    class(context_base), allocatable, intent(out) :: ctx
+    class(generic_suite), pointer, intent(in) :: testsuite
+    class(generic_context), allocatable, intent(out) :: ctx
 
     type(coa_context), allocatable :: coactx
 

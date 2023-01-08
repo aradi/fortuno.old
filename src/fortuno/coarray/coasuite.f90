@@ -1,14 +1,14 @@
 module fortuno_coarray_coasuite
   use fortuno_coarray_coatest, only : coa_test_base, coa_test_base_cls
-  use fortuno_suitebase, only : suite_base, init_suite_base
-  use fortuno_testbase, only : test_base_cls
+  use fortuno_genericsuite, only : generic_suite, init_generic_suite
+  use fortuno_generictest, only : generic_test_cls
   implicit none
 
   private
   public :: coa_suite, coa_suite_base, coa_suite_base_cls
 
 
-  type, extends(suite_base) :: coa_suite_base
+  type, extends(generic_suite) :: coa_suite_base
   contains
     procedure :: set_up => coa_suite_base_set_up
     procedure :: tear_down => coa_suite_base_tear_down
@@ -46,7 +46,7 @@ contains
     class(coa_test_base), optional, intent(in) :: tests(:)
     type(coa_suite) :: this
 
-    call init_suite_base(this, name, tests)
+    call init_generic_suite(this, name, tests)
 
   end function new_coa_suite_test
 
@@ -56,10 +56,10 @@ contains
     type(coa_test_base_cls), intent(in) :: tests(:)
     type(coa_suite) :: this
 
-    type(test_base_cls), allocatable :: stbc(:)
+    type(generic_test_cls), allocatable :: stbc(:)
     integer :: itest
 
-    call init_suite_base(this, name)
+    call init_generic_suite(this, name)
     allocate(stbc(size(tests)))
     do itest = 1, size(tests)
       stbc(itest)%instance = tests(itest)%instance

@@ -1,13 +1,13 @@
 module fortuno_coarray_coatest
   use fortuno_coarray_coacontext, only : coa_context
-  use fortuno_testbase, only : test_base
+  use fortuno_generictest, only : generic_test
   implicit none
 
   private
   public :: coa_test, coa_test_base, coa_test_base_cls
 
 
-  type, extends(test_base), abstract :: coa_test_base
+  type, extends(generic_test), abstract :: coa_test_base
   contains
     procedure(coa_test_base_run_i), deferred :: run
   end type coa_test_base

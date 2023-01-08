@@ -1,5 +1,5 @@
 module fortuno_serial_serialtest
-  use fortuno_testbase, only : test_base
+  use fortuno_generictest, only : generic_test
   use fortuno_utils, only : keyword_arg_enforcer_
   implicit none
 
@@ -7,7 +7,7 @@ module fortuno_serial_serialtest
   public :: serial_test_base, serial_test_base_cls, serial_test
 
 
-  type, extends(test_base), abstract :: serial_test_base
+  type, extends(generic_test), abstract :: serial_test_base
   contains
     procedure(serial_test_base_run_i), deferred :: run
   end type serial_test_base

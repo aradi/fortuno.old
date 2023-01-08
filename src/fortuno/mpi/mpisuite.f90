@@ -1,15 +1,15 @@
 module fortuno_mpi_mpisuite
   use fortuno_mpi_mpicontext, only : mpi_context
   use fortuno_mpi_mpitest, only : mpi_test_base, mpi_test_base_cls
-  use fortuno_suitebase, only : init_suite_base, suite_base
-  use fortuno_testbase, only : test_base_cls
+  use fortuno_genericsuite, only : init_generic_suite, generic_suite
+  use fortuno_generictest, only : generic_test_cls
   implicit none
 
   private
   public :: mpi_suite, mpi_suite_base, mpi_suite_base_cls
 
 
-  type, extends(suite_base) :: mpi_suite_base
+  type, extends(generic_suite) :: mpi_suite_base
   contains
     procedure :: set_up => mpi_suite_base_set_up
     procedure :: tear_down => mpi_suite_base_tear_down
@@ -49,7 +49,7 @@ contains
     class(mpi_test_base), optional, intent(in) :: tests(:)
     type(mpi_suite) :: this
 
-    call init_suite_base(this, name, tests)
+    call init_generic_suite(this, name, tests)
 
   end function new_mpi_suite_test
 
@@ -59,10 +59,10 @@ contains
     type(mpi_test_base_cls), intent(in) :: tests(:)
     type(mpi_suite) :: this
 
-    type(test_base_cls), allocatable :: stbc(:)
+    type(generic_test_cls), allocatable :: stbc(:)
     integer :: itest
 
-    call init_suite_base(this, name)
+    call init_generic_suite(this, name)
     allocate(stbc(size(tests)))
     do itest = 1, size(tests)
       stbc(itest)%instance = tests(itest)%instance

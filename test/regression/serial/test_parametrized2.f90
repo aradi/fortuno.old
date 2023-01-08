@@ -1,6 +1,6 @@
 module testmod_parametrized2
   use mylib, only : factorial
-  use fortuno_serial, only : check, suite_base_cls, test_suite, serial_test_base
+  use fortuno_serial, only : check, test_base, test_suite, test_suite_base_cls
   implicit none
 
 
@@ -13,7 +13,7 @@ module testmod_parametrized2
       & ]
 
 
-  type, extends(serial_test_base) :: factcalc_test
+  type, extends(test_base) :: factcalc_test
     type(calc) :: data
   contains
     procedure :: run
@@ -23,7 +23,7 @@ contains
 
 
   function new_suite() result(suite)
-    type(suite_base_cls) :: suite
+    type(test_suite_base_cls) :: suite
 
     integer :: icalc
     character(200) :: name

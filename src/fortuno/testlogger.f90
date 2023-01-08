@@ -1,5 +1,5 @@
 module fortuno_testlogger
-  use fortuno_contextbase, only : context_base
+  use fortuno_genericcontext, only : generic_context
   use fortuno_failureinfo, only : failure_info
   use fortuno_teststatus, only : teststatus
   implicit none
@@ -85,7 +85,7 @@ contains
     type(test_result), intent(out) :: this
     character(*), intent(in) :: name
     character(:), allocatable, intent(in) :: repr
-    class(context_base), intent(inout) :: ctx
+    class(generic_context), intent(inout) :: ctx
 
     this%status = ctx%status()
     this%name = name

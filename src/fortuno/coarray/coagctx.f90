@@ -1,7 +1,7 @@
 module fortuno_coarray_coagctx
   use fortuno_checkresult, only : check_result
   use fortuno_coarray_coacontext, only : coa_context
-  use fortuno_suitebase, only : suite_base
+  use fortuno_genericsuite, only : generic_suite
   implicit none
 
   private
@@ -40,7 +40,7 @@ contains
 
 
   function suite_ptr() result(suiteptr)
-    class(suite_base), pointer :: suiteptr
+    class(generic_suite), pointer :: suiteptr
 
     suiteptr => coagctx%suite
 

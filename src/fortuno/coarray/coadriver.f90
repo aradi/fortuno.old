@@ -1,6 +1,6 @@
 module fortuno_coarray_coadriver
   use iso_fortran_env, only : stderr => error_unit
-  use fortuno_contextbase, only : context_base
+  use fortuno_genericcontext, only : generic_context
   use fortuno_contextfactory, only : context_factory
   use fortuno_coarray_coacontext, only : coa_context, coa_context_factory
   use fortuno_coarray_coagctx, only : set_global_context, restore_global_context
@@ -8,8 +8,8 @@ module fortuno_coarray_coadriver
   use fortuno_coarray_coasuite, only : coa_suite_base, coa_suite_base_cls
   use fortuno_coarray_coatest, only : coa_test_base
   use fortuno_genericdriver, only : generic_driver, test_runner
-  use fortuno_suitebase, only : suite_base, suite_base_cls
-  use fortuno_testbase, only : test_base
+  use fortuno_genericsuite, only : generic_suite, generic_suite_cls
+  use fortuno_generictest, only : generic_test
   use fortuno_testerror, only : test_error
   use fortuno_testlogger, only : test_logger
   implicit none
@@ -43,10 +43,10 @@ contains
 
 
   function new_coa_driver_suite(testsuites) result(this)
-    class(suite_base), optional, intent(in) :: testsuites(:)
+    class(generic_suite), optional, intent(in) :: testsuites(:)
     type(coa_driver) :: this
 
-    if (present(testsuites)) call this%add_suite_base(testsuites)
+    if (present(testsuites)) call this%add_generic_suite(testsuites)
 
   end function new_coa_driver_suite
 
@@ -55,14 +55,14 @@ contains
     type(coa_suite_base_cls), intent(in) :: testsuites(:)
     type(coa_driver) :: this
 
-    type(suite_base_cls), allocatable :: sbc(:)
+    type(generic_suite_cls), allocatable :: sbc(:)
     integer :: isuite
 
     allocate(sbc(size(testsuites)))
     do isuite = 1, size(testsuites)
       sbc(isuite)%instance = testsuites(isuite)%instance
     end do
-    call this%add_suite_base(sbc)
+    call this%add_generic_suite(sbc)
 
   end function new_coa_driver_suite_cls
 
@@ -108,8 +108,8 @@ contains
 
   subroutine set_up_suite(this, testsuite, ctx)
     class(coa_runner), intent(in) :: this
-    class(suite_base), pointer, intent(in) :: testsuite
-    class(context_base), pointer, intent(in) :: ctx
+    class(generic_suite), pointer, intent(in) :: testsuite
+    class(generic_context), pointer, intent(in) :: ctx
 
     class(coa_context), pointer :: myctx, oldctx
     class(coa_suite_base), pointer :: mysuite
@@ -137,8 +137,8 @@ contains
 
   subroutine tear_down_suite(this, testsuite, ctx)
     class(coa_runner), intent(in) :: this
-    class(suite_base), pointer, intent(in) :: testsuite
-    class(context_base), pointer, intent(in) :: ctx
+    class(generic_suite), pointer, intent(in) :: testsuite
+    class(generic_context), pointer, intent(in) :: ctx
 
     class(coa_context), pointer :: myctx, oldctx
     class(coa_suite_base), pointer :: mysuite
@@ -166,8 +166,8 @@ contains
 
   subroutine run_test(this, test, ctx)
     class(coa_runner), intent(in) :: this
-    class(test_base), pointer, intent(in) :: test
-    class(context_base), pointer, intent(in) :: ctx
+    class(generic_test), pointer, intent(in) :: test
+    class(generic_context), pointer, intent(in) :: ctx
 
     class(coa_context), pointer :: myctx, oldctx
     class(coa_test_base), pointer :: mytest
