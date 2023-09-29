@@ -1,31 +1,22 @@
-# Prefix to use for the test names
-set(testprefix "unit/serial")
-
-# Prefix to use for target names
-set(targetprefix "test-unit-serial")
-
-# Set up all test suites to consider (contained in files named test_${suite})
-set(
-    suites
-    selftest
+set(test_suites
+		selftest
+)
+set_property(DIRECTORY APPEND
+		PROPERTY LABELS unit
 )
 
-# Create library from all test suites
-add_library(${targetprefix}-suites)
-foreach(suite IN LISTS suites)
-    target_sources(${targetprefix}-suites PRIVATE test_${suite}.f90)
-endforeach()
-target_link_libraries(${targetprefix}-suites Fortuno)
-
-# Create test app
-add_executable(${targetprefix}-app testapp.f90)
-set_target_properties(${targetprefix}-app PROPERTIES OUTPUT_NAME "testapp")
-target_link_libraries(${targetprefix}-app ${targetprefix}-suites)
+# Use the same framework as in regression tests
+# TODO: The test-app should be common and test-suites should be added as needed
+add_executable(test-app)
+target_sources(test-app PRIVATE
+		testapp.f90
+)
+target_link_libraries(test-app PRIVATE Fortuno_Fortuno)
 
 # Run test app separately for each test suite
-foreach(test IN LISTS suites)
-    add_test(
-        NAME ${testprefix}/${test}
-        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/testapp ${test}
-    )
-endforeach()
+foreach (test IN LISTS test_suites)
+	target_sources(test-app PRIVATE test_${test}.f90)
+	add_test(NAME ${test}
+			COMMAND $<TARGET_FILE:test-app> ${test}
+	)
+endforeach ()
