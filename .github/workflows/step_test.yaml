@@ -12,8 +12,19 @@ permissions:
   contents: read
 
 jobs:
+  pre-commit:
+    name: Check pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - uses: pre-commit/action@v3.0.0
+
   tests:
     name: Check ${{ matrix.toolchain }} toolchain
+    needs: [ pre-commit ]
     runs-on: ubuntu-latest
     container: ghcr.io/lecrisut/dev-env:main
     continue-on-error: ${{ matrix.experimental || false }}
@@ -44,7 +55,7 @@ jobs:
           workflowPreset: "${{ matrix.toolchain }}-ci"
 
   pass:
-    needs: [ tests ]
+    needs: [ pre-commit, tests ]
     runs-on: ubuntu-latest
     steps:
       - name: Check test jobs
