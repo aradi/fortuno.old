@@ -1,10 +1,9 @@
 module fortuno_failureinfo
-  use fortuno_failuredetails, only : failure_details
+  use fortuno_failuredetails, only: failure_details
   implicit none
 
   private
   public :: failure_info
-
 
   type :: failure_info
     character(:), allocatable :: message
@@ -19,21 +18,20 @@ module fortuno_failureinfo
 
 contains
 
-
   subroutine write_formatted(this, unit)
     class(failure_info), intent(in) :: this
     integer, intent(in) :: unit
 
     if (allocated(this%file)) then
-      write(unit, "(a, t12, 2a, i0)") "Location:", this%file, ":", this%line
+      write (unit, "(a, t12, 2a, i0)") "Location:", this%file, ":", this%line
     else if (this%checknr /= 0) then
-      write(unit, "(a, t12, i0)") "Check:", this%checknr
+      write (unit, "(a, t12, i0)") "Check:", this%checknr
     end if
     if (allocated(this%message)) then
-      write(unit, "(a, t12, a)") "Message: ", this%message
+      write (unit, "(a, t12, a)") "Message: ", this%message
     end if
     if (allocated(this%failuredet)) then
-      write(unit, "(a)") "::"
+      write (unit, "(a)") "::"
       call this%failuredet%write_formatted(unit)
     end if
 

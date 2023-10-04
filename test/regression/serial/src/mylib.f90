@@ -6,7 +6,6 @@ module mylib
 
 contains
 
-
   function factorial(nn) result(fact)
     integer, intent(in) :: nn
     integer :: fact
@@ -15,7 +14,7 @@ contains
 
     fact = 1
     do ii = 2, nn
-      fact = fact * ii
+      fact = fact*ii
     end do
 
   end function factorial

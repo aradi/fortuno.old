@@ -10,4 +10,3 @@ target_link_options(mylib PUBLIC
 		$<$<Fortran_COMPILER_ID:GNU>:-fcoarray=lib>
 		$<$<Fortran_COMPILER_ID:Intel,IntelLLVM,NAG>:-coarray>
 )
-

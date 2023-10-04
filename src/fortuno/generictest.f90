@@ -1,10 +1,9 @@
 module fortuno_generictest
-  use fortuno_utils, only : keyword_arg_enforcer_
+  use fortuno_utils, only: keyword_arg_enforcer_
   implicit none
 
   private
   public :: generic_test, generic_test_cls
-
 
   type, abstract :: generic_test
     character(:), allocatable :: name
@@ -13,13 +12,11 @@ module fortuno_generictest
     procedure :: get_char_repr
   end type generic_test
 
-
   type :: generic_test_cls
     class(generic_test), allocatable :: instance
   end type generic_test_cls
 
 contains
-
 
   subroutine get_char_repr(this, repr)
     class(generic_test), intent(in) :: this

@@ -1,8 +1,7 @@
 module testmod_parametrized
-  use mylib, only : factorial
-  use fortuno_serial, only : check, test_base, test_suite, test_suite_base_cls
+  use mylib, only: factorial
+  use fortuno_serial, only: check, test_base, test_suite, test_suite_base_cls
   implicit none
-
 
   type, extends(test_base) :: factcalc_test
     integer :: arg, res
@@ -11,7 +10,6 @@ module testmod_parametrized
   end type
 
 contains
-
 
   function new_suite() result(suite)
     type(test_suite_base_cls) :: suite
@@ -26,7 +24,6 @@ contains
         & ])
 
   end function new_suite
-
 
   subroutine test_factcalc(this)
     class(factcalc_test), intent(inout) :: this

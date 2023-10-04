@@ -1,10 +1,10 @@
 module fortuno_mpi_mpicontext
-  use mpi_f08, only : mpi_comm, mpi_allreduce, MPI_IN_PLACE, MPI_INTEGER, MPI_PROD
-  use fortuno_genericcontext, only : generic_context
-  use fortuno_contextfactory, only : context_factory
-  use fortuno_mpi_mpifailureinfo, only : mpi_failure_info
-  use fortuno_genericsuite, only : generic_suite
-  use fortuno_generictest, only : generic_test
+  use mpi_f08, only: mpi_comm, mpi_allreduce, MPI_IN_PLACE, MPI_INTEGER, MPI_PROD
+  use fortuno_genericcontext, only: generic_context
+  use fortuno_contextfactory, only: context_factory
+  use fortuno_mpi_mpifailureinfo, only: mpi_failure_info
+  use fortuno_genericsuite, only: generic_suite
+  use fortuno_generictest, only: generic_test
 
   implicit none
 
@@ -13,13 +13,11 @@ module fortuno_mpi_mpicontext
   public :: mpi_context_factory
   public :: mpi_env
 
-
   type :: mpi_env
     type(mpi_comm) :: comm
     integer :: rank
     integer :: commsize
   end type mpi_env
-
 
   type, extends(generic_context) :: mpi_context
     type(mpi_env) :: mpi
@@ -28,7 +26,6 @@ module fortuno_mpi_mpicontext
     procedure :: check_logical => mpi_context_check_logical
   end type mpi_context
 
-
   type, extends(context_factory) :: mpi_context_factory
     type(mpi_env) :: mpi
   contains
@@ -36,7 +33,6 @@ module fortuno_mpi_mpicontext
   end type mpi_context_factory
 
 contains
-
 
   subroutine mpi_context_check_logical(this, cond, msg, file, line)
     class(mpi_context), intent(inout) :: this
@@ -63,7 +59,7 @@ contains
 
     call this%register_check(all(globalcond))
     if (.not. this%check_failed()) return
-    allocate(failureinfo)
+    allocate (failureinfo)
     failureinfo%checknr = this%nchecks
     if (present(msg)) failureinfo%message = msg
     if (present(file)) failureinfo%file = file
@@ -74,7 +70,6 @@ contains
 
   end subroutine mpi_context_check_logical
 
-
   subroutine mpi_context_factory_create_context(this, testsuite, ctx)
     class(mpi_context_factory), intent(in) :: this
     class(generic_suite), pointer, intent(in) :: testsuite
@@ -82,8 +77,8 @@ contains
 
     type(mpi_context), allocatable :: mpictx
 
-    allocate(mpictx)
-    mpictx%suite=> testsuite
+    allocate (mpictx)
+    mpictx%suite => testsuite
     mpictx%mpi = this%mpi
     call move_alloc(mpictx, ctx)
 

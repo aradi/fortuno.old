@@ -1,14 +1,13 @@
 module fortuno_serial_seriallogger
-  use iso_fortran_env, only : stdout => output_unit
-  use fortuno_failureinfo, only : failure_info
-  use fortuno_testlogger, only : driver_result, test_logger, test_name_str, test_result, testtypes
-  use fortuno_teststatus, only : teststatus
-  use fortuno_utils, only : nr_digits
+  use iso_fortran_env, only: stdout => output_unit
+  use fortuno_failureinfo, only: failure_info
+  use fortuno_testlogger, only: driver_result, test_logger, test_name_str, test_result, testtypes
+  use fortuno_teststatus, only: teststatus
+  use fortuno_utils, only: nr_digits
   implicit none
 
   private
   public :: serial_logger
-
 
   type, extends(test_logger) :: serial_logger
   contains
@@ -26,20 +25,17 @@ module fortuno_serial_seriallogger
 
 contains
 
-
   subroutine begin_short_log(this)
     class(serial_logger), intent(inout) :: this
 
   end subroutine begin_short_log
 
-
   subroutine end_short_log(this)
     class(serial_logger), intent(inout) :: this
 
-    write(stdout, "(/)")
+    write (stdout, "(/)")
 
   end subroutine end_short_log
-
 
   subroutine short_log_result(this, testtype, suiteresult, testresult)
     class(serial_logger), intent(inout) :: this
@@ -57,19 +53,18 @@ contains
 
     select case (status)
     case (teststatus%ok)
-      write(stdout, "(a)", advance="no") "| OK      | "
+      write (stdout, "(a)", advance="no") "| OK      | "
     case (teststatus%failed)
-      write(stdout, "(a)", advance="no") "| FAILED  | "
+      write (stdout, "(a)", advance="no") "| FAILED  | "
     case (teststatus%skipped)
-      write(stdout, "(a)", advance="no") "| Skipped | "
+      write (stdout, "(a)", advance="no") "| Skipped | "
     case default
-      write(stdout, "(a)", advance="no") "??????? | "
+      write (stdout, "(a)", advance="no") "??????? | "
     end select
 
-    write(stdout, "(a)") test_name_str(testtype, suiteresult, testresult)
+    write (stdout, "(a)") test_name_str(testtype, suiteresult, testresult)
 
   end subroutine short_log_result
-
 
   subroutine log_results(this, driverresult)
     class(serial_logger), intent(inout) :: this
@@ -83,17 +78,15 @@ contains
 
   end subroutine log_results
 
-
   subroutine begin_test_base_failure_log(this, testtype, suiteresult, testresult)
     class(serial_logger), intent(inout) :: this
     integer, intent(in) :: testtype
     type(test_result), intent(in) :: suiteresult
     type(test_result), optional, intent(in) :: testresult
 
-    write(stdout, "(a, t12, a, /)") "# FAILED:", test_name_str(testtype, suiteresult, testresult)
+    write (stdout, "(a, t12, a, /)") "# FAILED:", test_name_str(testtype, suiteresult, testresult)
 
   end subroutine begin_test_base_failure_log
-
 
   recursive subroutine log_test_base_failure(this, failureinfo)
     class(serial_logger), intent(inout) :: this
@@ -101,20 +94,18 @@ contains
 
     if (allocated(failureinfo%previous)) then
       call this%log_test_base_failure(failureinfo%previous)
-      write(stdout, "()")
+      write (stdout, "()")
     end if
     call failureinfo%write_formatted(stdout)
 
   end subroutine log_test_base_failure
 
-
   subroutine end_test_base_failure_log(this)
     class(serial_logger), intent(inout) :: this
 
-    write(stdout, "(/)")
+    write (stdout, "(/)")
 
   end subroutine end_test_base_failure_log
-
 
   subroutine log_summary(this, suitestats, teststats)
     class(serial_logger), intent(inout) :: this
@@ -126,31 +117,30 @@ contains
     ntests = sum(suitestats)
     fieldwidth = nr_digits(ntests)
 
-    write(formstr, "(a, i0, a)") "('Total test suites: ', i", fieldwidth, ")"
-    write(stdout, formstr) ntests
-    write(formstr, "(a, i0, a)") "('Skipped:     ', i", fieldwidth, ", '  (', I3, '%)')"
-    write(stdout, formstr) suitestats(2), int(real(suitestats(2)) / real(ntests) * 100.0)
-    write(formstr, "(a, i0, a)") "('Passed:      ', i", fieldwidth, ", '  (', I3, '%)')"
-    write(stdout, formstr) suitestats(1), int(real(suitestats(1)) / real(ntests) * 100.0)
-    write(formstr, "(a, i0, a)") "('Failed:      ', i", fieldwidth, ", '  (', I3, '%)')"
-    write(stdout, formstr) suitestats(3), int(real(suitestats(3)) / real(ntests) * 100.0)
-    write(stdout, "()")
+    write (formstr, "(a, i0, a)") "('Total test suites: ', i", fieldwidth, ")"
+    write (stdout, formstr) ntests
+    write (formstr, "(a, i0, a)") "('Skipped:     ', i", fieldwidth, ", '  (', I3, '%)')"
+    write (stdout, formstr) suitestats(2), int(real(suitestats(2))/real(ntests)*100.0)
+    write (formstr, "(a, i0, a)") "('Passed:      ', i", fieldwidth, ", '  (', I3, '%)')"
+    write (stdout, formstr) suitestats(1), int(real(suitestats(1))/real(ntests)*100.0)
+    write (formstr, "(a, i0, a)") "('Failed:      ', i", fieldwidth, ", '  (', I3, '%)')"
+    write (stdout, formstr) suitestats(3), int(real(suitestats(3))/real(ntests)*100.0)
+    write (stdout, "()")
 
     ntests = sum(teststats)
     fieldwidth = nr_digits(ntests)
 
-    write(formstr, "(a, i0, a)") "('Total test cases: ', i", fieldwidth, ")"
-    write(stdout, formstr) ntests
-    write(formstr, "(a, i0, a)") "('Skipped:     ', i", fieldwidth, ", '  (', I3, '%)')"
-    write(stdout, formstr) teststats(2), int(real(teststats(2)) / real(ntests) * 100.0)
-    write(formstr, "(a, i0, a)") "('Passed:      ', i", fieldwidth, ", '  (', I3, '%)')"
-    write(stdout, formstr) teststats(1), int(real(teststats(1)) / real(ntests) * 100.0)
-    write(formstr, "(a, i0, a)") "('Failed:      ', i", fieldwidth, ", '  (', I3, '%)')"
-    write(stdout, formstr) teststats(3), int(real(teststats(3)) / real(ntests) * 100.0)
-    write(stdout, "()")
+    write (formstr, "(a, i0, a)") "('Total test cases: ', i", fieldwidth, ")"
+    write (stdout, formstr) ntests
+    write (formstr, "(a, i0, a)") "('Skipped:     ', i", fieldwidth, ", '  (', I3, '%)')"
+    write (stdout, formstr) teststats(2), int(real(teststats(2))/real(ntests)*100.0)
+    write (formstr, "(a, i0, a)") "('Passed:      ', i", fieldwidth, ", '  (', I3, '%)')"
+    write (stdout, formstr) teststats(1), int(real(teststats(1))/real(ntests)*100.0)
+    write (formstr, "(a, i0, a)") "('Failed:      ', i", fieldwidth, ", '  (', I3, '%)')"
+    write (stdout, formstr) teststats(3), int(real(teststats(3))/real(ntests)*100.0)
+    write (stdout, "()")
 
   end subroutine log_summary
-
 
   subroutine log_test_results_(this, driverresult, stats)
     class(serial_logger), intent(inout) :: this
@@ -187,7 +177,6 @@ contains
     stats = [nsucceeded, nskipped, nfailed]
 
   end subroutine log_test_results_
-
 
   subroutine log_suite_results_(this, driverresult, stats)
     class(serial_logger), intent(inout) :: this

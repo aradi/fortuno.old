@@ -1,7 +1,7 @@
 module fortuno_testlogger
-  use fortuno_genericcontext, only : generic_context
-  use fortuno_failureinfo, only : failure_info
-  use fortuno_teststatus, only : teststatus
+  use fortuno_genericcontext, only: generic_context
+  use fortuno_failureinfo, only: failure_info
+  use fortuno_teststatus, only: teststatus
   implicit none
 
   private
@@ -11,7 +11,6 @@ module fortuno_testlogger
   public :: test_result, init_test_result
   public :: testtypes
 
-
   type, abstract :: test_logger
   contains
     procedure(begin_short_log_i), deferred :: begin_short_log
@@ -20,7 +19,6 @@ module fortuno_testlogger
     procedure(log_results_i), deferred :: log_results
   end type test_logger
 
-
   type :: test_result
     integer :: status = teststatus%failed
     character(:), allocatable :: name
@@ -28,14 +26,12 @@ module fortuno_testlogger
     class(failure_info), allocatable :: failureinfo
   end type test_result
 
-
   type :: driver_result
-    type(test_result), allocatable :: suiteresults(:,:)
+    type(test_result), allocatable :: suiteresults(:, :)
     type(test_result), allocatable :: testresults(:)
     integer, allocatable :: suiteindex(:)
     logical :: failed = .false.
   end type driver_result
-
 
   type :: test_types_enum_
     integer :: suitesetup = 1
@@ -44,7 +40,6 @@ module fortuno_testlogger
   end type test_types_enum_
 
   type(test_types_enum_), parameter :: testtypes = test_types_enum_()
-
 
   abstract interface
 
@@ -80,7 +75,6 @@ module fortuno_testlogger
 
 contains
 
-
   subroutine init_test_result(this, name, repr, ctx)
     type(test_result), intent(out) :: this
     character(*), intent(in) :: name
@@ -93,7 +87,6 @@ contains
     if (allocated(ctx%failureinfo)) call move_alloc(ctx%failureinfo, this%failureinfo)
 
   end subroutine init_test_result
-
 
   function test_name_str(testtype, suiteresult, testresult) result(testnamestr)
     integer, intent(in) :: testtype
@@ -113,20 +106,20 @@ contains
     end select
 
     if (allocated(suiteresult%repr)) then
-      suitename = prefix // suiteresult%name // "{" // suiteresult%repr // "}"
+      suitename = prefix//suiteresult%name//"{"//suiteresult%repr//"}"
     else
-      suitename = prefix // suiteresult%name
+      suitename = prefix//suiteresult%name
     end if
     if (.not. present(testresult)) then
       testnamestr = suitename
       return
     end if
     if (allocated(testresult%repr)) then
-      testname = testresult%name // "{" // testresult%repr // "}"
+      testname = testresult%name//"{"//testresult%repr//"}"
     else
       testname = testresult%name
     end if
-    testnamestr = suitename // "/" // testname
+    testnamestr = suitename//"/"//testname
 
   end function test_name_str
 

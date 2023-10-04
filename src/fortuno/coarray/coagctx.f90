@@ -1,7 +1,7 @@
 module fortuno_coarray_coagctx
-  use fortuno_checkresult, only : check_result
-  use fortuno_coarray_coacontext, only : coa_context
-  use fortuno_genericsuite, only : generic_suite
+  use fortuno_checkresult, only: check_result
+  use fortuno_coarray_coacontext, only: coa_context
+  use fortuno_genericsuite, only: generic_suite
   implicit none
 
   private
@@ -10,16 +10,13 @@ module fortuno_coarray_coagctx
   public :: set_global_context, restore_global_context
   public :: check, check_failed, failed, skip
 
-
   interface check
     module procedure check_logical, check_detailed
   end interface check
 
   class(coa_context), pointer, protected :: coagctx => null()
 
-
 contains
-
 
   subroutine set_global_context(newctx, oldctx)
     class(coa_context), pointer, intent(in) :: newctx
@@ -30,7 +27,6 @@ contains
 
   end subroutine set_global_context
 
-
   subroutine restore_global_context(oldctx)
     class(coa_context), pointer, intent(in) :: oldctx
 
@@ -38,14 +34,12 @@ contains
 
   end subroutine restore_global_context
 
-
   function suite_ptr() result(suiteptr)
     class(generic_suite), pointer :: suiteptr
 
     suiteptr => coagctx%suite
 
   end function suite_ptr
-
 
   subroutine check_logical(cond, msg, file, line)
     logical, intent(in) :: cond
@@ -57,7 +51,6 @@ contains
 
   end subroutine check_logical
 
-
   subroutine check_detailed(checkresult, msg, file, line)
     type(check_result), intent(in) :: checkresult
     character(*), optional, intent(in) :: msg
@@ -68,7 +61,6 @@ contains
 
   end subroutine check_detailed
 
-
   function check_failed() result(checkfailed)
     logical :: checkfailed
 
@@ -76,14 +68,12 @@ contains
 
   end function check_failed
 
-
   function failed()
     logical :: failed
 
     failed = coagctx%failed()
 
   end function failed
-
 
   subroutine skip()
 

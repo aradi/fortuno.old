@@ -6,7 +6,6 @@ module mylib
 
 contains
 
-
   !> Broadcasts a scalar integer.
   subroutine broadcast(buffer, source)
 
@@ -21,7 +20,6 @@ contains
     buffer = buffer[source]
 
   end subroutine broadcast
-
 
   !> Reduces a scalar integer by summation on all images.
   subroutine allreduce_sum(val)
