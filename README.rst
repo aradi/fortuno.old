@@ -4,6 +4,9 @@
 Fortuno – Fortran Unit Testing Objects
 **************************************
 
+**NOTE**: The Fortuno repository had been relocated and this repository is going to be deleted soon.
+Visit the project in the `new Fortuno repository <https://github.com/fortuno-repos/fortuno>`_.
+
 The **Fortuno** project offers an object oriented unit testing framework for the
 Fortran language. It aims to combine the simplicity of `test-drive
 <https://github.com/fortran-lang/test-drive>`_ with the broad range of features
