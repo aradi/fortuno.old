@@ -5,3 +5,7 @@
 *.a
 *.so
 docs/_build
+
+### Project specific
+cmake-build-*
+CMakeUserPresets.json
