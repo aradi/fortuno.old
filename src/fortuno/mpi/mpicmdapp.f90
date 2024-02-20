@@ -1,15 +1,14 @@
 module fortuno_mpi_mpicmdapp
-  use fortuno_argumentparser, only : argument_parser
-  use fortuno_mpi_mpidriver, only : mpi_driver
-  use fortuno_mpi_mpisuite, only : mpi_suite_base, mpi_suite_base_cls
+  use fortuno_argumentparser, only: argument_parser
+  use fortuno_mpi_mpidriver, only: mpi_driver
+  use fortuno_mpi_mpisuite, only: mpi_suite_base, mpi_suite_base_cls
   implicit none
 
   private
   public :: mpi_cmd_app
 
-
   type :: mpi_cmd_app
-  private
+    private
     type(mpi_driver) :: driver
   contains
     procedure :: run
@@ -18,13 +17,11 @@ module fortuno_mpi_mpicmdapp
     generic :: add_suite => add_suite_scalar, add_suite_array
   end type mpi_cmd_app
 
-
   interface mpi_cmd_app
     module procedure new_mpi_cmd_app_suite, new_mpi_cmd_app_suite_cls
   end interface mpi_cmd_app
 
 contains
-
 
   function new_mpi_cmd_app_suite(testsuites) result(this)
     class(mpi_suite_base), optional, intent(in) :: testsuites(:)
@@ -34,7 +31,6 @@ contains
 
   end function new_mpi_cmd_app_suite
 
-
   function new_mpi_cmd_app_suite_cls(testsuites) result(this)
     type(mpi_suite_base_cls), intent(in) :: testsuites(:)
     type(mpi_cmd_app) :: this
@@ -42,7 +38,6 @@ contains
     this%driver = mpi_driver(testsuites)
 
   end function new_mpi_cmd_app_suite_cls
-
 
   subroutine run(this)
     class(mpi_cmd_app), intent(inout) :: this
@@ -54,7 +49,6 @@ contains
 
   end subroutine run
 
-
   subroutine add_suite_scalar(this, testsuite)
     class(mpi_cmd_app), intent(inout) :: this
     class(mpi_suite_base), intent(in) :: testsuite
@@ -62,7 +56,6 @@ contains
     call this%driver%add_generic_suite(testsuite)
 
   end subroutine add_suite_scalar
-
 
   subroutine add_suite_array(this, testsuites)
     class(mpi_cmd_app), intent(inout) :: this

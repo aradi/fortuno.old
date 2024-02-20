@@ -1,7 +1,7 @@
 module fortuno_serial_serialgctx
-  use fortuno_checkresult, only : check_result
-  use fortuno_serial_serialcontext, only : serial_context
-  use fortuno_genericsuite, only : generic_suite
+  use fortuno_checkresult, only: check_result
+  use fortuno_serial_serialcontext, only: serial_context
+  use fortuno_genericsuite, only: generic_suite
 
   private
   public :: serialgctx
@@ -9,16 +9,13 @@ module fortuno_serial_serialgctx
   public :: set_global_context, restore_global_context
   public :: check, check_failed, failed, skip
 
-
   interface check
     module procedure check_logical, check_detailed
   end interface check
 
   class(serial_context), pointer, protected :: serialgctx => null()
 
-
 contains
-
 
   subroutine set_global_context(newctx, oldctx)
     class(serial_context), pointer, intent(in) :: newctx
@@ -29,7 +26,6 @@ contains
 
   end subroutine set_global_context
 
-
   subroutine restore_global_context(oldctx)
     class(serial_context), pointer, intent(in) :: oldctx
 
@@ -37,14 +33,12 @@ contains
 
   end subroutine restore_global_context
 
-
   function suite_ptr() result(suiteptr)
     class(generic_suite), pointer :: suiteptr
 
     suiteptr => serialgctx%suite
 
   end function suite_ptr
-
 
   subroutine check_logical(cond, msg, file, line)
     logical, intent(in) :: cond
@@ -56,7 +50,6 @@ contains
 
   end subroutine check_logical
 
-
   subroutine check_detailed(checkresult, msg, file, line)
     type(check_result), intent(in) :: checkresult
     character(*), optional, intent(in) :: msg
@@ -67,7 +60,6 @@ contains
 
   end subroutine check_detailed
 
-
   function check_failed() result(checkfailed)
     logical :: checkfailed
 
@@ -75,14 +67,12 @@ contains
 
   end function check_failed
 
-
   function failed()
     logical :: failed
 
     failed = serialgctx%failed()
 
   end function failed
-
 
   subroutine skip()
 

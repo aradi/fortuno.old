@@ -1,9 +1,8 @@
 module testmod_simple
-  use mylib, only : allreduce_sum, broadcast
-  use fortuno_mpi, only : comm_handle_f08, comm_rank, comm_size, check, skip,&
+  use mylib, only: allreduce_sum, broadcast
+  use fortuno_mpi, only: comm_handle_f08, comm_rank, comm_size, check, skip,&
       & test, test_base, tbc => test_base_cls, test_suite, test_suite_base_cls
   implicit none
-
 
   type, extends(test_base) :: div_n_failure
     integer :: div, rem
@@ -12,7 +11,6 @@ module testmod_simple
   end type
 
 contains
-
 
   function new_suite() result(suite)
     type(test_suite_base_cls) :: suite
@@ -30,7 +28,6 @@ contains
         & ])
 
   end function new_suite
-
 
   ! Given: source rank contains a different integer value as all other ranks
   ! When: source rank broadcasts its value
@@ -53,7 +50,6 @@ contains
 
   end subroutine test_broadcast
 
-
   ! Given: all ranks contain integer with value (rank + 1)
   ! When: allreduce_sum() is invoked
   ! Then: all ranks contain the sum N * (N + 1) / 2, where N = nr. of ranks
@@ -65,11 +61,10 @@ contains
 
     call allreduce_sum(val, comm_handle_f08())
 
-    expected = comm_size() * (comm_size() + 1) / 2
+    expected = comm_size()*(comm_size() + 1)/2
     call check(val == expected)
 
   end subroutine test_allreduce
-
 
   ! Empty test executed only when nr. of processes < 4.
   subroutine test_procs_lt_4()
@@ -82,7 +77,6 @@ contains
 
   end subroutine test_procs_lt_4
 
-
   ! Empty test executed only when nr. of processes >= 4.
   subroutine test_procs_ge_4()
 
@@ -94,7 +88,6 @@ contains
 
   end subroutine test_procs_ge_4
 
-
   ! When: rank, rank -1 or rank - 2 divided by `div` have a remainder of `rem`
   ! Then: fail with customized error message
   subroutine test_divnfailure(this)
@@ -103,21 +96,21 @@ contains
     character(100) :: msg
 
     if (mod(comm_rank(), this%div) == this%rem) then
-      write(msg, "(a, i0)") "This has failed on purpose on rank ", comm_rank()
+      write (msg, "(a, i0)") "This has failed on purpose on rank ", comm_rank()
       call check(.false., msg=trim(msg))
     else
       call check(.true.)
     end if
 
     if (mod(comm_rank() - 1, this%div) == this%rem) then
-      write(msg, "(a, i0)") "This has failed on purpose (2nd time) on rank ", comm_rank()
+      write (msg, "(a, i0)") "This has failed on purpose (2nd time) on rank ", comm_rank()
       call check(.false., msg=trim(msg))
     else
       call check(.true.)
     end if
 
     if (mod(comm_rank() - 2, this%div) == this%rem) then
-      write(msg, "(a, i0)") "This has failed on purpose (3rd time) on rank ", comm_rank()
+      write (msg, "(a, i0)") "This has failed on purpose (3rd time) on rank ", comm_rank()
       call check(.false., msg=trim(msg))
     else
       call check(.true.)

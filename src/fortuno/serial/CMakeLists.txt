@@ -1,15 +1,10 @@
-set(curdir "${CMAKE_CURRENT_SOURCE_DIR}")
-
-list(
-    APPEND f90-sources
-    "${curdir}/serialgctx.f90"
-    "${curdir}/serialcmdapp.f90"
-    "${curdir}/serialcontext.f90"
-    "${curdir}/serialdriver.f90"
-    "${curdir}/seriallogger.f90"
-    "${curdir}/serialsuite.f90"
-    "${curdir}/serialtest.f90"
-    "${curdir}/simplified.f90"
+target_sources(Fortuno_Fortuno PRIVATE
+		serialgctx.f90
+		serialcmdapp.f90
+		serialcontext.f90
+		serialdriver.f90
+		seriallogger.f90
+		serialsuite.f90
+		serialtest.f90
+		simplified.f90
 )
-
-set(f90-sources "${f90-sources}" PARENT_SCOPE)

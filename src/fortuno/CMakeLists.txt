@@ -1,39 +1,27 @@
-set(curdir "${CMAKE_CURRENT_SOURCE_DIR}")
-
-list(
-    APPEND f90-sources
-    "${curdir}/argumentparser.f90"
-    "${curdir}/checkers.f90"
-    "${curdir}/checkresult.f90"
-    "${curdir}/common.f90"
-    "${curdir}/contextfactory.f90"
-    "${curdir}/failuredetails.f90"
-    "${curdir}/failureinfo.f90"
-    "${curdir}/genericcontext.f90"
-    "${curdir}/genericdriver.f90"
-    "${curdir}/genericsuite.f90"
-    "${curdir}/generictest.f90"
-    "${curdir}/serial.f90"
-    "${curdir}/testerror.f90"
-    "${curdir}/testlogger.f90"
-    "${curdir}/teststatus.f90"
-    "${curdir}/utils.f90"
-    "${curdir}/version.f90"
+target_sources(Fortuno_Fortuno PRIVATE
+		argumentparser.f90
+		checkers.f90
+		checkresult.f90
+		common.f90
+		contextfactory.f90
+		failuredetails.f90
+		failureinfo.f90
+		genericcontext.f90
+		genericdriver.f90
+		genericsuite.f90
+		generictest.f90
+		serial.f90
+		testerror.f90
+		testlogger.f90
+		teststatus.f90
+		utils.f90
+		version.f90
 )
+
 add_subdirectory(serial)
-
-list(
-    APPEND mpi-f90-sources
-    "${curdir}/mpi.f90"
-)
-add_subdirectory(mpi)
-
-list(
-    APPEND coa-f90-sources
-    "${curdir}/coarray.f90"
-)
-add_subdirectory(coarray)
-
-set(f90-sources "${f90-sources}" PARENT_SCOPE)
-set(mpi-f90-sources "${mpi-f90-sources}" PARENT_SCOPE)
-set(coa-f90-sources "${coa-f90-sources}" PARENT_SCOPE)
+if (FORTUNO_MPI)
+	add_subdirectory(mpi)
+endif ()
+if (FORTUNO_COARRAY)
+	add_subdirectory(coarray)
+endif ()

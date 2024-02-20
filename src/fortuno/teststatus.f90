@@ -4,7 +4,6 @@ module fortuno_teststatus
   private
   public :: teststatus
 
-
   type :: test_status_enum_
     integer :: ok = 0
     integer :: failed = 1

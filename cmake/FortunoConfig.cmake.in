@@ -1,0 +1,12 @@
+@PACKAGE_INIT@
+
+# Global config options
+# Set any variable here, you want to communicate to packages using yours
+set(Fortuno_MPI @FORTUNO_MPI@)
+set(Fortuno_Coarray @FORTUNO_COARRAY@)
+
+include(CMakeFindDependencyMacro)
+
+if(NOT TARGET Fortuno::Fortuno)
+    include(${CMAKE_CURRENT_LIST_DIR}/FortunoTargets.cmake)
+endif()

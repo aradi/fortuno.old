@@ -5,3 +5,8 @@
 *.a
 *.so
 docs/_build
+venv/
+
+### Project specific
+cmake-build-*
+CMakeUserPresets.json

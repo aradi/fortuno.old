@@ -4,10 +4,9 @@ module fortuno_version
   private
   public :: get_version
 
-  integer, private :: version(3) = [ 0, 1, 0]
+  integer, private :: version(3) = [0, 1, 0]
 
 contains
-
 
   subroutine get_version(major, minor, patch)
     integer, intent(out) :: major, minor, patch

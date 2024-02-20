@@ -1,10 +1,9 @@
 module fortuno_coarray_coafailureinfo
-  use fortuno_failureinfo, only : failure_info
+  use fortuno_failureinfo, only: failure_info
   implicit none
 
   private
   public :: coa_failure_info
-
 
   type, extends(failure_info) :: coa_failure_info
     logical, allocatable :: failedimages(:)
@@ -14,9 +13,8 @@ module fortuno_coarray_coafailureinfo
 
 contains
 
-
   subroutine write_formatted(this, unit)
-    class(coa_failure_info),intent(in) :: this
+    class(coa_failure_info), intent(in) :: this
     integer, intent(in) :: unit
 
     integer :: firstfailed, totalfailed
@@ -25,10 +23,10 @@ contains
       firstfailed = findloc(this%failedimages, .true., dim=1)
       totalfailed = count(this%failedimages, dim=1)
       if (totalfailed > 1) then
-        write(unit, "(a, t12, i0, a, i0, a)") "Image:", firstfailed, "  (+ ", totalfailed - 1,&
+        write (unit, "(a, t12, i0, a, i0, a)") "Image:", firstfailed, "  (+ ", totalfailed - 1,&
             & " more)"
       else
-        write(unit, "(a, t12, i0)") "Image:", firstfailed
+        write (unit, "(a, t12, i0)") "Image:", firstfailed
       end if
     end if
     call this%failure_info%write_formatted(unit)

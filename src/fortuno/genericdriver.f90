@@ -1,16 +1,15 @@
 module fortuno_genericdriver
-  use fortuno_genericcontext, only : generic_context
-  use fortuno_contextfactory, only : context_factory
-  use fortuno_genericsuite, only : generic_suite, generic_suite_cls
-  use fortuno_generictest, only : generic_test
-  use fortuno_testlogger, only : driver_result, test_logger, init_test_result, testtypes
-  use fortuno_testerror, only : test_error
-  use fortuno_teststatus, only : teststatus
+  use fortuno_genericcontext, only: generic_context
+  use fortuno_contextfactory, only: context_factory
+  use fortuno_genericsuite, only: generic_suite, generic_suite_cls
+  use fortuno_generictest, only: generic_test
+  use fortuno_testlogger, only: driver_result, test_logger, init_test_result, testtypes
+  use fortuno_testerror, only: test_error
+  use fortuno_teststatus, only: teststatus
   implicit none
 
   private
   public :: generic_driver, test_name, test_runner
-
 
   type, abstract :: test_runner
   contains
@@ -18,7 +17,6 @@ module fortuno_genericdriver
     procedure(tear_down_suite_i), deferred :: tear_down_suite
     procedure(run_test_i), deferred :: run_test
   end type test_runner
-
 
   abstract interface
 
@@ -30,7 +28,6 @@ module fortuno_genericdriver
       class(generic_context), pointer, intent(in) :: ctx
     end subroutine set_up_suite_i
 
-
     subroutine tear_down_suite_i(this, testsuite, ctx)
       import :: test_runner, generic_suite, generic_context
       implicit none
@@ -38,7 +35,6 @@ module fortuno_genericdriver
       class(generic_suite), pointer, intent(in) :: testsuite
       class(generic_context), pointer, intent(in) :: ctx
     end subroutine tear_down_suite_i
-
 
     subroutine run_test_i(this, test, ctx)
       import :: test_runner, generic_test, generic_context
@@ -50,12 +46,10 @@ module fortuno_genericdriver
 
   end interface
 
-
   type :: test_name
     character(:), allocatable :: suitename
     character(:), allocatable :: testname
   end type test_name
-
 
   type, abstract :: generic_driver
     type(generic_suite_cls), allocatable :: testsuites(:)
@@ -73,7 +67,6 @@ module fortuno_genericdriver
     procedure(create_test_runner_i), deferred :: create_test_runner
     procedure(stop_on_error_i), deferred :: stop_on_error
   end type generic_driver
-
 
   abstract interface
 
@@ -108,7 +101,6 @@ module fortuno_genericdriver
 
 contains
 
-
   subroutine add_generic_suite_scalar(this, testsuite)
     class(generic_driver), intent(inout) :: this
     class(generic_suite), intent(in) :: testsuite
@@ -117,7 +109,6 @@ contains
     this%testsuites(size(this%testsuites))%instance = testsuite
 
   end subroutine add_generic_suite_scalar
-
 
   subroutine add_generic_suite_array(this, testsuites)
     class(generic_driver), intent(inout) :: this
@@ -133,7 +124,6 @@ contains
 
   end subroutine add_generic_suite_array
 
-
   subroutine add_generic_suite_cls_array(this, testsuites)
     class(generic_driver), intent(inout) :: this
     class(generic_suite_cls), intent(inout) :: testsuites(:)
@@ -147,7 +137,6 @@ contains
     end do
 
   end subroutine add_generic_suite_cls_array
-
 
   subroutine run(this, testnames, error, driverresult)
     class(generic_driver), target, intent(inout) :: this
@@ -182,22 +171,19 @@ contains
 
   end subroutine run
 
-
   subroutine set_up(this)
     class(generic_driver), intent(inout) :: this
 
   end subroutine set_up
-
 
   subroutine tear_down(this)
     class(generic_driver), intent(inout) :: this
 
   end subroutine tear_down
 
-
   subroutine get_test_indices_(testsuites, testindices, testnames)
     type(generic_suite_cls), intent(in) :: testsuites(:)
-    integer, allocatable, intent(out) :: testindices(:,:)
+    integer, allocatable, intent(out) :: testindices(:, :)
     type(test_name), optional, intent(in) :: testnames(:)
 
     logical :: usetestnames
@@ -213,14 +199,13 @@ contains
 
   end subroutine get_test_indices_
 
-
   subroutine get_test_indices_by_name_(testsuites, testnames, testindices)
     type(generic_suite_cls), intent(in) :: testsuites(:)
     type(test_name), intent(in) :: testnames(:)
-    integer, allocatable, intent(out) :: testindices(:,:)
+    integer, allocatable, intent(out) :: testindices(:, :)
 
-    integer, allocatable :: testindbuffer(:,:)
-    logical, allocatable :: included(:,:)
+    integer, allocatable :: testindbuffer(:, :)
+    logical, allocatable :: included(:, :)
     integer :: testspersuite, maxtestspersuite, nglobaltests, maxglobaltests
     integer :: isuite, itest, iname
 
@@ -232,15 +217,15 @@ contains
       maxtestspersuite = max(maxtestspersuite, testspersuite)
     end do
 
-    allocate(included(maxtestspersuite, size(testsuites)), source=.false.)
-    allocate(testindbuffer(2, maxglobaltests))
+    allocate (included(maxtestspersuite, size(testsuites)), source=.false.)
+    allocate (testindbuffer(2, maxglobaltests))
     nglobaltests = 0
     do iname = 1, size(testnames)
       associate (suitename => testnames(iname)%suitename, testname => testnames(iname)%testname)
         do isuite = 1, size(testsuites)
           if (testsuites(isuite)%instance%name == suitename) exit
         end do
-        if (isuite > size(testsuites)) error stop "Test suite '" // suitename // "' not found"
+        if (isuite > size(testsuites)) error stop "Test suite '"//suitename//"' not found"
         if (len(testname) == 0) then
           do itest = 1, size(testsuites(isuite)%instance%tests)
             if (included(itest, isuite)) cycle
@@ -253,7 +238,7 @@ contains
             if (testsuites(isuite)%instance%tests(itest)%instance%name == testname) exit
           end do
           if (itest > size(testsuites(isuite)%instance%tests)) then
-            error stop "Test '" // suitename // "/" // testname // "' not found"
+            error stop "Test '"//suitename//"/"//testname//"' not found"
           end if
           if (included(itest, isuite)) cycle
           included(itest, isuite) = .true.
@@ -266,10 +251,9 @@ contains
 
   end subroutine get_test_indices_by_name_
 
-
   subroutine get_all_test_indices_(testsuites, testindices)
     type(generic_suite_cls), intent(in) :: testsuites(:)
-    integer, allocatable, intent(out) :: testindices(:,:)
+    integer, allocatable, intent(out) :: testindices(:, :)
 
     integer :: nglobaltests, iglobaltest
     integer :: isuite, itest
@@ -279,12 +263,12 @@ contains
       nglobaltests = nglobaltests + size(testsuites(isuite)%instance%tests)
     end do
 
-    allocate(testindices(2, nglobaltests))
+    allocate (testindices(2, nglobaltests))
     iglobaltest = 0
     do isuite = 1, size(testsuites)
-      associate(testsuite => testsuites(isuite)%instance)
+      associate (testsuite => testsuites(isuite)%instance)
         do itest = 1, size(testsuite%tests)
-          associate(test => testsuite%tests(itest)%instance)
+          associate (test => testsuite%tests(itest)%instance)
             iglobaltest = iglobaltest + 1
             testindices(:, iglobaltest) = [isuite, itest]
           end associate
@@ -294,10 +278,9 @@ contains
 
   end subroutine get_all_test_indices_
 
-
   subroutine run_tests_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     type(generic_suite_cls), target, intent(inout) :: testsuites(:)
-    integer, intent(in) :: testinds(:,:)
+    integer, intent(in) :: testinds(:, :)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
     class(test_runner), intent(in) :: runner
@@ -310,15 +293,14 @@ contains
     call finalize_suites_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     call logger%end_short_log()
 
-    driverresult%failed = any(driverresult%suiteresults(:,:)%status == teststatus%failed) &
+    driverresult%failed = any(driverresult%suiteresults(:, :)%status == teststatus%failed) &
         & .or. any(driverresult%testresults(:)%status == teststatus%failed)
 
   end subroutine run_tests_
 
-
   subroutine initialize_suites_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     type(generic_suite_cls), target, intent(inout) :: testsuites(:)
-    integer, intent(in) :: testinds(:,:)
+    integer, intent(in) :: testinds(:, :)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
     class(test_runner), intent(in) :: runner
@@ -333,7 +315,7 @@ contains
     nsuites = size(testsuites)
     ntests = size(testinds, dim=2)
 
-    allocate(done(nsuites), source=.false.)
+    allocate (done(nsuites), source=.false.)
     do itest = 1, ntests
       isuite = testinds(1, itest)
       if (done(isuite)) cycle
@@ -356,10 +338,9 @@ contains
 
   end subroutine initialize_suites_
 
-
   subroutine finalize_suites_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     type(generic_suite_cls), target, intent(inout) :: testsuites(:)
-    integer, intent(in) :: testinds(:,:)
+    integer, intent(in) :: testinds(:, :)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
     class(test_runner), intent(in) :: runner
@@ -374,7 +355,7 @@ contains
     nsuites = size(testsuites)
     ntests = size(testinds, dim=2)
 
-    allocate(done(nsuites), source=.false.)
+    allocate (done(nsuites), source=.false.)
     do itest = 1, ntests
       isuite = testinds(1, itest)
       isuiteres = driverresult%suiteindex(itest)
@@ -385,7 +366,7 @@ contains
           & suiteresults => driverresult%suiteresults(:, isuiteres))
 
         call ctxfact%create_context(testsuite, ctx)
-        if  (suiteresults(1)%status == teststatus%ok) then
+        if (suiteresults(1)%status == teststatus%ok) then
           ctxptr => ctx
           call runner%tear_down_suite(testsuite, ctxptr)
         else
@@ -401,10 +382,9 @@ contains
 
   end subroutine finalize_suites_
 
-
   subroutine execute_tests_(testsuites, testinds, ctxfact, logger, runner, driverresult)
     type(generic_suite_cls), target, intent(inout) :: testsuites(:)
-    integer, intent(in) :: testinds(:,:)
+    integer, intent(in) :: testinds(:, :)
     class(context_factory), intent(in) :: ctxfact
     class(test_logger), intent(inout) :: logger
     class(test_runner), intent(in) :: runner
@@ -441,7 +421,6 @@ contains
 
   end subroutine execute_tests_
 
-
   subroutine add_slots_(testsuites, newslots)
     type(generic_suite_cls), allocatable, intent(inout) :: testsuites(:)
     integer, intent(in) :: newslots
@@ -450,17 +429,16 @@ contains
     integer :: ii
 
     if (.not. allocated(testsuites)) then
-      allocate(testsuites(newslots))
+      allocate (testsuites(newslots))
     else
       call move_alloc(testsuites, buffer)
-      allocate(testsuites(size(buffer) + newslots))
+      allocate (testsuites(size(buffer) + newslots))
       do ii = 1, size(buffer)
         call move_alloc(buffer(ii)%instance, testsuites(ii)%instance)
       end do
     end if
 
   end subroutine add_slots_
-
 
   function nr_tests_(testsuites) result(ntests)
     type(generic_suite_cls), allocatable, intent(in) :: testsuites(:)
@@ -477,10 +455,9 @@ contains
 
   end function nr_tests_
 
-
   subroutine allocate_driver_result_(testsuites, testinds, driverresult)
     type(generic_suite_cls), intent(in) :: testsuites(:)
-    integer, intent(in) :: testinds(:,:)
+    integer, intent(in) :: testinds(:, :)
     type(driver_result), allocatable, intent(out) :: driverresult
 
     integer, allocatable :: suitemap(:)
@@ -489,13 +466,13 @@ contains
 
     nsuites = size(testsuites)
     ntests = size(testinds, dim=2)
-    allocate(driverresult)
+    allocate (driverresult)
 
-    allocate(included(nsuites), source=.false.)
+    allocate (included(nsuites), source=.false.)
     do itest = 1, ntests
       included(testinds(1, itest)) = .true.
     end do
-    allocate(suitemap(nsuites), source=0)
+    allocate (suitemap(nsuites), source=0)
     nnewsuites = 0
     do isuite = 1, nsuites
       if (included(isuite)) then
@@ -504,10 +481,10 @@ contains
       end if
     end do
 
-    allocate(driverresult%suiteresults(2, nnewsuites))
-    allocate(driverresult%testresults(ntests))
+    allocate (driverresult%suiteresults(2, nnewsuites))
+    allocate (driverresult%testresults(ntests))
 
-    allocate(driverresult%suiteindex(ntests))
+    allocate (driverresult%suiteindex(ntests))
     do itest = 1, ntests
       driverresult%suiteindex(itest) = suitemap(testinds(1, itest))
     end do

@@ -1,15 +1,14 @@
 module fortuno_coarray_coacontext
-  use fortuno_genericcontext, only : generic_context
-  use fortuno_contextfactory, only : context_factory
-  use fortuno_coarray_coafailureinfo, only : coa_failure_info
-  use fortuno_genericsuite, only : generic_suite
-  use fortuno_generictest, only : generic_test
+  use fortuno_genericcontext, only: generic_context
+  use fortuno_contextfactory, only: context_factory
+  use fortuno_coarray_coafailureinfo, only: coa_failure_info
+  use fortuno_genericsuite, only: generic_suite
+  use fortuno_generictest, only: generic_test
   implicit none
 
   private
   public :: coa_context
   public :: coa_context_factory
-
 
   type, extends(generic_context) :: coa_context
     logical, allocatable :: failedimages(:)
@@ -17,14 +16,12 @@ module fortuno_coarray_coacontext
     procedure :: check_logical => coa_context_check_logical
   end type coa_context
 
-
   type, extends(context_factory) :: coa_context_factory
   contains
     procedure :: create_context => coa_context_factory_create_context
   end type coa_context_factory
 
 contains
-
 
   subroutine coa_context_check_logical(this, cond, msg, file, line)
     class(coa_context), intent(inout) :: this
@@ -34,28 +31,28 @@ contains
     integer, optional, intent(in) :: line
 
     type(coa_failure_info), allocatable :: failureinfo
-    logical, allocatable :: globalcond(:)[:]
+    logical, allocatable :: globalcond(:) [:]
     integer :: iimg
 
-    allocate(globalcond(num_images())[*], source=.true.)
+    allocate (globalcond(num_images()) [*], source=.true.)
     globalcond(this_image()) = cond
     sync all
 
     ! TODO: replace hand-coded all reduce with corresponding reduction
     if (this_image() == 1) then
       do iimg = 2, num_images()
-        globalcond(iimg) = globalcond(iimg)[iimg]
+        globalcond(iimg) = globalcond(iimg) [iimg]
       end do
     end if
     sync all
     do iimg = 2, num_images()
-      globalcond(:) = globalcond(:)[1]
+      globalcond(:) = globalcond(:) [1]
     end do
 
     call this%register_check(all(globalcond))
     if (.not. this%check_failed()) return
 
-    allocate(failureinfo)
+    allocate (failureinfo)
     failureinfo%checknr = this%nchecks
     if (present(msg)) failureinfo%message = msg
     if (present(file)) failureinfo%file = file
@@ -66,7 +63,6 @@ contains
 
   end subroutine coa_context_check_logical
 
-
   subroutine coa_context_factory_create_context(this, testsuite, ctx)
     class(coa_context_factory), intent(in) :: this
     class(generic_suite), pointer, intent(in) :: testsuite
@@ -74,8 +70,8 @@ contains
 
     type(coa_context), allocatable :: coactx
 
-    allocate(coactx)
-    coactx%suite=> testsuite
+    allocate (coactx)
+    coactx%suite => testsuite
     call move_alloc(coactx, ctx)
 
   end subroutine coa_context_factory_create_context

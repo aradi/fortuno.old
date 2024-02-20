@@ -1,11 +1,10 @@
 module fortuno_argumentparser
-  use fortuno_genericdriver, only : test_name
-  use fortuno_utils, only : dyn_char
+  use fortuno_genericdriver, only: test_name
+  use fortuno_utils, only: dyn_char
   implicit none
 
   private
   public :: argument_parser
-
 
   type :: argument_parser
     private
@@ -14,13 +13,11 @@ module fortuno_argumentparser
     procedure :: get_test_names
   end type
 
-
   interface argument_parser
     module procedure new_argument_parser
   end interface
 
 contains
-
 
   function new_argument_parser(args) result(this)
     type(dyn_char), optional, intent(in) :: args(:)
@@ -33,7 +30,6 @@ contains
     end if
 
   end function new_argument_parser
-
 
   function get_test_names(this) result(testnames)
     class(argument_parser), intent(in) :: this
@@ -49,7 +45,7 @@ contains
       end associate
     end do
 
-    allocate(testnames(nnames))
+    allocate (testnames(nnames))
     iname = 0
     do iarg = 1, size(this%args)
       associate (arg => this%args(iarg))
@@ -61,26 +57,24 @@ contains
 
   end function get_test_names
 
-
   subroutine get_args_from_cmd_line_(args)
     type(dyn_char), allocatable, intent(out) :: args(:)
 
     integer :: nargs, iarg, arglen
 
     nargs = command_argument_count()
-    allocate(args(nargs))
+    allocate (args(nargs))
     do iarg = 1, nargs
       block
         character(:), allocatable :: buffer
         call get_command_argument(iarg, length=arglen)
-        allocate(character(arglen) :: buffer)
+        allocate (character(arglen) :: buffer)
         call get_command_argument(iarg, value=buffer)
         args(iarg) = buffer
       end block
     end do
 
   end subroutine get_args_from_cmd_line_
-
 
   subroutine get_test_name_from_arg_(arg, testname)
     character(*), intent(in) :: arg
@@ -94,8 +88,8 @@ contains
       testname%testname = ""
       return
     end if
-    testname%suitename = arg(1 : seppos - 1)
-    testname%testname = arg(seppos + 1 :)
+    testname%suitename = arg(1:seppos - 1)
+    testname%testname = arg(seppos + 1:)
 
   end subroutine get_test_name_from_arg_
 

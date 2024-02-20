@@ -4,12 +4,10 @@ module fortuno_failuredetails
   private
   public :: failure_details
 
-
   type, abstract :: failure_details
   contains
     procedure(write_formatted_i), deferred :: write_formatted
   end type failure_details
-
 
   abstract interface
 

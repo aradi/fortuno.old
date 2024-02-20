@@ -1,11 +1,11 @@
 module fortuno_coa_simplified
-  use fortuno_coarray_coagctx, only : check, check_failed, failed, globalctx => coagctx, skip,&
+  use fortuno_coarray_coagctx, only: check, check_failed, failed, globalctx => coagctx, skip,&
       & suite_ptr
-  use fortuno_coarray_coacmdapp, only : cmd_app => coa_cmd_app
-  use fortuno_coarray_coatest, only : test => coa_test, test_base => coa_test_base,&
+  use fortuno_coarray_coacmdapp, only: cmd_app => coa_cmd_app
+  use fortuno_coarray_coatest, only: test => coa_test, test_base => coa_test_base,&
       & test_base_cls => coa_test_base_cls
-  use fortuno_coarray_coadriver, only : test_driver => coa_driver
-  use fortuno_coarray_coasuite, only : test_suite => coa_suite,&
+  use fortuno_coarray_coadriver, only: test_driver => coa_driver
+  use fortuno_coarray_coasuite, only: test_suite => coa_suite,&
       & test_suite_base_cls => coa_suite_base_cls
   implicit none
 

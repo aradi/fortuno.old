@@ -6,11 +6,9 @@ module fortuno_utils
   public :: keyword_arg_enforcer_
   public :: nr_digits, string
 
-
   interface string
     module procedure string_from_integer
   end interface
-
 
   type :: dyn_char
     private
@@ -25,15 +23,12 @@ module fortuno_utils
     procedure :: starts_with => dyn_char_starts_with
   end type dyn_char
 
-
   ! Dummy type used to enforce explicit keyword arguments in type initializations
   ! Should only be used internally in fortuno and not exported to consumers!
   type :: keyword_arg_enforcer_
   end type keyword_arg_enforcer_
 
-
 contains
-
 
   subroutine dyn_char_assign_from_char(this, rhs)
     class(dyn_char), intent(out) :: this
@@ -43,7 +38,6 @@ contains
 
   end subroutine dyn_char_assign_from_char
 
-
   subroutine dyn_char_assign_to_char(lhs, this)
     character(*), intent(out) :: lhs
     class(dyn_char), intent(in) :: this
@@ -51,7 +45,6 @@ contains
     lhs = this%content
 
   end subroutine dyn_char_assign_to_char
-
 
   pure function dyn_char_get_repr_len(this) result(reprlen)
     class(dyn_char), intent(in) :: this
@@ -65,7 +58,6 @@ contains
 
   end function dyn_char_get_repr_len
 
-
   pure function dyn_char_as_char(this) result(chr)
     class(dyn_char), intent(in) :: this
     character(len=this%get_repr_len()) :: chr
@@ -74,7 +66,6 @@ contains
 
   end function dyn_char_as_char
 
-
   pure function dyn_char_has_content(this) result(hascontent)
     class(dyn_char), intent(in) :: this
     logical :: hascontent
@@ -82,7 +73,6 @@ contains
     hascontent = allocated(this%content)
 
   end function dyn_char_has_content
-
 
   pure function dyn_char_starts_with(this, str) result(starts_with)
     class(dyn_char), intent(in) :: this
@@ -99,38 +89,36 @@ contains
 
   end function dyn_char_starts_with
 
-
   function string_from_integer(val, maxval) result(str)
     integer, intent(in) :: val
     integer, optional, intent(in) :: maxval
     character(:), allocatable :: str
 
-    integer, parameter :: maxintlen = int(log(real(huge(maxval))) / log(10.0)) + 1
+    integer, parameter :: maxintlen = int(log(real(huge(maxval)))/log(10.0)) + 1
     ! Add extra char to accomodate eventual minus sign
-    integer, parameter :: maxintlenlen = int(log(real(maxintlen)) / log(10.0)) + 1
+    integer, parameter :: maxintlenlen = int(log(real(maxintlen))/log(10.0)) + 1
 
     character(maxintlen + 1) :: buffer
-    character(2 * maxintlenlen + 4) :: formstr
+    character(2*maxintlenlen + 4) :: formstr
     integer :: ndigits
 
     if (present(maxval)) then
       ndigits = nr_digits(maxval)
-      write(formstr, "(a, i0, a, i0, a)") "(i", ndigits, ".", ndigits, ")"
-      write(buffer, formstr) val
+      write (formstr, "(a, i0, a, i0, a)") "(i", ndigits, ".", ndigits, ")"
+      write (buffer, formstr) val
     else
-      write(buffer, "(i0)") val
+      write (buffer, "(i0)") val
     end if
     str = trim(buffer)
 
   end function string_from_integer
-
 
   function nr_digits(val) result(ndigits)
     integer, intent(in) :: val
     integer :: ndigits
 
     ! Make sure, we can treat val = 0 correctly
-    ndigits = int(log(real(max(abs(val), 1))) / log(10.0)) + 1
+    ndigits = int(log(real(max(abs(val), 1)))/log(10.0)) + 1
     if (val < 0) ndigits = ndigits + 1
 
   end function nr_digits
